@@ -38,7 +38,7 @@ class ApplicationState:
 
 
 class Application(FastAPI):
-    state: ApplicationState
+    state: ApplicationState  # type: ignore
 
 
 def get_application() -> Application:

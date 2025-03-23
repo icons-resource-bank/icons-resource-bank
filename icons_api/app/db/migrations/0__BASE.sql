@@ -1,0 +1,39 @@
+-- Version: 0
+-- Date: 2025-03-21
+-- BASE
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+SET TIMEZONE='UTC';
+
+CREATE TABLE IF NOT EXISTS schema (
+    version INT NOT NULL PRIMARY KEY,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Users
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(36) NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    flags INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    temp_banned_until TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
+
+-- Microsoft OAuth2 authorization
+CREATE TABLE IF NOT EXISTS bearers (
+    email VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE REFERENCES users(email),
+    id_token TEXT NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+-- First party authorization
+CREATE TABLE IF NOT EXISTS tokens (
+    token VARCHAR(255) NOT NULL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL REFERENCES users(email),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS tokens_email_idx ON tokens (email);

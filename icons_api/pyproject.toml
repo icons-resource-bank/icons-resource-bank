@@ -24,13 +24,11 @@ combine_star = true
 line_length = 125
 
 [tool.pyright]
-include = ["api"]
+include = ["app"]
 exclude = ["**/__pycache__", "build", "dist", "docs"]
 reportUnnecessaryTypeIgnoreComment = "warning"
 reportUnusedImport = "error"
-reportShadowedImports = false
 pythonVersion = "3.11"
-typeCheckingMode = "basic"
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"

@@ -16,11 +16,31 @@ $ source .venv/bin/activate  # macOS / Linux
 $ pip install -r requirements.txt
 ```
 
-Then, you can start the development server:
+You must now create a `.env` file in the `icons_api` directory. See `.env.example` for the required environment variables.
+
+Then, after initializing the database, you can start the development server:
 
 ```bash
 python -m app
 ```
+
+#### Database
+
+The PostgreSQL database can be managed with a builtin CLI. To migrate the database, run the following command:
+
+```bash
+python -m app.db migrate
+```
+
+See additional commands by running:
+
+```bash
+python -m app.db --help
+```
+
+#### S3 Bucket
+
+The API uses an S3 bucket to store resources. The details for the bucket must be provided in the `.env` file. The production bucket is currently using Cloudflare R2.
 
 ## Deployment
 

@@ -6,16 +6,15 @@ from loguru import logger
 
 
 class InterceptHandler(logging.Handler):
-    def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
-        # Get corresponding Loguru level if it exists
+    def emit(self, record: logging.LogRecord):
         try:
             level = logger.level(record.levelname).name
         except ValueError:
             level = str(record.levelno)
 
-        # Find caller from where originated the logged message
+        # Find caller
         frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:  # noqa: WPS609
+        while frame.f_code.co_filename == logging.__file__:
             frame = cast(FrameType, frame.f_back)
             depth += 1
 

@@ -1,25 +1,33 @@
-from typing import Callable
+from __future__ import annotations
 
-from fastapi import FastAPI
+from typing import TYPE_CHECKING, Awaitable, Callable
+
+import aiohttp
 from loguru import logger
 
-from .settings import AppSettings
+from ..api.managers.user import UserManager
+from ..db.events import close_db_connection, connect_to_db
+from .auth import setup_oauth2
 
-def create_start_app_handler(
-    app: FastAPI,
-    settings: AppSettings,
-) -> Callable:  # type: ignore
+if TYPE_CHECKING:
+    from ..app import Application
+    from .settings import Settings
+
+
+def create_start_app_handler(app: Application, settings: Settings) -> Callable[[], Awaitable[None]]:
     async def start_app() -> None:
-        # await connect_to_db(app, settings)
-        ...
+        app.state.session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=0))
+        app.state.users = UserManager(app)
+        await connect_to_db(app, settings)
+        await setup_oauth2(app)
 
     return start_app
 
 
-def create_stop_app_handler(app: FastAPI) -> Callable:  # type: ignore
+def create_stop_app_handler(app: Application) -> Callable[[], Awaitable[None]]:
     @logger.catch
     async def stop_app() -> None:
-        # await close_db_connection(app)
-        ...
+        await close_db_connection(app)
+        await app.state.session.close()
 
     return stop_app

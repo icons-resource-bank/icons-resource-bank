@@ -1,54 +1,54 @@
-from enum import Enum
-
 import logging
 import sys
-from typing import Any, Dict, List, Tuple
+from enum import Enum
+from typing import Any
 
 from loguru import logger
 from pydantic import PostgresDsn, SecretStr
+from pydantic_settings import BaseSettings
 
 from .logging import InterceptHandler
 
 __all__ = (
-    "AppEnvTypes",
-    "AppSettings",
-    "DevAppSettings",
-    "ProdAppSettings",
-    "TestAppSettings",
+    "Environment",
+    "Settings",
+    "DevSettings",
+    "ProdSettings",
+    "TestSettings",
 )
 
 
-class AppEnvTypes(Enum):
-    prod = "prod"
-    dev = "dev"
-    test = "test"
+class Environment(Enum):
+    prod = "PRODUCTION"
+    dev = "DEVELOPMENT"
+    test = "TESTING"
 
 
-class AppSettings:
-    app_env: AppEnvTypes = AppEnvTypes.prod
-    debug: bool = False
-    title: str = "FastAPI example application"
-    version: str = "0.0.0"
+class Settings(BaseSettings):
+    app_env: Environment = Environment.prod
+    debug: bool = True
+    title: str = "iCons Resource Bank"
+    version: str = "0.0.1"
 
-    database_url: PostgresDsn
-    max_connection_count: int = 10
-    min_connection_count: int = 10
+    database_uri: PostgresDsn
+    max_connection_count: int = 25
+    min_connection_count: int = 5
 
     secret_key: SecretStr
 
-    jwt_token_prefix: str = "Token"
+    microsoft_tenant_id: str
+    microsoft_client_id: str
+    microsoft_client_secret: SecretStr
 
-    allowed_hosts: List[str] = ["*"]
-
-    logging_level: int = logging.INFO
-    loggers: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
+    logging_level: int = logging.DEBUG
+    loggers: tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
 
     class Config:
         env_file = ".env"
         validate_assignment = True
 
     @property
-    def fastapi_kwargs(self) -> Dict[str, Any]:
+    def fastapi_kwargs(self) -> dict[str, Any]:
         return {
             "debug": self.debug,
             "title": self.title,
@@ -61,33 +61,29 @@ class AppSettings:
             logging_logger = logging.getLogger(logger_name)
             logging_logger.handlers = [InterceptHandler(level=self.logging_level)]
 
-        logger.configure(handlers=[{"sink": sys.stderr, "level": self.logging_level}])
+        logger.configure(
+            handlers=[
+                {"sink": sys.stderr, "level": self.logging_level},
+                {"sink": "logs/app.log", "level": self.logging_level},
+            ]
+        )
 
 
-class DevAppSettings(AppSettings):
+class DevSettings(Settings):
+    ...
+
+
+class ProdSettings(Settings):
+    debug: bool = False
+    logging_level: int = logging.INFO
+
+
+class TestSettings(Settings):
     debug: bool = True
-
-    title: str = "Dev FastAPI example application"
-
-    logging_level: int = logging.DEBUG
-
-    class Config(AppSettings.Config):
-        env_file = ".env"
-
-
-class ProdAppSettings(AppSettings):
-    class Config(AppSettings.Config):
-        env_file = "prod.env"
-
-
-class TestAppSettings(AppSettings):
-    debug: bool = True
-
-    title: str = "Test FastAPI example application"
 
     secret_key: SecretStr = SecretStr("test_secret")
 
-    database_url: PostgresDsn
+    database_uri: PostgresDsn
     max_connection_count: int = 5
     min_connection_count: int = 5
 

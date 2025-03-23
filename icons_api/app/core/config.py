@@ -1,16 +1,17 @@
-from functools import lru_cache
+import os
+from functools import cache
 from typing import Dict, Type
 
 from .settings import *
 
-environments: Dict[AppEnvTypes, Type[AppSettings]] = {
-    AppEnvTypes.dev: DevAppSettings,
-    AppEnvTypes.prod: ProdAppSettings,
-    AppEnvTypes.test: TestAppSettings,
+environments: Dict[Environment, Type[Settings]] = {
+    Environment.prod: ProdSettings,
+    Environment.dev: DevSettings,
+    Environment.test: TestSettings,
 }
 
 
-@lru_cache
-def get_app_settings() -> AppSettings:
-    config = environments[AppEnvTypes.prod]  # TODO: Detect environment
-    return config()
+@cache
+def get_app_settings() -> Settings:
+    env = Environment(os.getenv("APP_ENV", Environment.prod.value))
+    return environments[Environment(env)]()  # type: ignore

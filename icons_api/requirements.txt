@@ -6,3 +6,4 @@ pydantic-settings<3
 asyncpg<1
 aiohttp<4
 python-jose[cryptography]<4
+aioboto3<15

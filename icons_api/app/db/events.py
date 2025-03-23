@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from ..app import Application
     from ..core.settings import Settings
 
+__all__ = ("connect_to_db", "close_db_connection")
+
 
 def encode_timestamp(value: datetime | None) -> str | None:
     # I really hate datetime handling in Python
@@ -34,10 +36,10 @@ async def connect_to_db(app: Application, settings: Settings) -> None:
         init=db_init,
         statement_cache_size=0,
     )
-    logger.info("Connection established")
+    logger.info("DB connection established")
 
 
 async def close_db_connection(app: Application) -> None:
     logger.info("Closing connection to database...")
     await app.state.pool.close()
-    logger.info("Connection closed")
+    logger.info("DB connection closed")

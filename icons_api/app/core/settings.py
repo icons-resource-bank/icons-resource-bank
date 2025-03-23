@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     title: str = "iCons Resource Bank"
     version: str = "0.0.1"
 
+    s3_storage_url: str
+    s3_bucket_name: str
+    s3_client_id: str
+    s3_client_secret: SecretStr
     database_uri: PostgresDsn
     max_connection_count: int = 25
     min_connection_count: int = 5
@@ -46,6 +50,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         validate_assignment = True
+        extra = "allow"
 
     @property
     def fastapi_kwargs(self) -> dict[str, Any]:

@@ -13,6 +13,7 @@ from .core.config import get_app_settings
 from .core.events import create_start_app_handler, create_stop_app_handler
 
 if TYPE_CHECKING:
+    from aiobotocore.client import AioBaseClient
     from aiohttp import ClientSession
     from asyncpg import Pool
 
@@ -27,6 +28,7 @@ __all__ = (
 
 class ApplicationState:
     pool: Pool
+    s3: AioBaseClient
     session: ClientSession
     settings: Settings
 

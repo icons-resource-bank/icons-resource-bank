@@ -1,9 +1,9 @@
-import Image from "next/image"
-import Link from "next/link"
-import { SiteHeader } from "@/components/site-header"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, Clock, BookOpen, Users, Upload } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, Clock, BookOpen, Users, Upload } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -21,12 +21,10 @@ export default function HomePage() {
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
           <div className="container flex flex-col items-center text-center">
-            <h1 className="text-6xl font-bold text-white mb-6">
+            <h1 className="mb-6 text-6xl font-bold text-white">
               <span className="text-7xl">i</span>Cons
             </h1>
-            <p className="max-w-2xl text-xl text-white/90 mb-8">
-              The Integrated Constables at the ILC
-            </p>
+            <p className="mb-8 max-w-2xl text-xl text-white/90">The Integrated Constables at the ILC</p>
             <div className="flex gap-4">
               <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
                 <Link href="/resources">Browse Resources</Link>
@@ -35,7 +33,7 @@ export default function HomePage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
+                className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
               >
                 <Link href="/get-involved">Get Involved</Link>
               </Button>
@@ -46,13 +44,13 @@ export default function HomePage() {
 
       {/* About Section */}
       <section className="bg-[#4B0082] py-16 text-white">
-        <div className="container grid md:grid-cols-2 gap-8 items-center">
+        <div className="container grid items-center gap-8 md:grid-cols-2">
           <div>
             <Image
               src="/images/beamish-munro.jpg?height=600&width=800"
               alt="Beamish-Munro Hall"
-              width={640}
-              height={600}
+              width={690}
+              height={500}
               className="rounded-lg shadow-lg"
             />
           </div>
@@ -65,8 +63,8 @@ export default function HomePage() {
               act as a resource for students 😊.
             </p>
 
-            <div className="mt-6 pt-6 border-t border-white/20">
-              <h3 className="text-xl font-bold mb-3">Operating Hours</h3>
+            <div className="mt-6 border-t border-white/20 pt-6">
+              <h3 className="mb-3 text-xl font-bold">Operating Hours</h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 <div className="font-semibold">Monday</div>
                 <div>5:00 PM - 11:00 PM</div>
@@ -91,7 +89,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Button asChild variant="outline" className="mt-4 bg-white/10 border-white/20 hover:bg-white/20 hover:text-white">
+            <Button
+              asChild
+              variant="outline"
+              className="mt-4 border-white/20 bg-white/10 hover:bg-white/20 hover:text-white"
+            >
               <Link href="/about">
                 Learn More <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -101,7 +103,7 @@ export default function HomePage() {
 
         {/* Google Maps Embed */}
         <div className="container mt-12">
-          <div className="rounded-lg overflow-hidden shadow-lg w-full h-[300px]">
+          <div className="h-[300px] w-full overflow-hidden rounded-lg shadow-lg">
             <iframe
               src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
               width="100%"
@@ -111,7 +113,7 @@ export default function HomePage() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Beamish-Munro Hall Map"
-              className="w-full h-full"
+              className="h-full w-full"
             />
           </div>
         </div>
@@ -120,14 +122,14 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="mb-12 text-center text-3xl font-bold">Our Services</h2>
+          <div className="grid gap-8 md:grid-cols-3">
             <Card>
               <CardContent className="pt-6">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
                   <Clock className="h-6 w-6 text-[#4B0082]" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Extended Hours</h3>
+                <h3 className="mb-2 text-xl font-bold">Extended Hours</h3>
                 <p className="text-muted-foreground">
                   Access to the ILC facilities outside of regular administration hours.
                 </p>
@@ -136,19 +138,19 @@ export default function HomePage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
-                  <BookOpen className="h-6 w-6 text-[#4B0082]" />
+                  <Users className="h-6 w-6 text-[#4B0082]" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Resource Bank</h3>
-                <p className="text-muted-foreground">Access to course materials, past exams, and study resources.</p>
+                <h3 className="mb-2 text-xl font-bold">Equipment</h3>
+                <p className="text-muted-foreground">Need a calculator, laptop, or charger? iCons has you covered.</p>
               </CardContent>
-            </Card>
+            </Card>{" "}
             <Card>
               <CardContent className="pt-6">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
-                  <Users className="h-6 w-6 text-[#4B0082]" />
+                  <BookOpen className="h-6 w-6 text-[#4B0082]" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Tutoring</h3>
-                <p className="text-muted-foreground">Peer tutoring services for engineering courses.</p>
+                <h3 className="mb-2 text-xl font-bold">Resource Bank</h3>
+                <p className="text-muted-foreground">Access to course materials, past exams, and study resources.</p>
               </CardContent>
             </Card>
           </div>
@@ -158,8 +160,8 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="bg-gray-100 py-16">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold mb-6">Contribute to Our Resource Bank</h2>
-          <p className="max-w-2xl mx-auto text-lg text-muted-foreground mb-8">
+          <h2 className="mb-6 text-3xl font-bold">Contribute to Our Resource Bank</h2>
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
             Help fellow students by sharing your notes, study guides, or practice problems.
           </p>
           <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
@@ -171,5 +173,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

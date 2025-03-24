@@ -1,7 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { Mail, MapPin, Instagram } from "lucide-react";
 
 export function SiteFooter() {
+  const toggleUserWay = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    // @ts-ignore
+    UserWay.widgetToggle();
+  };
+
   return (
     <footer className="bg-[#273655] py-12 text-white">
       <div className="container">
@@ -50,7 +58,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/accessibility" className="hover:underline">
+                <Link href="#" className="hover:underline" onClick={toggleUserWay}>
                   Accessibility Options
                 </Link>
               </li>

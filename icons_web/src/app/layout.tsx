@@ -14,6 +14,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <script
+        type="text/javascript"
+        src="https://cdn.userway.org/widget.js"
+        data-account={process.env.NEXT_PUBLIC_USERWAY_ACCOUNT_ID}
+        async
+      ></script>
       <html lang="en">
         <body className={font.className}>{children}</body>
       </html>

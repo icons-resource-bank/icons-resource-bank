@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from loguru import logger
 
-from ...core.auth import generate_token, handle_oauth2_token
+from ...core.auth import generate_token, handle_oauth2_token, verify_token, revoke_token
 
 __all__ = ("setup",)
 
@@ -10,7 +10,7 @@ __all__ = ("setup",)
 router = APIRouter(prefix="/auth")
 
 
-@router.post("/oauth2/callback")
+@router.post("/callback")
 async def oauth2_callback(
     request: Request,
     code: str | None = None,
@@ -56,6 +56,20 @@ async def oauth2_callback(
             return JSONResponse({"error": "invalid_request", "error_description": str(e)}, 400)
         else:
             return {"token": await generate_token(request.app, user.id)}
+
+
+@router.post("/logout")
+async def logout(request: Request, current_url: str | None = None):
+    token = request.headers.get("Authorization", "").removeprefix("Bearer ")
+    try:
+        await verify_token(request.app, token)
+    except Exception:
+        return Response("", 204)
+
+    await revoke_token(request.app, token)
+    return {
+        "url": f"https://login.microsoftonline.com/{request.app.state.settings.microsoft_tenant_id}/oauth2/v2.0/logout?post_logout_redirect_uri={current_url or request.app.state.settings.frontend_url}"
+    }
 
 
 def setup(api: APIRouter):

@@ -37,9 +37,9 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-100 w-64 flex-col bg-[#4B0082] text-white">
+    <div className="flex h-100 w-64 flex-col bg-[#273655] text-white">
       <div className="flex h-16 items-center border-b border-white/10 px-6">
-        <h2 className="text-lg font-semibold">Admin Dashboard</h2>
+        <h2 className="text-lg font-semibold">Admin Panel</h2>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {sidebarItems.map((item) => {

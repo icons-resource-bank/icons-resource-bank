@@ -13,5 +13,5 @@ environments: Dict[Environment, Type[Settings]] = {
 
 @cache
 def get_app_settings() -> Settings:
-    env = Environment(os.getenv("APP_ENV", Environment.prod.value))
+    env = Environment(os.getenv("APP_ENV", Environment.dev.value))
     return environments[Environment(env)]()  # type: ignore

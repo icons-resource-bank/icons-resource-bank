@@ -1,144 +1,175 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Search } from "lucide-react"
+import { SiteHeader } from "@/components/site-header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowRight, Clock, BookOpen, Users, Upload } from "lucide-react"
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-screen">
-      {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-white">
-        <div className="flex items-center gap-2">
-          <div className="relative w-12 h-12">
-            <Image
-              src="/placeholder.svg?height=48&width=48"
-              alt="Engineering Society Logo"
-              width={48}
-              height={48}
-              className="object-contain"
-            />
-          </div>
-          <div className="text-xs font-semibold leading-tight">
-            <div>ENGINEERING SOCIETY</div>
-            <div>QUEENS UNIVERSITY</div>
-          </div>
-        </div>
-
-        <div className="flex items-center">
-          <nav className="hidden md:block">
-            <ul className="flex bg-[#d9d9d9]">
-              {["About", "Get Involved", "Services", "Resources", "Upload"].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="px-6 py-2 inline-block hover:bg-gray-300 transition-colors">
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <button className="ml-4" aria-label="Search">
-            <Search size={24} />
-          </button>
-        </div>
-      </header>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative h-[400px]">
-        <div className="absolute inset-0">
-          <Image
-            src="/placeholder.svg?height=400&width=1200"
-            alt="Campus Aerial View"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-        <div className="relative h-full flex items-center justify-center">
-          <h1 className="text-8xl font-serif text-white">
-            <span className="inline-block mr-2">
-              <svg
-                width="80"
-                height="80"
-                viewBox="0 0 80 80"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="inline-block"
+      <section className="relative h-[500px] overflow-hidden">
+        <Image
+          src="/images/queens-campus.webp?height=1080&width=1920"
+          alt="Queen's University Campus"
+          fill
+          className="object-cover brightness-75"
+          priority
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+          <div className="container flex flex-col items-center text-center">
+            <h1 className="text-6xl font-bold text-white mb-6">
+              <span className="text-7xl">i</span>Cons
+            </h1>
+            <p className="max-w-2xl text-xl text-white/90 mb-8">
+              The Integrated Constables at the ILC
+            </p>
+            <div className="flex gap-4">
+              <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
+                <Link href="/resources">Browse Resources</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
               >
-                <path d="M40 10C25 10 15 25 15 40C15 55 25 70 40 70" stroke="white" strokeWidth="5" />
-                <path d="M30 20C20 20 10 30 10 45C10 60 20 70 35 70" stroke="white" strokeWidth="5" />
-              </svg>
-            </span>
-            iCons
-          </h1>
+                <Link href="/get-involved">Get Involved</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="bg-[#7b06ae] text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-8 items-center">
-            <div className="md:w-1/3">
-              <Image
-                src="/placeholder.svg?height=300&width=300"
-                alt="Engineering Building"
-                width={300}
-                height={300}
-                className="rounded-md"
-              />
-            </div>
-            <div className="md:w-2/3">
-              <h2 className="text-2xl font-bold mb-4">About us:</h2>
-              <p className="text-lg">
-                The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home of
-                the Integrated Learning Centre (ILC). The iCons operate after ILC administration hours to keep the
-                facility open to students, loan out equipment, promote a positive studying and learning atmosphere, and
-                to act as a resource for students.
-              </p>
-            </div>
+      <section className="bg-[#4B0082] py-16 text-white">
+        <div className="container grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <Image
+              src="/images/beamish-munro.jpg?height=600&width=800"
+              alt="Beamish-Munro Hall"
+              width={640}
+              height={600}
+              className="rounded-lg shadow-lg"
+            />
           </div>
-        </div>
-      </section>
-
-      {/* Upload Hours Section */}
-      <section className="bg-[#fffafa] py-16">
-        <div className="container mx-auto px-4 flex justify-center">
-          <Link href="#" className="bg-[#d9d9d9] px-8 py-4 text-xl hover:bg-gray-300 transition-colors">
-            Upload-hours
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[#273655] text-white py-6">
-        <div className="container mx-auto px-4">
           <div className="space-y-4">
-            <p className="font-bold">Contact us :</p>
-            <p>- Email: icon@engsoc.queensu.ca</p>
-            <p>- Address : Beamish-Munro Hall 45 Union St, Kingston, ON K7L 3N6</p>
+            <h2 className="text-3xl font-bold">About Us</h2>
+            <p className="text-lg text-white/90">
+              The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home of
+              the Integrated Learning Centre (ILC). The iCons operate after ILC administration hours to keep the
+              facility open to students, loan out equipment, promote a positive studying and learning atmosphere, and to
+              act as a resource for students 😊.
+            </p>
 
-            <div className="pt-4 space-y-1">
-              <p>
-                -{" "}
-                <Link href="#" className="hover:underline">
-                  privacy policy
-                </Link>
-              </p>
-              <p>
-                -{" "}
-                <Link href="#" className="hover:underline">
-                  terms of services
-                </Link>
-              </p>
-              <p>
-                -{" "}
-                <Link href="#" className="hover:underline">
-                  accessibility options
-                </Link>
-              </p>
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <h3 className="text-xl font-bold mb-3">Operating Hours</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                <div className="font-semibold">Monday</div>
+                <div>5:00 PM - 11:00 PM</div>
+
+                <div className="font-semibold">Tuesday</div>
+                <div>5:00 PM - 11:00 PM</div>
+
+                <div className="font-semibold">Wednesday</div>
+                <div>5:00 PM - 11:00 PM</div>
+
+                <div className="font-semibold">Thursday</div>
+                <div>5:00 PM - 11:00 PM</div>
+
+                <div className="font-semibold">Friday</div>
+                <div>5:00 PM - 11:00 PM</div>
+
+                <div className="font-semibold">Saturday</div>
+                <div>10:00 AM - 7:00 PM</div>
+
+                <div className="font-semibold">Sunday</div>
+                <div>10:00 AM - 11:00 PM</div>
+              </div>
             </div>
+
+            <Button asChild variant="outline" className="mt-4 bg-white/10 border-white/20 hover:bg-white/20 hover:text-white">
+              <Link href="/about">
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
-      </footer>
-    </main>
+
+        {/* Google Maps Embed */}
+        <div className="container mt-12">
+          <div className="rounded-lg overflow-hidden shadow-lg w-full h-[300px]">
+            <iframe
+              src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={false}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Beamish-Munro Hall Map"
+              className="w-full h-full"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
+                  <Clock className="h-6 w-6 text-[#4B0082]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Extended Hours</h3>
+                <p className="text-muted-foreground">
+                  Access to the ILC facilities outside of regular administration hours.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
+                  <BookOpen className="h-6 w-6 text-[#4B0082]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Resource Bank</h3>
+                <p className="text-muted-foreground">Access to course materials, past exams, and study resources.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
+                  <Users className="h-6 w-6 text-[#4B0082]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Tutoring</h3>
+                <p className="text-muted-foreground">Peer tutoring services for engineering courses.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gray-100 py-16">
+        <div className="container text-center">
+          <h2 className="text-3xl font-bold mb-6">Contribute to Our Resource Bank</h2>
+          <p className="max-w-2xl mx-auto text-lg text-muted-foreground mb-8">
+            Help fellow students by sharing your notes, study guides, or practice problems.
+          </p>
+          <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
+            <Link href="/upload">
+              <Upload className="mr-2 h-5 w-5" />
+              Upload Resources
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </div>
   )
 }
-

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ..api.managers.user import User
     from ..app import Application
 
-__all__ = ("setup_oauth2", "handle_oauth2_token", "generate_token", "verify_token")
+__all__ = ("setup_oauth2", "handle_oauth2_token", "generate_token", "verify_token", "revoke_token")
 
 
 async def setup_oauth2(app: Application):
@@ -84,6 +84,10 @@ async def verify_token(app: Application, token: str) -> User:
     if not user:
         raise ValueError("User not found")
     return user
+
+
+async def revoke_token(app: Application, token: str) -> None:
+    await app.state.pool.execute("DELETE FROM tokens WHERE token = $1", token)
 
 
 async def refresh_bearer(app: Application, email: str) -> dict[str, Any]:

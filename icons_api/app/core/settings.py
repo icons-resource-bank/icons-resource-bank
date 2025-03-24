@@ -27,9 +27,11 @@ class Environment(Enum):
 class Settings(BaseSettings):
     app_env: Environment = Environment.prod
     debug: bool = True
-    title: str = "iCons Resource Bank"
+    title: str = "iCons"
     version: str = "0.0.1"
+    secret_key: SecretStr
 
+    frontend_url: str
     s3_storage_url: str
     s3_bucket_name: str
     s3_client_id: str
@@ -37,8 +39,6 @@ class Settings(BaseSettings):
     database_uri: PostgresDsn
     max_connection_count: int = 25
     min_connection_count: int = 5
-
-    secret_key: SecretStr
 
     microsoft_tenant_id: str
     microsoft_client_id: str
@@ -75,7 +75,7 @@ class Settings(BaseSettings):
 
 
 class DevSettings(Settings):
-    ...
+    frontend_url: str = "http://localhost:3000"
 
 
 class ProdSettings(Settings):
@@ -85,11 +85,7 @@ class ProdSettings(Settings):
 
 class TestSettings(Settings):
     debug: bool = True
-
     secret_key: SecretStr = SecretStr("test_secret")
-
-    database_uri: PostgresDsn
-    max_connection_count: int = 5
-    min_connection_count: int = 5
-
+    frontend_url: str = "http://localhost:3000"
+    database_uri: PostgresDsn = PostgresDsn("postgresql://postgres:postgres@localhost:5432/postgres")
     logging_level: int = logging.DEBUG

@@ -1,7 +1,7 @@
 "use client";
 
 import { Moon, Sun, Monitor } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,12 @@ export function ThemeToggle({ themeSetting }: { themeSetting: "light" | "dark" |
     document.querySelector("html")?.classList.remove(theme === "dark" ? "light" : "dark");
     document.querySelector("html")?.classList.add(theme);
   };
+
+  useEffect(() => {
+    if (theme === "system") {
+      applyTheme("system");
+    }
+  }, [theme]);
 
   return (
     <DropdownMenu>

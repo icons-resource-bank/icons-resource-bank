@@ -12,10 +12,6 @@ export default {
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: {
-    // TODO: test this
-    unoptimized: true,
-  },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,

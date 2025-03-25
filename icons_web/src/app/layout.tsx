@@ -31,12 +31,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <>
       <html lang="en" suppressHydrationWarning className={theme === "dark" ? "dark" : ""} data-theme={theme}>
         <head>
-          {/* <script
+          <script
             type="text/javascript"
             src="https://cdn.userway.org/widget.js"
             data-account={process.env.NEXT_PUBLIC_USERWAY_ACCOUNT_ID}
             async
-          ></script> */}
+          ></script>
         </head>
         <body className={`${font.className} flex min-h-screen flex-col`}>
           <SiteHeader themeSetting={themeSetting as "light" | "dark" | "system"} />

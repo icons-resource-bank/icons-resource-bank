@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const linkClassName = "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
+const linkClassName =
+  "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
 
-export function SiteHeader({themeSetting}: {themeSetting: "light" | "dark" | "system"}) {
+export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | "system" }) {
   // This would be replaced with actual auth state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("John Doe");
@@ -34,50 +35,41 @@ export function SiteHeader({themeSetting}: {themeSetting: "light" | "dark" | "sy
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="flex h-16 items-center px-6">
         <Link href="/" className="flex items-center">
+          {/* One image per theme */}
           <Image
-            src="/images/engsoc-wordmark.png"
+            src={`/images/engsoc-wordmark-light.png`}
             alt="Engineering Society"
             width={120}
             height={72}
-            className="h-12 w-auto"
+            className="h-12 w-auto dark:hidden"
+            priority
+          />
+          <Image
+            src={`/images/engsoc-wordmark-dark.png`}
+            alt="Engineering Society"
+            width={120}
+            height={72}
+            className="hidden h-12 w-auto dark:block"
             priority
           />
         </Link>
         <nav className="mx-6 flex flex-1 items-center justify-center space-x-8">
-          <Link
-            href="/about"
-            className={linkClassName}
-          >
+          <Link href="/about" className={linkClassName}>
             About
           </Link>
-          <Link
-            href="/get-involved"
-            className={linkClassName}
-          >
+          <Link href="/get-involved" className={linkClassName}>
             Get Involved
           </Link>
-          <Link
-            href="/services"
-            className={linkClassName}
-          >
+          <Link href="/services" className={linkClassName}>
             Services
           </Link>
-          <Link
-            href="/resources"
-            className={linkClassName}
-          >
+          <Link href="/resources" className={linkClassName}>
             Resources
           </Link>
-          <Link
-            href="/upload"
-            className={linkClassName}
-          >
+          <Link href="/upload" className={linkClassName}>
             Upload
           </Link>
-          <Link
-            href="/admin/pending"
-            className={linkClassName}
-          >
+          <Link href="/admin/pending" className={linkClassName}>
             Admin
           </Link>
         </nav>

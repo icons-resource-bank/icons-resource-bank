@@ -11,7 +11,7 @@ export function SiteFooter() {
   };
 
   return (
-    <footer className="bg-[#273655] py-12 text-white">
+    <footer className="bg-footer py-12 text-white">
       <div className="container">
         <div className="grid gap-8 md:grid-cols-2">
           <div>

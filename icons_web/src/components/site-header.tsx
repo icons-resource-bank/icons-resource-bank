@@ -13,8 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-export function SiteHeader() {
+const linkClassName = "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
+
+export function SiteHeader({themeSetting}: {themeSetting: "light" | "dark" | "system"}) {
   // This would be replaced with actual auth state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("John Doe");
@@ -28,7 +31,7 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
+    <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="flex h-16 items-center px-6">
         <Link href="/" className="flex items-center">
           <Image
@@ -43,42 +46,43 @@ export function SiteHeader() {
         <nav className="mx-6 flex flex-1 items-center justify-center space-x-8">
           <Link
             href="/about"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             About
           </Link>
           <Link
             href="/get-involved"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             Get Involved
           </Link>
           <Link
             href="/services"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             Services
           </Link>
           <Link
             href="/resources"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             Resources
           </Link>
           <Link
             href="/upload"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             Upload
           </Link>
           <Link
             href="/admin/pending"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            className={linkClassName}
           >
             Admin
           </Link>
         </nav>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle themeSetting={themeSetting} />
           {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

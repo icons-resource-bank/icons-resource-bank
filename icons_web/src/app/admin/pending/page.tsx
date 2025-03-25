@@ -55,7 +55,7 @@ export default function PendingContentPage() {
                   <TableCell>{resource.submittedAt}</TableCell>
                   <TableCell>{resource.type}</TableCell>
                   <TableCell className="space-x-2">
-                    <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700">
+                    <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white">
                       Approve
                     </Button>
                     <Button variant="destructive" size="sm">

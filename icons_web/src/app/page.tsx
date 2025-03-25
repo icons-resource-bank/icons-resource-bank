@@ -1,15 +1,12 @@
 import Image from "next/image";
-import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Clock, BookOpen, Users, Upload } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-
       {/* Hero Section */}
       <section className="relative h-[500px] overflow-hidden">
         <Image
@@ -26,7 +23,7 @@ export default function HomePage() {
             </h1>
             <p className="mb-8 max-w-2xl text-xl text-white/90">The Integrated Constables at the ILC</p>
             <div className="flex gap-4">
-              <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
+              <Button asChild size="lg" className="bg-primary text-white hover:bg-primary/85">
                 <Link href="/resources">Browse Resources</Link>
               </Button>
               <Button
@@ -43,7 +40,7 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section className="bg-[#4B0082] py-16 text-white">
+      <section className="bg-primary py-16 text-white">
         <div className="container grid items-center gap-8 md:grid-cols-2">
           <div>
             <Image
@@ -89,11 +86,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Button
-              asChild
-              variant="outline"
-              className="mt-4 border-white/20 bg-white/10 hover:bg-white/20 hover:text-white"
-            >
+            <Button asChild variant="outline" className="mt-4 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white">
               <Link href="/about">
                 Learn More <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -108,7 +101,7 @@ export default function HomePage() {
               src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
               width="100%"
               height="100%"
-              style={{ border: 0 }}
+              style={{ border: 0, filter: "invert(var(--maps-invert)) hue-rotate(var(--maps-hue-rotate))" }}
               allowFullScreen={false}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -120,14 +113,14 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16">
+      <section className="dark:bg-footer py-16">
         <div className="container">
           <h2 className="mb-12 text-center text-3xl font-bold">Our Services</h2>
           <div className="grid gap-8 md:grid-cols-3">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
-                  <Clock className="h-6 w-6 text-[#4B0082]" />
+            <Card className="dark:rounded-sm dark:border-2">
+              <CardContent className="dark:bg-footer pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                  <Clock className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Extended Hours</h3>
                 <p className="text-muted-foreground">
@@ -135,19 +128,19 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
-                  <Users className="h-6 w-6 text-[#4B0082]" />
+            <Card className="dark:rounded-sm dark:border-2">
+              <CardContent className="dark:bg-footer pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                  <Users className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Equipment</h3>
                 <p className="text-muted-foreground">Need a calculator, laptop, or charger? iCons has you covered.</p>
               </CardContent>
-            </Card>{" "}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#4B0082]/10">
-                  <BookOpen className="h-6 w-6 text-[#4B0082]" />
+            </Card>
+            <Card className="dark:rounded-sm dark:border-2">
+              <CardContent className="dark:bg-footer pt-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                  <BookOpen className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Resource Bank</h3>
                 <p className="text-muted-foreground">Access to course materials, past exams, and study resources.</p>
@@ -158,13 +151,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gray-100 py-16">
+      <section className="bg-muted py-16">
         <div className="container text-center">
           <h2 className="mb-6 text-3xl font-bold">Contribute to Our Resource Bank</h2>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
             Help fellow students by sharing your notes, study guides, or practice problems.
           </p>
-          <Button asChild size="lg" className="bg-[#4B0082] hover:bg-[#4B0082]/90">
+          <Button
+            asChild
+            size="lg"
+            className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+          >
             <Link href="/upload">
               <Upload className="mr-2 h-5 w-5" />
               Upload Resources

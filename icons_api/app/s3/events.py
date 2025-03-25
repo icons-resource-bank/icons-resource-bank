@@ -17,14 +17,17 @@ async def connect_to_s3(app: Application, settings: Settings) -> None:
     logger.info("Connecting to S3...")
 
     botocore = aiobotocore.session.AioSession()
-    botocore.set_config_variable("s3", {"endpoint_url": settings.s3_storage_url})
     botocore.set_config_variable("request_checksum_calculation", "WHEN_REQUIRED")
     botocore.set_config_variable("response_checksum_verification", "WHEN_REQUIRED")
 
     session = aioboto3.Session(
         settings.s3_client_id, settings.s3_client_secret.get_secret_value(), botocore_session=botocore
     )
-    app.state.s3 = await session.client("s3").__aenter__()
+    app.state.s3 = await session.client("s3", endpoint_url=settings.s3_storage_url).__aenter__()
+
+    # Test s3 connection
+    await app.state.s3.list_buckets()
+
     logger.info("S3 connection established")
 
 

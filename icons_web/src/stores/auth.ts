@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { get } from "@/lib/http";
 
 interface User {
   id: string;
@@ -13,8 +14,13 @@ interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
   user: User | null;
-  login: (token: string, user: User) => void;
+  login: (token: string) => void;
   logout: () => void;
+  update: (user: User) => void;
+}
+
+export async function fetchUserInfo() {
+  return await get("/users/@me");
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,9 +29,9 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       token: null,
       user: null,
-      login: (token: string, user: User) => set({ isAuthenticated: true, token, user }),
+      login: (token) => set({ isAuthenticated: true, token }),
       logout: () => set({ isAuthenticated: false, token: null, user: null }),
-      update: (user: User) => set({ user }),
+      update: (user) => set({ user }),
     }),
     {
       name: "auth-store",

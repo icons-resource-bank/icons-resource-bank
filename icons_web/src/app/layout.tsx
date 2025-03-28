@@ -5,6 +5,7 @@ import { Open_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 import type React from "react";
 
+import { Providers } from "./providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -39,8 +40,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           ></script>
         </head>
         <body className={`${font.className} flex min-h-screen flex-col`}>
-          <SiteHeader themeSetting={themeSetting as "light" | "dark" | "system"} />
-          <div className="flex-1">{children}</div>
+          <Providers>
+            <SiteHeader themeSetting={themeSetting as "light" | "dark" | "system"} />
+            <div className="flex-1">{children}</div>
+          </Providers>
         </body>
       </html>
       <SiteFooter />

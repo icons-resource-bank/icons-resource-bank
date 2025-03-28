@@ -4,28 +4,14 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import { useAuthStore } from "@/stores/auth";
-
-async function fetchUserInfo(token: string) {
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/users/@me", {
-    headers: {
-      Authorization: token,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch user info");
-  }
-
-  return await response.json();
-}
+import { useAuthStore, fetchUserInfo } from "@/stores/auth";
 
 export default function AuthCallback() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState("");
   const pathname = usePathname();
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, update } = useAuthStore();
 
   useEffect(() => {
     async function handleCallback() {
@@ -57,14 +43,14 @@ export default function AuthCallback() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to authenticate");
+          throw new Error(errorData.errors?.[1] || "Failed to authenticate");
         }
         const data = await response.json();
 
         // Store token and user info
-        const { token } = data;
-        const userInfo = await fetchUserInfo(token);
-        login(token, userInfo);
+        login(data.token);
+        const userInfo = await fetchUserInfo();
+        update(userInfo);
 
         setStatus("success");
 
@@ -81,7 +67,7 @@ export default function AuthCallback() {
     }
 
     handleCallback();
-  }, [router, login]);
+  }, [router, login, update]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">

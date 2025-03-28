@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { LogIn, ChevronDown, Settings, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,21 +14,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {useAuthStore} from "@/stores/auth";
 
 const linkClassName =
   "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
 
+const AUTH_REDIRECT_URI =
+  typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "http://localhost:3000/auth/callback";
+
 export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | "system" }) {
-  // This would be replaced with actual auth state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("John Doe");
+  const {isAuthenticated, user, logout} = useAuthStore();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
+    // Redirect to Microsoft login
+    const authUrl =
+      `https://login.microsoftonline.com/${process.env.NEXT_PUBLIC_MICROSOFT_TENANT_ID}/oauth2/v2.0/authorize?` +
+      `client_id=${process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID}` +
+      `&response_type=code` +
+      `&redirect_uri=${encodeURIComponent(AUTH_REDIRECT_URI)}` +
+      `&response_mode=query` +
+      `&scope=openid%20profile%20email` +
+      `&state=${encodeURIComponent(pathname || "/")}`;
+
+    window.location.href = authUrl;
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
+    logout();
+    router.push("/")
   };
 
   return (
@@ -75,11 +90,11 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle themeSetting={themeSetting} />
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-1">
-                  <span>{username}</span>
+                  <span>{user?.name ?? "Unknown"}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

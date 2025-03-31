@@ -61,6 +61,7 @@ async def generate_presigned_url(
     """Generate a presigned URL to share an S3 object."""
     return await app.state.s3.generate_presigned_url(
         "get_object",
-        Params={"Bucket": app.state.settings.s3_bucket_name, "Key": object_name},
+        # Ensure the browser always downloads the file even if it's e.g. a PDF
+        Params={"Bucket": app.state.settings.s3_bucket_name, "Key": object_name, "ResponseContentDisposition": "attachment"},
         ExpiresIn=int(expiration.total_seconds()),
     )

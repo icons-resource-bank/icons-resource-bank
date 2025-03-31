@@ -39,7 +39,7 @@ body {
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
+    --border: 271 30% 85%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
@@ -93,5 +93,27 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .resource-card-link {
+    @apply transition-all duration-200;
+  }
+
+  .resource-card-link:hover h3 {
+    @apply text-primary underline decoration-1 underline-offset-2;
+  }
+
+  .resource-card {
+    @apply transition-all duration-200 hover:shadow-lg hover:border-primary/50;
+  }
+
+  .dark .resource-card {
+    @apply hover:border-purple-400 hover:border-opacity-70;
+  }
+
+  .dark .resource-card-link:hover h3 {
+    @apply text-purple-400 brightness-125;
   }
 }

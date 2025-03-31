@@ -11,8 +11,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function refreshUser() {
       if (isAuthenticated) {
-        const userInfo = await fetchUserInfo();
-        update(userInfo);
+        try {
+          const userInfo = await fetchUserInfo();
+          update(userInfo);
+        } catch (error) {
+          console.error("Failed to fetch user info", error);
+          logout();
+          return;
+        }
       }
     }
 

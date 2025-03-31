@@ -26,11 +26,6 @@ const sidebarItems = [
     href: "/admin/courses",
     icon: BookCheck,
   },
-  {
-    title: "Settings",
-    href: "/admin/settings",
-    icon: Settings,
-  },
 ];
 
 export function AdminSidebar() {

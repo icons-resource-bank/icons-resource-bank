@@ -34,7 +34,10 @@ async function _request(method: string, url: string, options: RequestOptions = {
     throw new HTTPError(errorData.errors || ["Failed to fetch"], response.status);
   }
 
-  return response.json();
+  if (response.status === 204) {
+    return null;
+  }
+  return await response.json();
 }
 
 export function get(url: string, options?: RequestOptions) {
@@ -55,4 +58,15 @@ export function del(url: string, options?: RequestOptions) {
 
 export function patch(url: string, options?: RequestOptions) {
   return _request("PATCH", url, options);
+}
+
+// Debugging
+if (typeof window !== "undefined") {
+  (window as any).http = {
+    get,
+    post,
+    put,
+    del,
+    patch,
+  };
 }

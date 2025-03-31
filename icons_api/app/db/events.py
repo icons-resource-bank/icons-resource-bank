@@ -40,6 +40,5 @@ async def connect_to_db(app: Application, settings: Settings) -> None:
 
 
 async def close_db_connection(app: Application) -> None:
-    logger.info("Closing connection to database...")
     await app.state.pool.close()
     logger.info("DB connection closed")

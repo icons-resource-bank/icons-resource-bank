@@ -21,7 +21,11 @@ def _parse(value: Any) -> Any:
 
 
 def _dict_factory(data: list[tuple[str, Any]]) -> dict[str, Any]:
-    return {key: _parse(value) for (key, value) in data if not key.startswith("_")}
+    return {
+        key: _parse(value)
+        for (key, value) in data
+        if not key.startswith("_") and not ((key.endswith("_id") or key.endswith("_ids")) and key is None)
+    }
 
 
 @dataclass(slots=True, kw_only=True)
@@ -43,14 +47,11 @@ class BaseManager:
     def __init__(self, app: Application):
         self.app = app
 
-    async def get(self):
-        raise NotImplementedError
+    @classmethod
+    async def initialize(cls, app: Application) -> Self:
+        inst = cls(app)
+        await inst.startup()
+        return inst
 
-    async def create(self):
-        raise NotImplementedError
-
-    async def update(self):
-        raise NotImplementedError
-
-    async def delete(self):
-        raise NotImplementedError
+    async def startup(self):
+        return

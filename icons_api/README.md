@@ -47,5 +47,5 @@ The API uses an S3 bucket to store resources. The details for the bucket must be
 For production, the API is run using Uvicorn. To deploy the API, run the following command:
 
 ```bash
-uvicorn app:app
+APP_ENV=production uvicorn app:app
 ```

@@ -6,8 +6,8 @@ from copy import copy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, overload
 
-from ...utils.dequedict import DequeDict
 from .base import *
+from ...utils.dequedict import DequeDict
 
 if TYPE_CHECKING:
     from ...app import Application
@@ -27,6 +27,19 @@ class User(Model):
     name: str
     flags: int
     created_at: datetime.datetime
+    temp_banned_until: datetime.datetime | None = None
+
+    @classmethod
+    def _deleted(cls) -> User:
+        return cls(
+            _manager=None,  # type: ignore
+            id="0",
+            email="deleted@queensu.ca",
+            name="Deleted User",
+            flags=0,
+            created_at=datetime.datetime.fromtimestamp(0, datetime.timezone.utc),
+            temp_banned_until=None,
+        )
 
     def has_flag(self, flag: UserFlags) -> bool:
         return bool(self.flags & flag)
@@ -35,6 +48,13 @@ class User(Model):
         _inst = copy(self)
         _inst.flags |= flag
         await self._manager._update(_inst)
+
+    def is_banned(self) -> bool:
+        return (
+            self.has_flag(UserFlags.banned)
+            or self.temp_banned_until is not None
+            and self.temp_banned_until > datetime.datetime.now(datetime.timezone.utc)
+        )
 
 
 class UserFlags(enum.IntFlag):
@@ -49,6 +69,7 @@ class UserManager(BaseManager):
         self.app = app
         self.cache: DequeDict[str, User] = DequeDict(maxlen=1024)
         self._email_map: DequeDict[str, str] = DequeDict(maxlen=1024)
+        self.DELETED = User._deleted()
 
     async def _fetch(self, *, id: str | None = None, email: str | None = None) -> User | None:
         if id and email:
@@ -83,12 +104,10 @@ class UserManager(BaseManager):
         return await self._fetch(id=id, email=email)
 
     @overload
-    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User:
-        ...
+    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User: ...
 
     @overload
-    async def create(self, *, ignore_conflict: bool = False, **kwargs: Any) -> User:
-        ...
+    async def create(self, *, ignore_conflict: bool = False, **kwargs: Any) -> User: ...
 
     async def create(self, *, ignore_conflict: bool = False, **kwargs) -> User:
         query = f"INSERT INTO users ({', '.join(kwargs)}) VALUES ({', '.join(f'${i + 1}' for i in range(len(kwargs)))})"

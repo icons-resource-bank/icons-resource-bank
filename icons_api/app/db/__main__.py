@@ -94,21 +94,31 @@ class DatabaseManager:
 
     async def apply(self, migration: Migration, /):
         await self.connection.execute(migration.file.read_text("utf-8"))
-        await self.connection.execute("INSERT INTO schema (version) VALUES ($1)", migration.version)
+        await self.connection.execute("INSERT INTO schema (version) VALUES ($1) ON CONFLICT DO NOTHING", migration.version)
         self._version = migration.version
 
-    async def migrate(self, to: int = -1, /, *, dry_run: bool = False):
+    async def migrate(self, to: int = -1, /, *, dry_run: bool = False, force: bool = False):
         connection = self.connection
         current_version = await self.current_version()
         if to < 0:
             to = len(self.migrations) - 1
-        elif to < current_version:
+        elif to < current_version and not force:
             raise ValueError("Cannot migrate to a version lower than the current version")
-        elif to > len(self.migrations) - 1:
+        elif to > len(self.migrations) - 1 and not force:
             raise ValueError("Cannot migrate to a version higher than the latest version")
 
         async with connection.transaction():
-            for migration in self.migrations[current_version + 1 : to + 1]:
+            if not force:
+                migration_list = self.migrations[current_version + 1 : to + 1]
+            else:
+                # Apply only the selected migration
+                migration_list = [self.migrations[to]]
+
+            if not migration_list:
+                click.secho("Database is already up to date.", fg="green")
+                return
+
+            for migration in migration_list:
                 click.echo(f"Applying migration {migration.version} ({migration.name})...")
                 await self.apply(migration)
             if dry_run:
@@ -152,8 +162,9 @@ async def status(manager: DatabaseManager, /):
 @click.option("--list", "-l", is_flag=True, help="Lists all available migrations.")
 @click.option("--dry-run", "--dry", "-d", is_flag=True, help="Performs a dry run, without actually applying the migrations.")
 @click.option("--to", "-t", type=int, default=-1, help="The version to migrate to, or -1 for latest (default).")
+@click.option("--force", "-f", is_flag=True, help="Forces the migration to run, even if the database is up to date.")
 @wrapped_coro
-async def migrate(manager: DatabaseManager, /, *, list: bool, dry_run: bool, to: int):
+async def migrate(manager: DatabaseManager, /, *, list: bool, dry_run: bool, to: int, force: bool):
     """Migrates the database to the specified version."""
     if list:
         current = to if to > -1 else await manager.current_version()
@@ -176,7 +187,7 @@ async def migrate(manager: DatabaseManager, /, *, list: bool, dry_run: bool, to:
         click.secho("Performing dry run, no changes will be made.", fg="yellow")
 
     try:
-        await manager.migrate(to, dry_run=dry_run)
+        await manager.migrate(to, dry_run=dry_run, force=force)
     except ValueError as exc:
         click.secho(f"Invalid version specified: {exc}.", fg="red")
     except asyncio.CancelledError:
@@ -198,6 +209,15 @@ async def execute(manager: DatabaseManager, /, query: str):
     """Executes a query on the database."""
     await manager.connection.execute(query)
     click.secho("Query executed.", fg="green")
+
+
+@cli.command()
+@click.argument("query", type=str)
+@wrapped_coro
+async def fetch(manager: DatabaseManager, /, query: str):
+    """Fetches a query from the database."""
+    result = await manager.connection.fetch(query)
+    click.echo(result)
 
 
 @cli.command()

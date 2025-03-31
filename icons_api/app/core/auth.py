@@ -21,6 +21,7 @@ async def setup_oauth2(app: Application):
 
 
 async def update_bearer(app: Application, email: str, payload: dict[str, Any]):
+    logger.info(f"Updating bearer for {email}...")
     await app.state.pool.execute(
         "INSERT INTO bearers (email, access_token, refresh_token, expires_at, id_token) VALUES ($1, $2, $3, $4, $5) "
         "ON CONFLICT (email) DO UPDATE SET access_token = $2, refresh_token = $3, expires_at = $4, id_token = $5",
@@ -56,6 +57,8 @@ async def get_userinfo(app: Application, token: str) -> dict[str, Any]:
 
 
 async def generate_token(app: Application, id: str, *, skip_verification: bool = False) -> str:
+    """Generate a token for the user with the given ID."""
+    logger.info(f"Generating token for {id}...")
     user = await app.state.users.get(id=id)
     if not user:
         raise ValueError("User not found")
@@ -68,11 +71,13 @@ async def generate_token(app: Application, id: str, *, skip_verification: bool =
 
 
 async def verify_token(app: Application, token: str) -> User:
+    """Verify the token and return the user."""
     payload = verify(app.state.settings.secret_key.get_secret_value(), token)
     if not payload:
         raise ValueError("Invalid token")
     email = await app.state.pool.fetchval("SELECT email FROM tokens WHERE token = $1", token)
     if not email:
+        logger.debug(f"Valid token {token} for ID {payload} not found in database")
         raise ValueError("Token not found")
 
     # Check if we need to verify the bearer
@@ -104,7 +109,7 @@ async def refresh_bearer(app: Application, email: str) -> dict[str, Any]:
         },
     ) as response:
         if not response.ok:
-            logger.info(f"Refreshing token {email} returned {response.status} with {await response.text()}")
+            logger.info(f"Refreshing bearer for {email} returned {response.status} with {await response.text()}")
             response.raise_for_status()
         payload = await response.json()
         await update_bearer(app, email, payload)
@@ -128,6 +133,7 @@ async def handle_oauth2_token(app: Application, payload: dict[str, Any]) -> User
     )
     email = _jwt["email"]
     if not email.endswith("@queensu.ca"):
+        logger.warning(f"Rejecting registration request for {email} as it is not a Queen's University email. This shouldn't happen!")
         raise ValueError("Only Queen's University members are allowed to access this service")
 
     user = await app.state.users.create(email=email, name=_jwt["name"], ignore_conflict=True)

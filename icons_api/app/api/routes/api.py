@@ -15,6 +15,6 @@ for file in os.listdir(os.path.dirname(__file__)):
     if file in ("__init__.py", "api.py") or not file.endswith(".py"):
         continue
 
-    logger.debug(f"[API] Importing {file}...")
+    logger.debug(f"[API] Loading {file[:-3]} router...")
     module = importlib.import_module(f".{file[:-3]}", __package__)
     module.setup(router)

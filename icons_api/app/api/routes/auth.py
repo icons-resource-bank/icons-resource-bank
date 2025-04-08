@@ -1,11 +1,13 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 from loguru import logger
+from datetime import timedelta
 
 from ...core.errors import CustomValidationError
 from ..models.auth import AuthCallbackRequest
 from ...core.auth import generate_token, handle_oauth2_token, revoke_token
 from ...request import Request
+from ...utils import utcnow
 
 __all__ = ("setup",)
 
@@ -49,7 +51,12 @@ async def oauth2_callback(request: Request, data: AuthCallbackRequest):
             logger.info("Failed to handle OAuth2 token request", exception=e)
             raise CustomValidationError(f"Invalid request: {e}", status_code=400)
         else:
-            return JSONResponse({"token": await generate_token(request.app, user.id)})
+            return JSONResponse(
+                {
+                    "token": await generate_token(request.app, user.id),
+                    "new_user": utcnow() - user.created_at < timedelta(minutes=5),
+                }
+            )
 
 
 @router.post("/logout")

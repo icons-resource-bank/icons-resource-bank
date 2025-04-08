@@ -4,7 +4,7 @@ import datetime
 import enum
 from copy import copy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, overload, Self, Unpack, TypedDict, Final
 
 from .base import *
 from ...utils.dequedict import DequeDict
@@ -44,10 +44,17 @@ class User(Model):
     def has_flag(self, flag: UserFlags) -> bool:
         return bool(self.flags & flag)
 
-    async def set_flag(self, flag: UserFlags) -> None:
+    async def set_flag(self, flag: UserFlags, value: bool = True) -> Self:
+        if self.has_flag(flag) == value:
+            return self
+
         _inst = copy(self)
-        _inst.flags |= flag
+        if value:
+            _inst.flags |= flag
+        else:
+            _inst.flags &= ~flag
         await self._manager._update(_inst)
+        return _inst
 
     def is_banned(self) -> bool:
         return (
@@ -56,20 +63,39 @@ class User(Model):
             and self.temp_banned_until > datetime.datetime.now(datetime.timezone.utc)
         )
 
+    def can_track(self) -> bool:
+        return not self.has_flag(UserFlags.analytics_opt_out) and not self.is_banned()
+
+
+@dataclass(slots=True, kw_only=True)
+class UserSettings(Model):
+    _manager: UserManager
+    id: str
+    theme: str
+
 
 class UserFlags(enum.IntFlag):
     admin = 1
     staff = 2
     trusted = 4
     banned = 8
+    analytics_opt_out = 16  # Opt-out system here
+
+
+class _QueryArguments(TypedDict):
+    flags: UserFlags | None
+    query: str | None
+    name: str | None
+    email: str | None
 
 
 class UserManager(BaseManager):
+    DELETED: Final[User] = User._deleted()
+
     def __init__(self, app: Application):
         self.app = app
         self.cache: DequeDict[str, User] = DequeDict(maxlen=1024)
         self._email_map: DequeDict[str, str] = DequeDict(maxlen=1024)
-        self.DELETED = User._deleted()
 
     async def _fetch(self, *, id: str | None = None, email: str | None = None) -> User | None:
         if id and email:
@@ -89,6 +115,53 @@ class UserManager(BaseManager):
         self._email_map[user.email] = user.id
         return user
 
+    async def query(
+        self, *, limit: int = 100, offset: int = 0, sort_by: str = "created_at DESC", **kwargs: Unpack[_QueryArguments]
+    ) -> tuple[list[User], int]:
+        where, params = [], []
+        index = 1
+
+        if "query" in kwargs and ("name" in kwargs or "email" in kwargs):
+            raise ValueError("Cannot use query and name/email at the same time")
+
+        for key, value in kwargs.items():
+            if value is None:
+                continue
+            if key == "flags":
+                for flag in value:
+                    where.append(f"has_flag(flags, ${index})")
+                    params.append(flag.value)
+                    index += 1
+                continue
+
+            # We use pg_trgm for fuzzy search
+            elif key == "query":
+                where.append(f"(name % ${index} OR email % ${index})")
+                params.append(value)
+            elif key == "name":
+                where.append(f"name % ${index}")
+                params.append(value)
+            elif key == "email":
+                where.append(f"email % ${index}")
+                params.append(value)
+            else:
+                where.append(f"{key} = ${index}")
+                params.append(value)
+            index += 1
+        if not where:
+            where.append("TRUE")
+
+        where = " AND ".join(where)
+        result = await self.app.state.pool.fetch(
+            f"SELECT (*), COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT $1 OFFSET $2",
+            limit,
+            offset,
+            *params,
+        )
+        users = [User.from_row(self, row) for row in result]
+        total = result[0]["total"] if result else 0
+        return users, total
+
     async def get(self, *, id: str | None = None, email: str | None = None) -> User | None:
         if id and email:
             raise ValueError("Cannot specify both id and email")
@@ -103,6 +176,14 @@ class UserManager(BaseManager):
                 return await self.get(id=id)
         return await self._fetch(id=id, email=email)
 
+    async def get_settings(self, id: str) -> UserSettings | None:
+        result = await self.app.state.pool.fetchrow("SELECT * FROM user_settings WHERE id = $1", id)
+        if not result:
+            return
+
+        settings = UserSettings.from_row(self, result)
+        return settings
+
     @overload
     async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User: ...
 
@@ -116,6 +197,12 @@ class UserManager(BaseManager):
         query += " RETURNING *"
 
         result = await self.app.state.pool.fetchrow(query, *kwargs.values())
+        # We need to insert into user settings too
+        await self.app.state.pool.execute(
+            "INSERT INTO user_settings (id) VALUES ($1) ON CONFLICT DO NOTHING",
+            result["id"],
+        )
+
         user = User.from_row(self, result)
         self.cache[user.id] = user
         self._email_map[user.email] = user.id
@@ -132,6 +219,13 @@ class UserManager(BaseManager):
         await self._update(_inst)
         return _inst
 
+    async def update_settings(self, settings: UserSettings, **kwargs: Any) -> UserSettings:
+        _inst = copy(settings)
+        for key, value in kwargs.items():
+            setattr(_inst, key, value)
+        await self._update_settings(_inst)
+        return _inst
+
     async def _update(self, user: User) -> None:
         await self.app.state.pool.execute(
             "UPDATE users SET email = $1, name = $2, flags = $3 WHERE id = $4",
@@ -142,3 +236,19 @@ class UserManager(BaseManager):
         )
         self.cache[user.id] = user
         self._email_map[user.email] = user.id
+
+    async def _update_settings(self, settings: UserSettings):
+        return await self.app.state.pool.execute(
+            "UPDATE user_settings SET theme = $1 WHERE id = $2",
+            settings.theme,
+            settings.id,
+        )
+
+    async def track(self, user: User, event: str, reference_id: str | None = None, **kwargs: Any) -> None:
+        await self.app.state.pool.execute(
+            "INSERT INTO analytics (event, user_id, reference_id, metadata) VALUES ($1, $2, $3, $4)",
+            event,
+            user.id,
+            reference_id,
+            kwargs,
+        )

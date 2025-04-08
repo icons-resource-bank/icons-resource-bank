@@ -30,6 +30,7 @@ class Resource(Model):
     author_id: str
     uri: str
     tag_ids: list[str]
+    download_count: int = 0
     pending: bool
 
     async def to_dict(self, *, with_data: bool = False) -> dict[str, Any]:
@@ -50,12 +51,13 @@ class ResourceType(enum.IntEnum):
 
 
 class _QueryArguments(TypedDict):
-    course_id: str | None
-    author_id: str | None
+    course_ids: list[str] | None
+    author_ids: list[str] | None
     type: ResourceType | None
     tag_ids: list[str] | None
     created_before: datetime.datetime | None
     created_after: datetime.datetime | None
+    query: str | None
     title: str | None
     description: str | None
 
@@ -65,11 +67,16 @@ class ResourceManager(BaseManager):
         self.app = app
 
     _FILTERED_QUERY = """
-        SELECT resources.*, array_agg(resource_tags.tag_id) AS tag_ids
+        SELECT
+            resources.*,
+            array_agg(resource_tags.tag_id) AS tag_ids,
+            COUNT(analytics.id) AS download_count,
+            COUNT(*) OVER() AS total_count
         FROM resources
         LEFT JOIN resource_tags ON resources.id = resource_tags.resource_id
+        LEFT JOIN analytics ON analytics.reference_id = resources.id AND analytics.event = 'download'
         WHERE {query}
-        GROUP BY id
+        GROUP BY resources.id
         ORDER BY {sort}
         """
 
@@ -105,15 +112,22 @@ class ResourceManager(BaseManager):
         return result["count"]
 
     async def query(
-        self, *, limit: int = 100, offset: int = 0, sort_by: str = "created_at DESC", **kwargs: Unpack[_QueryArguments]
-    ) -> list[Resource]:
+        self, *, limit: int = 100, offset: int = 0, sort_by: str = "resources.created_at DESC", **kwargs: Unpack[_QueryArguments]
+    ) -> tuple[list[Resource], int]:
         where, params = [], []
         index = 1
+
+        if "query" in kwargs and ("title" in kwargs or "description" in kwargs):
+            raise ValueError("Cannot use query and title/description at the same time")
 
         for key, value in kwargs.items():
             if value is None:
                 continue
-            if key == "tag_ids":
+
+            if key in ("course_ids", "author_ids"):
+                where.append(f"resources.{key[:-1]} = ANY({index})")
+                params.append(value)  # type: ignore
+            elif key == "tag_ids":
                 for tag_id in value:  # type: ignore
                     where.append(f"resource_tags.tag_id = ${index}")
                     params.append(tag_id)
@@ -125,6 +139,15 @@ class ResourceManager(BaseManager):
             elif key == "created_after":
                 where.append(f"resources.created_at > ${index}")
                 params.append(value)
+
+            # We use pg_trgm for fuzzy search
+            elif key == "query":
+                where.append(f"(resources.title % ${index} OR resources.description % ${index})")
+                params.append(value)
+            elif key in ("title", "description"):
+                where.append(f"resources.{key} % ${index}")
+                params.append(value)
+
             else:
                 where.append(f"resources.{key} = ${index}")
                 params.append(value)
@@ -132,9 +155,20 @@ class ResourceManager(BaseManager):
         if not where:
             where.append("true")
 
+        if any(key in kwargs for key in ("title", "description")) and sort_by.startswith("resources.query "):
+            greatest = []
+            for key in ("title", "description"):
+                if key in kwargs:
+                    greatest.append(f"similarity(resources.{key}, ${index})")
+                    params.append(kwargs[key])
+                    index += 1
+            sort_by = f"greatest({', '.join(greatest)}) {sort_by.split()[-1]}"
+        elif sort_by.startswith("resources.query "):
+            sort_by = sort_by.replace("resources.query", "resources.created_at")
+
         query = self._FILTERED_QUERY.format(query=" AND ".join(where), sort=sort_by) + f" LIMIT {limit} OFFSET {offset}"
         result = await self.app.state.pool.fetch(query, *params)
-        return [Resource.from_row(self, row) for row in result]
+        return [Resource.from_row(self, row) for row in result], result[0]["total_count"] if result else 0
 
     async def create(
         self,

@@ -13,6 +13,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
+CREATE OR REPLACE FUNCTION set_flag(mask INT, flag INT) RETURNS INT AS $$
+BEGIN
+    RETURN mask | flag;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 CREATE TABLE IF NOT EXISTS schema (
     version INT NOT NULL PRIMARY KEY,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -28,6 +34,11 @@ CREATE TABLE IF NOT EXISTS users (
     temp_banned_until TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
+
+CREATE TABLE IF NOT EXISTS user_settings (
+    id VARCHAR(36) NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    theme VARCHAR(255) NOT NULL DEFAULT 'system'
+);
 
 -- Microsoft OAuth2 authorization
 CREATE TABLE IF NOT EXISTS bearers (
@@ -82,6 +93,8 @@ CREATE TABLE IF NOT EXISTS resources (
     uri TEXT NOT NULL, -- URL or S3 resource
     pending BOOLEAN NOT NULL DEFAULT TRUE
 );
+CREATE INDEX IF NOT EXISTS trgm_idx_title ON resources USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS trgm_idx_description ON resources USING gin (description gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS resources_course_id_idx ON resources (course_id);
 
 CREATE TABLE IF NOT EXISTS resource_tags (

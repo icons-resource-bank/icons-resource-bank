@@ -25,7 +25,7 @@ async def get_courses(request: Request):
 @flag_check(admin=True)
 async def create_course(request: Request, data: CourseCreateRequest):
     course = await request.app.state.courses.create_course(**{k: v for k, v in data.model_dump().items() if v is not None})
-    return JSONResponse(course.to_dict())
+    return JSONResponse(course.to_dict(), status_code=201)
 
 
 @router.get("/courses/{id}")
@@ -73,7 +73,7 @@ async def get_tags(request: Request):
 @flag_check(admin=True)
 async def create_tag(request: Request, data: TagCreateRequest):
     tag = await request.app.state.courses.create_tag(**data.model_dump())
-    return tag.to_dict()
+    return JSONResponse(tag.to_dict(), status_code=201)
 
 
 @router.get("/tags/{id}")

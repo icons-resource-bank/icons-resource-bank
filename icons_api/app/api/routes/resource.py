@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Response, UploadFile, File, Form
+from fastapi import APIRouter, Response, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 from os import urandom
 
-from typing import Annotated
+from typing import Annotated, Literal
+
+from pydantic import AwareDatetime
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
@@ -17,11 +19,45 @@ __all__ = ("setup",)
 router = APIRouter(prefix="/resources")
 
 
-# @router.get("")
-# @limiter.limit("10/5 seconds")
-# @auth_check
-# async def get_resources(request: Request):
-#     return [course.to_dict() for course in await request.app.state.courses.get_courses()]
+@router.get("")
+@limiter.limit("10/5 seconds")
+@flag_check(staff=True)
+async def get_resources(
+    request: Request,
+    limit: Annotated[int, Query(ge=0, le=100)] = 10,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    query: Annotated[str | None, Query(max_length=4096)] = None,
+    title: Annotated[str | None, Query(max_length=64)] = None,
+    description: Annotated[str | None, Query(max_length=4096)] = None,
+    type: Annotated[ResourceType | None, Query(max_length=255)] = None,
+    course_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
+    author_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
+    tag_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
+    created_before: Annotated[AwareDatetime | None, Query(max_length=255)] = None,
+    created_after: Annotated[AwareDatetime | None, Query(max_length=255)] = None,
+    sort_by: Annotated[Literal["query", "created_at"], Query(max_length=255)] = "query",
+    sort_order: Annotated[Literal["asc", "desc"], Query(max_length=255)] = "desc",
+):
+    resources, total = await request.app.state.resources.query(
+        limit=limit,
+        offset=offset,
+        query=query,
+        sort_by=f"resources.{sort_by} {sort_order.upper()}",
+        title=title,
+        description=description,
+        type=type,
+        course_ids=course_ids,
+        author_ids=author_ids,
+        tag_ids=tag_ids,
+        created_before=created_before,
+        created_after=created_after,
+    )
+    return JSONResponse(
+        {
+            "total": total,
+            "resources": [resource.to_dict(with_data=True) for resource in resources],
+        }
+    )
 
 
 @router.post("")
@@ -51,7 +87,7 @@ async def create_resource(
         author_id=request.state.user.id,  # type: ignore # author_id will be set
     )
 
-    return JSONResponse(await resource.to_dict(with_data=True))
+    return JSONResponse(await resource.to_dict(with_data=True), status_code=201)
 
 
 @router.get("/{id}")
@@ -73,6 +109,7 @@ async def download_resource(request: Request, id: str):
         raise CustomValidationError("Resource not found", 404)
 
     if resource.type == ResourceType.url:
+        # Fallback I guess
         uri = resource.uri
     else:
         uri = await generate_presigned_url(request.app, resource.uri)
@@ -94,13 +131,50 @@ async def update_resource(request: Request, id: str, data: ResourceUpdateRequest
     resource = await request.app.state.resources.update(
         id=resource.id, **{k: v for k, v in data.model_dump().items() if v is not None}
     )
-    return JSONResponse(await resource.to_dict(with_data=True))
+    return JSONResponse(await resource.to_dict())
+
+
+@router.post("/{id}/approve")
+@limiter.limit("5/5 seconds")
+@flag_check(staff=True)
+async def approve_resource(request: Request, id: str):
+    resource = await request.app.state.resources.get(id=id)
+    if not resource:
+        raise CustomValidationError("Resource not found", 404)
+
+    resource = await request.app.state.resources.update(
+        id=resource.id, pending=False
+    )
+    return JSONResponse(await resource.to_dict())
+
+
+@router.post("/{id}/deny")
+@limiter.limit("5/5 seconds")
+@flag_check(staff=True)
+async def deny_resource(request: Request, id: str):
+    resource = await request.app.state.resources.get(id=id)
+    if not resource:
+        raise CustomValidationError("Resource not found", 404)
+
+    # TODO: Do something better than just deleting the resource
+    if resource.type == ResourceType.file:
+        # Delete the file from S3
+        await delete_object(request.app, resource.uri)
+    await request.app.state.resources.delete(id)
+    return JSONResponse(resource.to_dict())  # For consistency
 
 
 @router.delete("/{id}")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
 async def delete_resource(request: Request, id: str):
+    resource = await request.app.state.resources.get(id=id)
+    if not resource:
+        return Response(status_code=204)
+
+    if resource.type == ResourceType.file:
+        # Delete the file from S3
+        await delete_object(request.app, resource.uri)
     await request.app.state.resources.delete(id)
     return Response(status_code=204)
 

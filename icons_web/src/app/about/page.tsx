@@ -142,7 +142,7 @@ export default function AboutPage() {
               <CardHeader>
                 <CardTitle>Regular Operating Hours</CardTitle>
                 <p className="mb-4 text-muted-foreground ">
-                  Hours in effect from December 4th, 2023, to December 21st, 2023
+                  Hours in effect from September to April (excluding holidays and exam periods)
                 </p>
               </CardHeader>
               <CardContent>
@@ -175,7 +175,7 @@ export default function AboutPage() {
               <CardHeader>
                 <CardTitle>Exam Season Extended Hours</CardTitle>
                 <p className="mb-4 text-muted-foreground ">
-                  Hours in effect from December 4th, 2023, to December 21st, 2023
+                  Hours in effect from December 4th to December 21st
                 </p>
               </CardHeader>
               <CardContent>

@@ -119,7 +119,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3">
             <Card className="dark:rounded-sm dark:border-2">
               <CardContent className="dark:bg-footer pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Clock className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Extended Hours</h3>
@@ -130,7 +130,7 @@ export default function HomePage() {
             </Card>
             <Card className="dark:rounded-sm dark:border-2">
               <CardContent className="dark:bg-footer pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Users className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Equipment</h3>
@@ -139,7 +139,7 @@ export default function HomePage() {
             </Card>
             <Card className="dark:rounded-sm dark:border-2">
               <CardContent className="dark:bg-footer pt-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/30">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <BookOpen className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Resource Bank</h3>

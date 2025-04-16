@@ -117,7 +117,7 @@ class ResourceManager(BaseManager):
         where, params = [], []
         index = 1
 
-        if "query" in kwargs and ("title" in kwargs or "description" in kwargs):
+        if kwargs.get("query") and (kwargs.get("title") or kwargs.get("description")):
             raise ValueError("Cannot use query and title/description at the same time")
 
         for key, value in kwargs.items():
@@ -155,10 +155,10 @@ class ResourceManager(BaseManager):
         if not where:
             where.append("true")
 
-        if any(key in kwargs for key in ("title", "description")) and sort_by.startswith("resources.query "):
+        if any(kwargs.get(key) for key in ("query", "title", "description")) and sort_by.startswith("resources.query "):
             greatest = []
             for key in ("title", "description"):
-                if key in kwargs:
+                if kwargs.get(key) or kwargs.get("query"):
                     greatest.append(f"similarity(resources.{key}, ${index})")
                     params.append(kwargs[key])
                     index += 1

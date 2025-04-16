@@ -56,9 +56,8 @@ export default function AuthCallback() {
 
         // Redirect back to the original page
         const redirectPath = decodeURIComponent(urlParams.get("state") || "/");
-        setTimeout(() => {
-          router.push(redirectPath);
-        }, 1000); // Short delay to show success message
+        // Short delay to show success message
+        setTimeout(() => router.push(redirectPath), 1000);
       } catch (error) {
         console.error("Authentication error:", error);
         setStatus("error");
@@ -74,7 +73,7 @@ export default function AuthCallback() {
       <div className="w-full max-w-md space-y-6 rounded-lg bg-card p-8 text-center shadow-lg">
         {status === "loading" && (
           <>
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary dark:text-white" />
             <h1 className="text-2xl font-bold">Signing you in...</h1>
             <p className="text-muted-foreground">Please wait while we complete the authentication process.</p>
           </>

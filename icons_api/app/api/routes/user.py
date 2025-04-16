@@ -21,7 +21,7 @@ router = APIRouter(prefix="/users")
 @flag_check(staff=True)
 async def get_users(
     request: Request,
-    limit: Annotated[int, Query(ge=0, le=100)] = 10,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
     offset: Annotated[int, Query(ge=0)] = 0,
     query: Annotated[str | None, Query(max_length=255)] = None,
     name: Annotated[str | None, Query(max_length=255)] = None,
@@ -32,11 +32,11 @@ async def get_users(
 ):
     users, total = await request.app.state.users.query(
         # convert flags int bitfield to list of UserFlag
-        limit=limit, offset=offset, query=query, name=name, email=email, sort_by=f"{sort_by} {sort_order.upper()}", flags=UserFlags(flags) if flags else None
+        limit=limit, offset=offset or 0, query=query, name=name, email=email, sort_by=f"{sort_by} {sort_order.upper()}", flags=UserFlags(flags) if flags else None
     )
     return JSONResponse({
         "total": total,
-        "users": [user.to_dict() for user in users],
+        "items": [user.to_dict() for user in users],
     })
 
 
@@ -94,6 +94,12 @@ async def ban_user(request: Request, id: str, data: BanRequest):
     user = await request.app.state.users.get(id=id)
     if not user:
         raise CustomValidationError("User not found", 404)
+
+    if user.has_flag(UserFlags.banned):
+        raise CustomValidationError("User is already permabanned", 400)
+
+    if user.has_flag(UserFlags.admin) or user.has_flag(UserFlags.staff):
+        raise CustomValidationError("Cannot ban staff", 403)
 
     if not data.until:
         user = await user.set_flag(UserFlags.banned, True)

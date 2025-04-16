@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { get } from "@/lib/http";
+import { get } from "@/lib/api";
 
 interface User {
   id: string;

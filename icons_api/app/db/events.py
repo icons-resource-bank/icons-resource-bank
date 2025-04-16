@@ -25,6 +25,7 @@ async def db_init(conn: asyncpg.Connection) -> None:
     await conn.set_type_codec(
         "timestamp", encoder=encode_timestamp, decoder=datetime.fromisoformat, schema="pg_catalog", format="text"
     )
+    await conn.execute("SET pg_trgm.similarity_threshold = 0.15")
 
 
 async def connect_to_db(app: Application, settings: Settings) -> None:

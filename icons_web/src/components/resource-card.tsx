@@ -52,6 +52,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
             <IconComponent className="h-5 w-5 text-primary" />
           </div>
           <div>
+            {/* Fix flashing when hover */}
             <h3 className="font-semibold line-clamp-2">{resource.title}</h3>
             <p className="text-sm text-muted-foreground mt-1">{resource.course}</p>
             <p className="text-xs text-muted-foreground mt-1">{resource.downloads} downloads</p>

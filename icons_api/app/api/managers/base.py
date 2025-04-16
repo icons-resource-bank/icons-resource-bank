@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from copy import copy
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -34,7 +35,7 @@ class Model:
 
     @classmethod
     def from_row(cls, manager: BaseManager, row: dict[str, Any]) -> Self:
-        return cls(_manager=manager, **row)
+        return cls(_manager=manager, **{k: v for k, v in row.items() if k in inspect.signature(cls).parameters})
 
     def to_dict(self) -> dict[str, Any]:
         # Dirty nasty filthy hack

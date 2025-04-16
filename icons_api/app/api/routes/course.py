@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Query
 from fastapi.responses import JSONResponse
+
+from typing import Annotated, Literal
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
@@ -16,8 +18,33 @@ router = APIRouter()
 @router.get("/courses")
 @limiter.limit("10/5 seconds")
 @auth_check
-async def get_courses(request: Request):
-    return JSONResponse([course.to_dict() for course in await request.app.state.courses.get_courses()])
+async def get_courses(
+    request: Request,
+    limit: Annotated[int, Query(ge=0, le=100)] = 0,  # Default to all courses
+    offset: Annotated[int, Query(ge=0)] = 0,
+    query: Annotated[str | None, Query(max_length=4096)] = None,
+    code: Annotated[str | None, Query(max_length=16)] = None,
+    name: Annotated[str | None, Query(max_length=64)] = None,
+    year_level: Annotated[int | None, Query(ge=1, le=4)] = None,
+    category: Annotated[str | None, Query(max_length=64)] = None,
+    icon: Annotated[str | None, Query(max_length=64)] = None,
+    description: Annotated[str | None, Query(max_length=4096)] = None,
+    sort_by: Annotated[Literal["query", "created_at", "code"], Query(max_length=255)] = "query",
+    sort_order: Annotated[Literal["asc", "desc"], Query(max_length=255)] = "desc",
+):
+    courses, total = await request.app.state.courses.query_courses(
+        limit=limit,
+        offset=offset,
+        query=query,
+        code=code,
+        name=name,
+        year_level=year_level,
+        category=category,
+        icon=icon,
+        description=description,
+        sort_by=f"{sort_by} {sort_order.upper()}",
+    )
+    return JSONResponse({"items": [course.to_dict() for course in courses], "total": total})
 
 
 @router.post("/courses")
@@ -49,7 +76,9 @@ async def update_course(request: Request, id: str, data: CourseUpdateRequest):
     if not course:
         raise CustomValidationError("Course not found", 404)
 
-    course = await request.app.state.courses.update_course(id=course.id, **{k: v for k, v in data.model_dump().items() if v is not None})
+    course = await request.app.state.courses.update_course(
+        id=course.id, **{k: v for k, v in data.model_dump().items() if v is not None}
+    )
     return JSONResponse(course.to_dict())
 
 
@@ -97,7 +126,9 @@ async def update_tag(request: Request, id: str, data: TagUpdateRequest):
     if not tag:
         raise CustomValidationError("Tag not found", 404)
 
-    _tag = await request.app.state.courses.update_tag(id=tag.id, **{k: v for k, v in data.model_dump().items() if v is not None})
+    _tag = await request.app.state.courses.update_tag(
+        id=tag.id, **{k: v for k, v in data.model_dump().items() if v is not None}
+    )
     return JSONResponse(_tag.to_dict())
 
 

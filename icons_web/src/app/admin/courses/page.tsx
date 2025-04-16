@@ -1,172 +1,516 @@
 "use client";
 
-import {
-  PlusCircle,
-  Pipette,
-  Calculator,
-  FlaskRoundIcon as Flask,
-  Atom,
-  BookOpen,
-  Code,
-  Palette,
-  Mountain,
-  Wrench,
-  Microscope,
-  BarChart2,
-  Search,
-  type LucideIcon,
-} from "lucide-react";
-import React from "react";
-import { useState, useEffect, useRef } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
+import { PlusCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { get, post } from "@/lib/http";
-
-// This would come from the database
-const __courses = [
-  {
-    id: 1,
-    code: "MATH 121",
-    name: "Calculus I",
-    yearLevel: 1,
-    icon: "calculator",
-  },
-  {
-    id: 2,
-    code: "PHYS 117",
-    name: "Physics I",
-    yearLevel: 1,
-    icon: "atom",
-  },
-];
-
-const __filters = [
-  {
-    id: 1,
-    name: "Notes",
-    color: "#4B0082", // Purple
-  },
-  {
-    id: 2,
-    name: "Flashcards",
-    color: "#2563EB", // Blue
-  },
-  {
-    id: 3,
-    name: "Quiz",
-    color: "#16A34A", // Green
-  },
-  {
-    id: 4,
-    name: "Tutorial",
-    color: "#DC2626", // Red
-  },
-];
-
-// Constants
-
-const years = [
-  { id: 1, name: "First Year" },
-  { id: 2, name: "Second Year" },
-  { id: 3, name: "Third Year" },
-  { id: 4, name: "Fourth Year" },
-];
-
-const predefinedColors = [
-  { name: "Purple", value: "#4B0082" },
-  { name: "Blue", value: "#2563EB" },
-  { name: "Green", value: "#16A34A" },
-  { name: "Red", value: "#DC2626" },
-  { name: "Orange", value: "#EA580C" },
-  { name: "Yellow", value: "#CA8A04" },
-  { name: "Pink", value: "#DB2777" },
-  { name: "Teal", value: "#0D9488" },
-  { name: "Indigo", value: "#4F46E5" },
-  // Custom color option will be handled separately
-];
-
-// Define course icons
-interface CourseIcon {
-  name: string;
-  icon: LucideIcon;
-  description: string;
-}
-
-const courseIcons: CourseIcon[] = [
-  { name: "wrench", icon: Wrench, description: "Engineering" },
-  { name: "calculator", icon: Calculator, description: "Mathematics" },
-  { name: "flask", icon: Flask, description: "Chemistry" },
-  { name: "atom", icon: Atom, description: "Physics" },
-  { name: "microscope", icon: Microscope, description: "Biology" },
-  { name: "mountain", icon: Mountain, description: "Earth Sciences" },
-  { name: "book-open", icon: BookOpen, description: "Literature" },
-  { name: "code", icon: Code, description: "Programming" },
-  { name: "palette", icon: Palette, description: "Graphics" },
-  { name: "bar-chart-2", icon: BarChart2, description: "Statistics" },
-];
-
-const getIconByName = (name: string): LucideIcon => {
-  const found = courseIcons.find((icon) => icon.name === name);
-  return found?.icon || courseIcons[0].icon;
-};
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { courseApi, filterApi, type Course, type Filter } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import { CourseForm } from "./course-form";
+import { CourseTable } from "./course-table";
+import { FilterTab } from "./filter-tab";
+import {
+  type CourseFormData,
+  type FilterFormData,
+  MIN_DESCRIPTION_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_CATEGORY_LENGTH,
+  MIN_COURSE_CODE_LENGTH,
+  MAX_COURSE_CODE_LENGTH,
+  MIN_COURSE_NAME_LENGTH,
+  MAX_COURSE_NAME_LENGTH,
+  MIN_FILTER_NAME_LENGTH,
+  MAX_FILTER_NAME_LENGTH,
+  predefinedColors,
+  colorHexToInt,
+} from "./types";
 
 export default function ManageCoursesPage() {
-  const [newCourse, setNewCourse] = useState({
+  const queryClient = useQueryClient();
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [yearLevelFilter, setYearLevelFilter] = useState(0);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // State for course form
+  const [courseFormOpen, setCourseFormOpen] = useState(false);
+  const [isEditingCourse, setIsEditingCourse] = useState(false);
+  const [courseForm, setCourseForm] = useState<CourseFormData>({
     code: "",
     name: "",
-    icon: courseIcons[0].name,
+    category: "",
+    yearLevel: 1,
+    icon: "book-open",
+    description: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // State for filter form
+  const [filterFormOpen, setFilterFormOpen] = useState(false);
+  const [isEditingFilter, setIsEditingFilter] = useState(false);
+  const [filterForm, setFilterForm] = useState<FilterFormData>({
+    name: "",
+    color: predefinedColors[0].value,
+  });
+
+  // State for validation
+  const [courseFormErrors, setCourseFormErrors] = useState<Record<string, string>>({});
+  const [filterFormErrors, setFilterFormErrors] = useState<Record<string, string>>({});
+
+  // State for description character count
+  const [descriptionCharCount, setDescriptionCharCount] = useState(0);
+
+  // State for category suggestions
+  const [categoryInputValue, setCategoryInputValue] = useState("");
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+
+  // State for confirmation dialogs
+  const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
+  const [filterToDelete, setFilterToDelete] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteFilterDialogOpen, setDeleteFilterDialogOpen] = useState(false);
+
+  // State for pending mutations
+  const [isPending, setIsPending] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch courses
+  const {
+    data: courses,
+    isLoading: isLoadingCourses,
+    error: coursesError,
+  } = useQuery({
+    queryKey: ["courses", debouncedSearch, yearLevelFilter, categoryFilter],
+    queryFn: () => courseApi.getCourses(debouncedSearch, yearLevelFilter, categoryFilter).then((r) => r.items),
+  });
+
+  // Fetch filters
+  const {
+    data: filters,
+    isLoading: isLoadingFilters,
+    error: filtersError,
+  } = useQuery({
+    queryKey: ["filters"],
+    queryFn: filterApi.getFilters,
+  });
+
+  // Extract unique categories from courses
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => {
+      if (!courses) return [];
+      const categorySet = new Set<string>();
+      courses.forEach((course) => {
+        if (course.category) {
+          categorySet.add(course.category);
+        }
+      });
+      return Array.from(categorySet);
+    },
+    enabled: !!courses,
+  });
+
+  // Create course mutation
+  const createCourseMutation = useMutation({
+    mutationFn: courseApi.createCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast({
+        title: "Course created",
+        description: "Course has been created successfully.",
+      });
+      setCourseFormOpen(false);
+      resetCourseForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create course: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update course mutation
+  const updateCourseMutation = useMutation({
+    mutationFn: courseApi.updateCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast({
+        title: "Course updated",
+        description: "Course has been updated successfully.",
+      });
+      setCourseFormOpen(false);
+      resetCourseForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update course: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete course mutation
+  const deleteCourseMutation = useMutation({
+    mutationFn: courseApi.deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast({
+        title: "Course deleted",
+        description: "Course has been deleted successfully.",
+      });
+      setDeleteDialogOpen(false);
+      setCourseToDelete(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete course: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create filter mutation
+  const createFilterMutation = useMutation({
+    mutationFn: filterApi.createFilter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["filters"] });
+      toast({
+        title: "Filter created",
+        description: "Filter has been created successfully.",
+      });
+      setFilterFormOpen(false);
+      resetFilterForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create filter: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+    onMutate: () => {
+      setIsPending(true);
+    },
+    onSettled: () => {
+      setIsPending(false);
+    },
+  });
+
+  // Update filter mutation
+  const updateFilterMutation = useMutation({
+    mutationFn: filterApi.updateFilter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["filters"] });
+      toast({
+        title: "Filter updated",
+        description: "Filter has been updated successfully.",
+      });
+      setFilterFormOpen(false);
+      resetFilterForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update filter: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+    onMutate: () => {
+      setIsPending(true);
+    },
+    onSettled: () => {
+      setIsPending(false);
+    },
+  });
+
+  // Delete filter mutation
+  const deleteFilterMutation = useMutation({
+    mutationFn: filterApi.deleteFilter,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["filters"] });
+      toast({
+        title: "Filter deleted",
+        description: "Filter has been deleted successfully.",
+      });
+      setDeleteFilterDialogOpen(false);
+      setFilterToDelete(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete filter: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+    onMutate: () => {
+      setIsPending(true);
+    },
+    onSettled: () => {
+      setIsPending(false);
+    },
+  });
+
+  // Check if course form is valid
+  const isCourseFormValid = () => {
+    return (
+      courseForm.code.trim().length >= MIN_COURSE_CODE_LENGTH &&
+      courseForm.name.trim().length >= MIN_COURSE_NAME_LENGTH &&
+      courseForm.category.trim().length > 0 &&
+      courseForm.description.trim().length >= MIN_DESCRIPTION_LENGTH
+    );
+  };
+
+  // Check if filter form is valid
+  const isFilterFormValid = () => {
+    return filterForm.name.trim().length >= MIN_FILTER_NAME_LENGTH && filterForm.color !== undefined;
+  };
+
+  // Handle filter form input change
+  const handleFilterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setNewCourse((prev) => ({ ...prev, [id]: value }));
+
+    if (id === "name") {
+      setFilterForm((prev) => ({ ...prev, [id]: value }));
+      validateFilterField("name", value);
+    } else if (id === "color" && e.target.type === "color") {
+      // Convert hex color to integer
+      const colorInt = colorHexToInt(value);
+      setFilterForm((prev) => ({ ...prev, color: colorInt }));
+    } else {
+      setFilterForm((prev) => ({ ...prev, [id]: value }));
+    }
   };
 
-  const handleSelectChange = (field: string, value: string) => {
-    setNewCourse((prev) => ({ ...prev, [field]: value }));
+  // Validate course field
+  const validateCourseField = (field: string, value: string) => {
+    let error = "";
+
+    if (field === "code") {
+      if (value.trim().length < MIN_COURSE_CODE_LENGTH) {
+        error = `Course code must be at least ${MIN_COURSE_CODE_LENGTH} characters`;
+      } else if (value.length > MAX_COURSE_CODE_LENGTH) {
+        error = `Course code must be at most ${MAX_COURSE_CODE_LENGTH} characters`;
+      }
+    } else if (field === "name") {
+      if (value.trim().length < MIN_COURSE_NAME_LENGTH) {
+        error = `Course name must be at least ${MIN_COURSE_NAME_LENGTH} characters`;
+      } else if (value.length > MAX_COURSE_NAME_LENGTH) {
+        error = `Course name must be at most ${MAX_COURSE_NAME_LENGTH} characters`;
+      }
+    } else if (field === "category") {
+      if (value.trim().length === 0) {
+        error = "Category is required";
+      } else if (value.length > MAX_CATEGORY_LENGTH) {
+        error = `Category must be at most ${MAX_CATEGORY_LENGTH} characters`;
+      }
+    } else if (field === "description") {
+      if (value.trim().length < MIN_DESCRIPTION_LENGTH) {
+        error = `Description must be at least ${MIN_DESCRIPTION_LENGTH} characters`;
+      } else if (value.length > MAX_DESCRIPTION_LENGTH) {
+        error = `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters`;
+      }
+    }
+
+    setCourseFormErrors((prev) => ({
+      ...prev,
+      [field]: error,
+    }));
+
+    return error === "";
   };
 
-  const resetForm = () => {
-    setNewCourse({
+  // Validate filter field
+  const validateFilterField = (field: string, value: string) => {
+    let error = "";
+
+    if (field === "name") {
+      if (value.trim().length < MIN_FILTER_NAME_LENGTH) {
+        error = `Filter name must be at least ${MIN_FILTER_NAME_LENGTH} characters`;
+      } else if (value.length > MAX_FILTER_NAME_LENGTH) {
+        error = `Filter name must be at most ${MAX_FILTER_NAME_LENGTH} characters`;
+      }
+    }
+
+    setFilterFormErrors((prev) => ({
+      ...prev,
+      [field]: error,
+    }));
+
+    return error === "";
+  };
+
+  // Validate course form
+  const validateCourseForm = () => {
+    const codeValid = validateCourseField("code", courseForm.code);
+    const nameValid = validateCourseField("name", courseForm.name);
+    const categoryValid = validateCourseField("category", courseForm.category);
+    const descriptionValid = validateCourseField("description", courseForm.description);
+
+    return codeValid && nameValid && categoryValid && descriptionValid;
+  };
+
+  // Validate filter form
+  const validateFilterForm = () => {
+    return validateFilterField("name", filterForm.name);
+  };
+
+  // Handle course form submit
+  const handleCourseSubmit = () => {
+    if (validateCourseForm()) {
+      if (isEditingCourse && courseForm.id) {
+        updateCourseMutation.mutate(courseForm as Course);
+      } else {
+        createCourseMutation.mutate(courseForm as Omit<Course, "id">);
+      }
+    }
+  };
+
+  // Handle filter form submit
+  const handleFilterSubmit = () => {
+    if (validateFilterForm()) {
+      if (isEditingFilter && filterForm.id) {
+        updateFilterMutation.mutate(filterForm as Filter);
+      } else {
+        createFilterMutation.mutate(filterForm as Omit<Filter, "id">);
+      }
+    }
+  };
+
+  // Reset course form
+  const resetCourseForm = () => {
+    setCourseForm({
       code: "",
       name: "",
-      icon: courseIcons[0].name,
+      category: "",
+      yearLevel: 1,
+      icon: "book-open",
+      description: "",
     });
+    setDescriptionCharCount(0);
+    setCourseFormErrors({});
+    setIsEditingCourse(false);
+    setCategoryInputValue("");
+    setShowCategorySuggestions(false);
   };
 
-  const [courses, setCourses] = useState([]);
-  async function fetchCourses() {
-    if (courses.length) return courses;
-    setCourses(await get("/courses"));
-    return courses;
-  }
+  // Reset filter form
+  const resetFilterForm = () => {
+    setFilterForm({
+      name: "",
+      color: predefinedColors[0].value,
+    });
+    setFilterFormErrors({});
+    setIsEditingFilter(false);
+  };
 
-  const createCourse = async (payload: any) => {
-    try {
-      const course = await post("/courses", {body: payload});
-      setCourses((prev) => [...prev, course]);
-      resetForm();
-      // Close create dialog
+  // Open course edit dialog
+  const openCourseEditDialog = (course: Course) => {
+    setCourseForm({
+      id: course.id,
+      code: course.code,
+      name: course.name,
+      category: course.category,
+      yearLevel: course.yearLevel,
+      icon: course.icon,
+      description: course.description,
+    });
+    setCategoryInputValue(course.category);
+    setDescriptionCharCount(course.description.length);
+    setIsEditingCourse(true);
+    setCourseFormOpen(true);
+  };
 
-    } catch (error) {
-      console.error("Failed to create course", error);
+  // Open filter edit dialog
+  const openFilterEditDialog = (filter: Filter) => {
+    setFilterForm({
+      id: filter.id,
+      name: filter.name,
+      color: filter.color,
+    });
+    setIsEditingFilter(true);
+    setFilterFormOpen(true);
+  };
+
+  // Handle course delete
+  const handleCourseDelete = (id: number) => {
+    setCourseToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm course delete
+  const confirmCourseDelete = () => {
+    if (courseToDelete !== null) {
+      deleteCourseMutation.mutate(courseToDelete);
     }
-  }
+  };
+
+  // Handle filter delete
+  const handleFilterDelete = (id: number) => {
+    setFilterToDelete(id);
+    setDeleteFilterDialogOpen(true);
+  };
+
+  // Confirm filter delete
+  const confirmFilterDelete = () => {
+    if (filterToDelete !== null) {
+      deleteFilterMutation.mutate(filterToDelete);
+    }
+  };
+
+  // Close category suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const dropdown = document.querySelector(".category-dropdown");
+      const input = document.getElementById("category");
+      const dropdownButton = document.querySelector(".category-dropdown-button");
+
+      // Don't close if clicking on the dropdown, input, or dropdown button
+      if (
+        (dropdown && dropdown.contains(target)) ||
+        (input && input.contains(target)) ||
+        (dropdownButton && dropdownButton.contains(target))
+      ) {
+        return;
+      }
+
+      // Close if clicking elsewhere
+      setShowCategorySuggestions(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -190,357 +534,103 @@ export default function ManageCoursesPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Courses</CardTitle>
-                <CardDescription>Manage available engineering courses</CardDescription>
+                <CardDescription>Manage engineering courses</CardDescription>
               </div>
-              <Dialog onOpenChange={(open) => !open && resetForm()}>
-                <DialogTrigger asChild>
-                  <Button className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Course
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[525px]">
-                  <DialogHeader>
-                    <DialogTitle>Add New Course</DialogTitle>
-                    <DialogDescription>Add a new course to the resource bank</DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="code">Course Code</Label>
-                        <Input
-                          id="code"
-                          placeholder="APSC 112"
-                          value={newCourse.code}
-                          onChange={handleInputChange}
-                        />{" "}
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="name">Course Name</Label>
-                        <Input id="name" placeholder="Physics II" value={newCourse.name} onChange={handleInputChange} />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="year-level">Year Level</Label>
-                      <Select value={newCourse.year_level} onValueChange={(value) => handleSelectChange("year_level", value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {years.map((year) => (
-                            <SelectItem key={year.id} value={year.id.toString()}>
-                              {year.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="icon">Course Icon</Label>
-                    <Select value={newCourse.icon} onValueChange={(value) => handleSelectChange("icon", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select icon">
-                          {newCourse.icon && (
-                            <div className="flex items-center gap-2">
-                              {React.createElement(getIconByName(newCourse.icon), { className: "h-4 w-4" })}
-                              <span>{courseIcons.find((i) => i.name === newCourse.icon)?.description || "Icon"}</span>
-                            </div>
-                          )}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {courseIcons.map((icon) => (
-                          <SelectItem key={icon.name} value={icon.name}>
-                            <div className="flex items-center gap-2">
-                              <icon.icon className="h-4 w-4" />
-                              <span>{icon.description}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="submit"
-                      className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                      onClick={() => createCourse(newCourse)}
-                    >
-                      Add Course
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <Button
+                className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                onClick={() => {
+                  resetCourseForm();
+                  setCourseFormOpen(true);
+                }}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Course
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 flex items-center gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input placeholder="Search courses..." className="pl-9" />
-                </div>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by year level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Years</SelectItem>
-                    {years.map((year) => (
-                      <SelectItem key={year.id} value={year.name}>
-                        {year.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead></TableHead>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Year Level</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {courses.map((course) => {
-                    const IconComponent = getIconByName(course.icon);
-                    return (
-                      <TableRow key={course.id}>
-                        <TableCell>
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/30 dark:bg-white/10">
-                            <IconComponent className="h-5 w-5 text-primary dark:text-gray-400" />
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">{course.code}</TableCell>
-                        <TableCell>{course.name}</TableCell>
-                        <TableCell>{years.find((year) => year.id === course.year_level)?.name}</TableCell>
-                        <TableCell className="space-x-2">
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
-                          <Button variant="destructive" size="sm">
-                            Delete
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <CourseTable
+                courses={courses}
+                filters={filters}
+                isLoading={isLoadingCourses}
+                error={coursesError}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                yearLevelFilter={yearLevelFilter}
+                setYearLevelFilter={setYearLevelFilter}
+                categoryFilter={categoryFilter}
+                setCategoryFilter={setCategoryFilter}
+                categories={categories}
+                onEdit={openCourseEditDialog}
+                onDelete={handleCourseDelete}
+              />
             </CardContent>
           </Card>
+
+          {/* Course Form Dialog */}
+          <CourseForm
+            courseForm={courseForm}
+            setCourseForm={setCourseForm}
+            courseFormOpen={courseFormOpen}
+            setCourseFormOpen={setCourseFormOpen}
+            isEditingCourse={isEditingCourse}
+            resetCourseForm={resetCourseForm}
+            handleCourseSubmit={handleCourseSubmit}
+            isCourseFormValid={isCourseFormValid}
+            isPending={createCourseMutation.isPending || updateCourseMutation.isPending}
+            categories={categories}
+          />
+
+          {/* Course Delete Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the course and remove it from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setCourseToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmCourseDelete} disabled={deleteCourseMutation.isPending}>
+                  {deleteCourseMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </TabsContent>
 
         <TabsContent value="filters">
-          <FilterTab />
+          <FilterTab
+            filters={filters || []}
+            onEdit={openFilterEditDialog}
+            onDelete={handleFilterDelete}
+            filterForm={filterForm}
+            filterFormOpen={filterFormOpen}
+            setFilterFormOpen={setFilterFormOpen}
+            handleFilterInputChange={handleFilterInputChange}
+            handleFilterSubmit={handleFilterSubmit}
+            resetFilterForm={resetFilterForm}
+            isEditingFilter={isEditingFilter}
+            filterFormErrors={filterFormErrors}
+            deleteFilterDialogOpen={deleteFilterDialogOpen}
+            setDeleteFilterDialogOpen={setDeleteFilterDialogOpen}
+            confirmFilterDelete={confirmFilterDelete}
+            isFilterFormValid={isFilterFormValid}
+            isLoading={isLoadingFilters}
+            error={filtersError}
+            isPending={
+              createFilterMutation.isPending || updateFilterMutation.isPending || deleteFilterMutation.isPending
+            }
+          />
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function FilterTab() {
-  const [selectedColorOption, setSelectedColorOption] = useState("#4B0082");
-  const [displayColor, setDisplayColor] = useState("#4B0082");
-  const [showCustomPicker, setShowCustomPicker] = useState(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [filters, setFilters] = useState([]);
-
-  async function fetchFilters() {
-    if (filters.length) return filters;
-    setFilters(await get("/tags"));
-    return filters;
-  }
-
-  useEffect(() => {
-    fetchFilters();
-  }, []);
-
-  // Handle selection of predefined color or custom option
-  const handleColorOptionChange = (option: string) => {
-    setSelectedColorOption(option);
-
-    if (option === "custom") {
-      setShowCustomPicker(true);
-      // Don't update the final color yet, wait for custom color selection
-    } else {
-      // For predefined colors, update both display and final color immediately
-      setDisplayColor(option);
-      setShowCustomPicker(false);
-    }
-  };
-
-  // Handle custom color picker changes with debounce
-  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newColor = e.target.value;
-
-    // Debounce the actual state update
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Update display color immediately for visual feedback
-    setDisplayColor(newColor);
-
-    debounceTimerRef.current = setTimeout(() => {
-      setDisplayColor(newColor);
-    }, 100); // 100ms debounce
-  };
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
-  const createFilter = async (payload: any, closeDialog: () => void) => {
-    try {
-        const filter = await post("/tags", {body: payload});
-        setFilters((prev) => [...prev, filter]);
-        closeDialog();
-    } catch (error) {
-        console.error("Failed to create filter", error);
-        }
-    }
-  
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Manage course filters</CardDescription>
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Filter
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Filter</DialogTitle>
-              <DialogDescription>Add a new filter for courses</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Filter Name</Label>
-                <Input id="name" placeholder="e.g., First Year" />
-              </div>
-              <div className="grid gap-2">
-                <Label>Filter Color</Label>
-                <RadioGroup
-                  value={selectedColorOption}
-                  onValueChange={handleColorOptionChange}
-                  className="grid grid-cols-5 gap-2"
-                >
-                  {predefinedColors.map((color) => (
-                    <div key={color.value} className="flex items-center space-x-2">
-                      <RadioGroupItem value={color.value} id={`color-${color.value}`} className="sr-only" />
-                      <Label
-                        htmlFor={`color-${color.value}`}
-                        className="flex cursor-pointer flex-col items-center space-y-1.5"
-                      >
-                        <div
-                          className="h-8 w-8 rounded-full ring-2 ring-transparent ring-offset-2 transition-all"
-                          style={{
-                            backgroundColor: color.value,
-                            boxShadow: selectedColorOption === color.value ? "0 0 0 2px hsl(var(--ring))" : "none",
-                          }}
-                        />
-                        <span className="text-xs">{color.name}</span>
-                      </Label>
-                    </div>
-                  ))}
-
-                  {/* Custom color option */}
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="custom" id="color-custom" className="sr-only" />
-                    <Label htmlFor="color-custom" className="flex cursor-pointer flex-col items-center space-y-1.5">
-                      <div
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white ring-2 ring-offset-2 transition-all"
-                        style={{
-                          boxShadow: selectedColorOption === "custom" ? "0 0 0 2px hsl(var(--ring))" : "none",
-                        }}
-                        onClick={() => {
-                          handleColorOptionChange("custom");
-                          document.getElementById("custom-color-picker")?.click();
-                        }}
-                      >
-                        <Pipette className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <span className="text-xs">Custom</span>
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                {/* Hidden color picker that appears when custom is selected */}
-                <div className={showCustomPicker ? "block" : "hidden"}>
-                  <div className="mt-2 flex items-center gap-3">
-                    <div
-                      className="h-8 w-8 rounded-full border border-gray-200"
-                      style={{ backgroundColor: displayColor }}
-                    />
-                    <Input
-                      id="custom-color-picker"
-                      type="color"
-                      value={displayColor}
-                      onChange={handleCustomColorChange}
-                      className="h-10 w-full"
-                    />
-                    <div className="font-mono text-sm">{displayColor}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                type="submit"
-                onClick={() => createFilter(newFilter, closeDialog)}
-              >
-                Add Filter
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Color</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filters.map((filter) => (
-              <TableRow key={filter.id}>
-                <TableCell className="font-medium">{filter.name}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: filter.color }} />
-                    <span>{filter.color}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="space-x-2">
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                  <Button variant="destructive" size="sm">
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
   );
 }

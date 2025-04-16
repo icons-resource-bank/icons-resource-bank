@@ -14,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {useAuthStore} from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth";
+import { hasAnyFlag, UserFlags } from "@/lib/flags";
 
 const linkClassName =
   "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
@@ -23,7 +24,7 @@ const AUTH_REDIRECT_URI =
   typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "http://localhost:3000/auth/callback";
 
 export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | "system" }) {
-  const {isAuthenticated, user, logout} = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -43,7 +44,12 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
 
   const handleLogout = () => {
     logout();
-    router.push("/")
+    router.push("/");
+  };
+
+  const isStaff = () => {
+    if (!isAuthenticated) return false;
+    return hasAnyFlag(user?.flags ?? 0, [UserFlags.Staff, UserFlags.Admin]);
   };
 
   return (
@@ -82,9 +88,11 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
           <Link href="/upload" className={linkClassName}>
             Upload
           </Link>
-          <Link href="/admin/pending" className={linkClassName}>
-            Admin
-          </Link>
+          {isStaff() && (
+            <Link href="/admin/pending" className={linkClassName}>
+              Admin
+            </Link>
+          )}
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle themeSetting={themeSetting} />

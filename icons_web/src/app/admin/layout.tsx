@@ -1,7 +1,26 @@
+"use client";
+
 import type React from "react";
 import { AdminSidebar } from "@/components/admin-sidebar";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/auth";
+import { useEffect } from "react";
+import { hasAnyFlag, UserFlags } from "@/lib/flags";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+
+  const isStaff = () => {
+    if (!isAuthenticated) return false;
+    return hasAnyFlag(user?.flags ?? 0, [UserFlags.Staff, UserFlags.Admin]);
+  };
+
+  useEffect(() => {
+    // Redirect to homepage if unauthenticated
+    if (!isStaff()) router.push("/");
+  }, [isAuthenticated, user, router]);
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex flex-1">

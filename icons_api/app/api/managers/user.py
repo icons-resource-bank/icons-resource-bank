@@ -42,6 +42,8 @@ class User(Model):
         )
 
     def has_flag(self, flag: UserFlags) -> bool:
+        if flag == UserFlags.staff and self.has_flag(UserFlags.admin):
+            return True
         return bool(self.flags & flag)
 
     async def set_flag(self, flag: UserFlags, value: bool = True) -> Self:
@@ -121,7 +123,7 @@ class UserManager(BaseManager):
         where, params = [], []
         index = 1
 
-        if "query" in kwargs and ("name" in kwargs or "email" in kwargs):
+        if kwargs.get("query") and (kwargs.get("name") or kwargs.get("email")):
             raise ValueError("Cannot use query and name/email at the same time")
 
         for key, value in kwargs.items():
@@ -129,7 +131,10 @@ class UserManager(BaseManager):
                 continue
             if key == "flags":
                 for flag in value:
-                    where.append(f"has_flag(flags, ${index})")
+                    if flag == UserFlags.banned:
+                        where.append(f"has_flag(flags, ${index}) OR temp_banned_until > NOW()")
+                    else:
+                        where.append(f"has_flag(flags, ${index})")
                     params.append(flag.value)
                     index += 1
                 continue
@@ -138,11 +143,8 @@ class UserManager(BaseManager):
             elif key == "query":
                 where.append(f"(name % ${index} OR email % ${index})")
                 params.append(value)
-            elif key == "name":
-                where.append(f"name % ${index}")
-                params.append(value)
-            elif key == "email":
-                where.append(f"email % ${index}")
+            elif key in ("name", "email"):
+                where.append(f"{key} % ${index}")
                 params.append(value)
             else:
                 where.append(f"{key} = ${index}")
@@ -151,11 +153,21 @@ class UserManager(BaseManager):
         if not where:
             where.append("TRUE")
 
+        if any(kwargs.get(key) for key in ("query", "name", "email")) and sort_by.startswith("query "):
+            greatest = []
+            for key in ("name", "email"):
+                if kwargs.get(key) in kwargs or kwargs.get("query"):
+                    greatest.append(f"similarity({key}, ${index})")
+                    params.append(kwargs[key])
+                    index += 1
+            sort_by = f"greatest({', '.join(greatest)}) {sort_by.split()[-1]}"
+        elif sort_by.startswith("query "):
+            sort_by = sort_by.replace("query", "created_at")
+
         where = " AND ".join(where)
+        print(f"SELECT *, COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT $1 OFFSET $2")
         result = await self.app.state.pool.fetch(
-            f"SELECT (*), COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT $1 OFFSET $2",
-            limit,
-            offset,
+            f"SELECT *, COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT {limit} OFFSET {offset}",
             *params,
         )
         users = [User.from_row(self, row) for row in result]
@@ -228,10 +240,11 @@ class UserManager(BaseManager):
 
     async def _update(self, user: User) -> None:
         await self.app.state.pool.execute(
-            "UPDATE users SET email = $1, name = $2, flags = $3 WHERE id = $4",
+            "UPDATE users SET email = $1, name = $2, flags = $3, temp_banned_until = $4 WHERE id = $5",
             user.email,
             user.name,
             user.flags,
+            user.temp_banned_until,
             user.id,
         )
         self.cache[user.id] = user

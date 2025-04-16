@@ -8,7 +8,7 @@ import type React from "react";
 import { Providers } from "./providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { Toaster } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/toast";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -31,24 +31,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <>
-      <html lang="en" suppressHydrationWarning className={theme === "dark" ? "dark" : ""} data-theme={theme}>
-        <head>
-          <script
-            type="text/javascript"
-            src="https://cdn.userway.org/widget.js"
-            data-account={process.env.NEXT_PUBLIC_USERWAY_ACCOUNT_ID}
-            async
-          ></script>
-        </head>
-        <body className={`${font.className} flex min-h-screen flex-col`}>
-          <Providers>
+      <Providers>
+        <html lang="en" suppressHydrationWarning className={theme === "dark" ? "dark" : ""} data-theme={theme}>
+          <head>
+            <script
+              type="text/javascript"
+              src="https://cdn.userway.org/widget.js"
+              data-account={process.env.NEXT_PUBLIC_USERWAY_ACCOUNT_ID}
+              async
+            ></script>
+          </head>
+          <body className={`${font.className} flex min-h-screen flex-col`}>
             <SiteHeader themeSetting={themeSetting as "light" | "dark" | "system"} />
             <div className="flex-1">{children}</div>
-          </Providers>
-        </body>
-      </html>
-      <SiteFooter />
-      <Toaster />
+          </body>
+        </html>
+        <SiteFooter />
+        <Toaster />
+      </Providers>
     </>
   );
 }

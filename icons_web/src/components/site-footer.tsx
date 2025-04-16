@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Mail, MapPin, Instagram } from "lucide-react";
+import { FeedbackForm } from "./feedback-form";
 
 export function SiteFooter() {
   const toggleUserWay = (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -61,6 +62,9 @@ export function SiteFooter() {
                 <Link href="#" className="hover:underline" onClick={toggleUserWay}>
                   Accessibility Options
                 </Link>
+              </li>
+              <li className="pt-2">
+                <FeedbackForm />
               </li>
             </ul>
           </div>

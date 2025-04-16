@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 
 __all__ = (
     "User",
+    "UserSettings",
     "UserFlags",
+    "Feedback",
     "UserManager",
 )
 
@@ -74,6 +76,24 @@ class UserSettings(Model):
     _manager: UserManager
     id: str
     theme: str
+
+
+@dataclass(slots=True, kw_only=True)
+class Feedback(Model):
+    _manager: UserManager
+    id: str
+    user_id: str
+    created_at: datetime.datetime
+    comment: str
+
+    async def to_dict(self, *, with_data: bool = False) -> dict[str, Any]:
+        data = Model.to_dict(self)
+        if with_data:
+            manager = self._manager
+            data["user"] = (
+                await manager.app.state.users.get(id=data.pop("user_id")) or manager.app.state.users.DELETED
+            ).to_dict()
+        return data
 
 
 class UserFlags(enum.IntFlag):
@@ -173,6 +193,23 @@ class UserManager(BaseManager):
         total = result[0]["total"] if result else 0
         return users, total
 
+    async def query_feedback(
+        self, *, limit: int = 100, offset: int = 0, query: str | None = None
+    ) -> tuple[list[Feedback], int]:
+        where = ""
+        sort_by = "created_at DESC"
+        params = []
+        if query:
+            where = "WHERE comment % $1"
+            sort_by = "similarity(comment, $1) DESC"
+            params.append(query)
+
+        result = await self.app.state.pool.fetch(
+            f"SELECT *, COUNT(*) OVER() AS total FROM feedback {where} ORDER BY {sort_by} LIMIT {limit} OFFSET {offset}",
+            *params,
+        )
+        return [Feedback.from_row(self, row) for row in result], result[0]["total"] if result else 0
+
     async def get(self, *, id: str | None = None, email: str | None = None) -> User | None:
         if id and email:
             raise ValueError("Cannot specify both id and email")
@@ -194,6 +231,14 @@ class UserManager(BaseManager):
 
         settings = UserSettings.from_row(self, result)
         return settings
+
+    async def get_feedback(self, id: str) -> Feedback | None:
+        result = await self.app.state.pool.fetchrow("SELECT * FROM feedback WHERE id = $1", id)
+        if not result:
+            return
+
+        feedback = Feedback.from_row(self, result)
+        return feedback
 
     @overload
     async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User: ...
@@ -218,6 +263,15 @@ class UserManager(BaseManager):
         self.cache[user.id] = user
         self._email_map[user.email] = user.id
         return user
+
+    async def create_feedback(self, user_id: str, comment: str) -> Feedback:
+        result = await self.app.state.pool.fetchrow(
+            "INSERT INTO feedback (user_id, comment) VALUES ($1, $2) RETURNING *",
+            user_id,
+            comment,
+        )
+        feedback = Feedback.from_row(self, result)
+        return feedback
 
     async def update(self, *, id: str | None = None, **kwargs: Any) -> User:
         user = await self.get(id=id, email=kwargs.pop("email", None) if not id else None)
@@ -255,6 +309,9 @@ class UserManager(BaseManager):
             settings.theme,
             settings.id,
         )
+
+    async def delete_feedback(self, id: str) -> None:
+        await self.app.state.pool.execute("DELETE FROM feedback WHERE id = $1", id)
 
     async def track(self, user: User, event: str, reference_id: str | None = None, **kwargs: Any) -> None:
         await self.app.state.pool.execute(

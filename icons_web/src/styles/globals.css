@@ -94,22 +94,42 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground;
+  }
+
+  input:-webkit-autofill,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  }
 }
 
 @layer components {
   .resource-card-link:hover h3 {
     @apply text-primary underline decoration-1 underline-offset-2;
   }
-  
+
   .resource-card {
-    @apply transition-all duration-200 hover:shadow-lg hover:border-primary/50;
+    @apply transition-all duration-200 hover:border-primary/50 hover:shadow-lg;
   }
-  
+
   /* Dark mode hover effects */
   .dark .resource-card {
     @apply hover:border-foreground/20;
   }
-  
+
   .dark .resource-card-link:hover h3 {
     @apply text-foreground brightness-125;
   }

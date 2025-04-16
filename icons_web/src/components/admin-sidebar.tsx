@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { BookCheck, FileCheck, LayoutDashboard, Settings, Users } from "lucide-react";
+import { BookCheck, FileCheck, LayoutDashboard, Users, MessageSquare } from "lucide-react";
 
 const sidebarItems = [
   {
@@ -25,6 +25,11 @@ const sidebarItems = [
     title: "Manage Courses",
     href: "/admin/courses",
     icon: BookCheck,
+  },
+  {
+    title: "Ingest Feedback",
+    href: "/admin/feedback",
+    icon: MessageSquare,
   },
 ];
 

@@ -16,7 +16,7 @@ import type { Filter } from "@/lib/api";
 
 // Course form interface
 export interface CourseFormData {
-  id?: number;
+  id?: string;
   code: string;
   name: string;
   category: string;
@@ -28,7 +28,7 @@ export interface CourseFormData {
 
 // Filter form interface
 export interface FilterFormData {
-  id?: number;
+  id?: string;
   name: string;
   color: number;
 }

@@ -147,7 +147,7 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
 
 // User API functions
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   flags: number;
@@ -161,7 +161,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface BanUserParams {
-  userId: number;
+  userId: string;
   until?: string | null;
 }
 
@@ -194,7 +194,7 @@ export const userApi = {
     return fetchApi<PaginatedResponse<User>>(endpoint);
   },
 
-  getUser: async (id: number): Promise<User> => {
+  getUser: async (id: string): Promise<User> => {
     return fetchApi<User>(`/users/${id}`);
   },
 
@@ -205,20 +205,20 @@ export const userApi = {
     });
   },
 
-  unbanUser: async (userId: number): Promise<User> => {
+  unbanUser: async (userId: string): Promise<User> => {
     return fetchApi<User>(`/users/${userId}/ban`, {
       method: "DELETE",
     });
   },
 
-  updateUserFlags: async (userId: number, flags: number): Promise<User> => {
+  updateUserFlags: async (userId: string, flags: number): Promise<User> => {
     return fetchApi<User>(`/users/${userId}`, {
       method: "PATCH",
       body: JSON.stringify({ flags }),
     });
   },
 
-  deleteUser: async (userId: number): Promise<void> => {
+  deleteUser: async (userId: string): Promise<void> => {
     return fetchApi<void>(`/users/${userId}`, {
       method: "DELETE",
     });
@@ -227,7 +227,7 @@ export const userApi = {
 
 // Course API functions
 export interface Course {
-  id: number;
+  id: string;
   code: string;
   name: string;
   category: string;
@@ -253,7 +253,7 @@ export const courseApi = {
     return fetchApi<PaginatedResponse<Course>>(endpoint);
   },
 
-  getCourse: async (id: number): Promise<Course> => {
+  getCourse: async (id: string): Promise<Course> => {
     return fetchApi<Course>(`/courses/${id}`);
   },
 
@@ -271,7 +271,7 @@ export const courseApi = {
     });
   },
 
-  deleteCourse: async (courseId: number): Promise<void> => {
+  deleteCourse: async (courseId: string): Promise<void> => {
     return fetchApi<void>(`/courses/${courseId}`, {
       method: "DELETE",
     });
@@ -280,7 +280,7 @@ export const courseApi = {
 
 // Filter API functions
 export interface Filter {
-  id: number;
+  id: string;
   name: string;
   color: number;
 }
@@ -290,7 +290,7 @@ export const filterApi = {
     return fetchApi<Filter[]>("/tags");
   },
 
-  getFilter: async (id: number): Promise<Filter> => {
+  getFilter: async (id: string): Promise<Filter> => {
     return fetchApi<Filter>(`/tags/${id}`);
   },
 
@@ -308,8 +308,56 @@ export const filterApi = {
     });
   },
 
-  deleteFilter: async (filterId: number): Promise<void> => {
+  deleteFilter: async (filterId: string): Promise<void> => {
     return fetchApi<void>(`/tags/${filterId}`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// Feedback API functions
+export interface Feedback {
+  id: string;
+  comment: string;
+  user: User;
+  createdAt: string;
+}
+
+export interface GetFeedbackParams {
+  offset?: number;
+  limit?: number;
+  query?: string;
+}
+
+export const feedbackApi = {
+  getFeedback: async ({ offset = 0, limit = 25, query }: GetFeedbackParams): Promise<PaginatedResponse<Feedback>> => {
+    let endpoint = "/feedback";
+    const params = new URLSearchParams();
+
+    params.append("offset", offset.toString());
+    params.append("limit", limit.toString());
+    if (query) params.append("query", query);
+
+    if (params.toString()) {
+      endpoint += `?${params.toString()}`;
+    }
+
+    return fetchApi<PaginatedResponse<Feedback>>(endpoint);
+  },
+
+  getFeedbackItem: async (id: string): Promise<Feedback> => {
+    return fetchApi<Feedback>(`/feedback/${id}`);
+  },
+
+  submitFeedback: async (comment: string): Promise<Feedback> => {
+    return fetchApi<Feedback>("/feedback", {
+      method: "POST",
+      body: JSON.stringify({ comment }),
+    });
+  },
+
+  deleteFeedback: async (id: string): Promise<void> => {
+    return fetchApi<void>(`/feedback/${id}`, {
       method: "DELETE",
     });
   },

@@ -32,6 +32,7 @@ import { userApi, type User } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import {formatDate, formatDateTime} from "@/lib/utils";
 
 // Flag filter options
 const flagFilterOptions = [
@@ -60,34 +61,6 @@ const banDurations = [
   { id: "3m", label: "3 Months", value: 90 },
   { id: "permanent", label: "Permanently", value: -1 },
 ];
-
-function formatDate(isoString: string): string {
-  try {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date);
-  } catch (error) {
-    return isoString;
-  }
-}
-
-function formatDateTime(isoString: string): string {
-  try {
-    const date = new Date(isoString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  } catch (error) {
-    return isoString;
-  }
-}
 
 export default function ManageUsersPage() {
   const queryClient = useQueryClient();
@@ -195,7 +168,7 @@ export default function ManageUsersPage() {
 
   // Update user flags mutation
   const updateUserFlagsMutation = useMutation({
-    mutationFn: ({ userId, flags }: { userId: number; flags: number }) => userApi.updateUserFlags(userId, flags),
+    mutationFn: ({ userId, flags }: { userId: string; flags: number }) => userApi.updateUserFlags(userId, flags),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast({
@@ -281,7 +254,7 @@ export default function ManageUsersPage() {
     }
   };
 
-  const handleUnbanUser = (userId: number) => {
+  const handleUnbanUser = (userId: string) => {
     unbanUserMutation.mutate(userId);
   };
 
@@ -291,9 +264,10 @@ export default function ManageUsersPage() {
   };
 
   // Update pagination helpers
-  const totalPages = Math.ceil((usersData?.total ?? 0) / limit);
-  const startItem = (usersData?.total ?? 0) === 0 ? 0 : offset + 1;
-  const endItem = Math.min(offset + (usersData?.items.length || 0), usersData?.total ?? 0);
+  const total = usersData?.total ?? 0;
+  const totalPages = Math.ceil(total / limit);
+  const startItem = total === 0 ? 0 : offset + 1;
+  const endItem = Math.min(offset + (usersData?.items.length || 0), total);
 
   // Update pagination handlers
   const handlePreviousPage = () => {
@@ -405,7 +379,7 @@ export default function ManageUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(usersData?.total ?? 0) > 0 ? (
+                {total > 0 ? (
                   usersData?.items.map((user) => (
                     <TableRow key={user.id} className={isBanned(user) ? "bg-red-50 dark:bg-red-950/20" : ""}>
                       <TableCell className="font-medium">{user.name}</TableCell>
@@ -477,7 +451,7 @@ export default function ManageUsersPage() {
           <CardFooter className="flex items-center justify-between border-t px-6 py-4">
             <div className="text-sm text-muted-foreground">
               Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span>{" "}
-              of <span className="font-medium">{usersData?.total ?? 0}</span> users
+              of <span className="font-medium">{total}</span> users
             </div>
             <div className="flex items-center space-x-2">
               <Button

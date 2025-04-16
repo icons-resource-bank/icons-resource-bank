@@ -116,3 +116,11 @@ CREATE TABLE IF NOT EXISTS analytics (
 );
 CREATE INDEX IF NOT EXISTS analytics_user_id_idx ON analytics (user_id);
 CREATE INDEX IF NOT EXISTS analytics_reference_id_idx ON analytics (reference_id);
+
+CREATE TABLE IF NOT EXISTS feedback (
+    id VARCHAR(36) NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id VARCHAR(36) NOT NULL REFERENCES users(id),
+    comment TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS feedback_user_id_idx ON feedback (user_id);

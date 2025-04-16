@@ -11,10 +11,10 @@ export default function AboutPage() {
       
 
       {/* Hero Section */}
-      <section className="bg-primary text-white py-16 dark:bg-footer">
+      <section className="bg-primary text-white py-16">
         <div className="container">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">About iCons</h1>
-          <p className="text-xl max-w-3xl  mx-auto">
+          <p className="text-xl max-w-3xl  mx-auto ">
             Queen's University Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro
             Hall, home of the Integrated Learning Centre (ILC).
           </p>
@@ -22,21 +22,21 @@ export default function AboutPage() {
       </section>
 
       {/* Who We Are Section */}
-      <section className="py-16 bg-background">
+      <section className="py-16 bg-background dark:bg-footer">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold mb-6 text-primary dark:text-white">Who We Are</h2>
               <div className="space-y-4 text-lg">
-                <p>
+                <p className="text-muted-foreground">
                   The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home
                   of the Integrated Learning Centre (ILC).
                 </p>
-                <p>
+                <p className="text-muted-foreground">
                   The iCons operate after ILC administration hours to keep the facility open to students, loan out
                   equipment, promote a positive studying and learning atmosphere, and to act as a resource for students.
                 </p>
-                <p>
+                <p className="text-muted-foreground">
                   Our team consists of dedicated engineering students who are passionate about helping their peers
                   succeed in their academic journey.
                 </p>
@@ -57,7 +57,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">What We Do</h2>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-2 dark:bg-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 dark:text-white">
                   <Clock className="h-5 w-5 text-primary dark:text-white" />
@@ -65,14 +65,14 @@ export default function AboutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>
+                <p className="text-muted-foreground">
                   We keep the ILC open beyond regular administration hours, providing students with a safe and
                   productive environment to study and work on projects.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-2 dark:bg-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <svg
@@ -93,14 +93,14 @@ export default function AboutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>
+                <p className="text-muted-foreground">
                   We maintain a comprehensive resource bank with course materials, past exams, and study resources to
                   help students excel in their courses.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-2 dark:bg-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 ">
                   <svg
@@ -122,7 +122,7 @@ export default function AboutPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>
+                <p className="text-muted-foreground">
                   We provide equipment loans for students working on projects, including tools, electronics, and other
                   resources needed for engineering coursework.
                 </p>
@@ -133,21 +133,21 @@ export default function AboutPage() {
       </section>
 
       {/* Hours of Service Section */}
-      <section className="py-16 bg-background ">
+      <section className="py-16 bg-background dark:bg-footer">
         <div className="container">
           <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">Hours of Service</h2>
 
           <div className="grid md:grid-cols-2 gap-12">
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-2 dark:bg-footer">
               <CardHeader>
                 <CardTitle>Regular Operating Hours</CardTitle>
-              </CardHeader>
-              <CardContent>
-              <p className="mb-4 text-white dark:text-primary">
+                <p className="mb-4 text-muted-foreground ">
                   Hours in effect from December 4th, 2023, to December 21st, 2023
                 </p>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <div className="font-semibold">Monday</div>
+                  <div className="font-semibold ">Monday</div>
                   <div>5:00 PM - 11:00 PM</div>
 
                   <div className="font-semibold">Tuesday</div>
@@ -171,14 +171,14 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-2 dark:bg-footer">
               <CardHeader>
                 <CardTitle>Exam Season Extended Hours</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground">
+                <p className="mb-4 text-muted-foreground ">
                   Hours in effect from December 4th, 2023, to December 21st, 2023
                 </p>
+              </CardHeader>
+              <CardContent>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                   <div className="font-semibold">Monday</div>
@@ -211,44 +211,26 @@ export default function AboutPage() {
       {/* Contact Section */}
       <section className="py-16 bg-muted">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">Find Us</h2>
+          <h2 className="text-3xl font-bold text-center text-primary dark:text-white">Find Us</h2>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-1 dark:text-white" />
-                <div>
-                  <h3 className="font-semibold text-lg ">Location</h3>
-                  <p>Beamish-Munro Hall, 45 Union St, Kingston, ON K7L 3N6</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1 dark:text-white" />
-                <div>
-                  <h3 className="font-semibold text-lg">Email</h3>
-                  <p>icon@engsoc.queensu.ca</p>
-                </div>
-              </div>
-
-              <Button asChild className="mt-4 dark:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
-                <Link href="/get-involved">Get Involved</Link>
-              </Button>
-            </div>
-
-            <div className="rounded-lg overflow-hidden shadow-lg w-full h-[300px]">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2859.0978448866!2d-76.49785382346772!3d44.22781777100306!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cd2ab0674088ad1%3A0x76a75110ae442196!2s45%20Union%20St%2C%20Kingston%2C%20ON%20K7L%203N6%2C%20Canada!5e0!3m2!1sen!2sus!4v1711166724062!5m2!1sen!2sus"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen={false}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Beamish-Munro Hall Map"
-                className="w-full h-full"
-              />
-            </div>
+          <div className="grid md:grid-cols-1 gap-8 items-center">
+          
+            {/* Google Maps Embed */}
+        <div className="container mt-12">
+          <div className="h-[300px] w-full overflow-hidden rounded-lg shadow-lg">
+            <iframe
+              src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
+              width="100%"
+              height="100%"
+              style={{ border: 0, filter: "invert(var(--maps-invert)) hue-rotate(var(--maps-hue-rotate))" }}
+              allowFullScreen={false}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Beamish-Munro Hall Map"
+              className="h-full w-full"
+            />
+          </div>
+        </div>
           </div>
         </div>
       </section>

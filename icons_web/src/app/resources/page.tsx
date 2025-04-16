@@ -176,8 +176,8 @@ export default function ResourcesPage() {
     <div className="flex flex-col h-screen">
       <div className="flex flex-1 overflow-hidden">
         <ResourceSidebar />
-        <main className="flex-1 flex flex-col h-full border-l border-[#d8c5e9] shadow-sm">
-          <div className="p-6 border-b border-[#d8c5e9] bg-background/80">
+        <main className="flex-1 flex flex-col h-full border-l border-[#d8c5e9] dark:border-border shadow-sm">
+          <div className="p-6  border-[#d8c5e9] dark:border-border ">
             {selectedCourse ? (
               <>
                 <h1 className="text-3xl font-bold">
@@ -194,23 +194,23 @@ export default function ResourcesPage() {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b border-[#d8c5e9] bg-background/80 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b ">
             <div className="text-sm text-muted-foreground">
               Showing <strong>{filteredResources.length}</strong> resources
               {selectedCourse && <span> for {selectedCourse.code}</span>}
             </div>
             <div className="flex items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0">
-              <Button asChild variant="default" size="sm" className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
-                <Link href="/upload" className="flex items-center gap-1">
-                  <Upload className="h-4 w-4" />
+              <Button asChild variant="default" size="sm" className="text-white">
+                <Link href="/upload" className="flex items-center gap-1 dark:border-2 hover:border-foreground/20 ">
+                  <Upload className="h-4 w-4 " />
                   Upload
                 </Link>
               </Button>
               <div className="relative w-full sm:w-[250px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search resources..." className="pl-9 border-[#d8c5e9]" />
+                <Input placeholder="Search resources..." className="pl-9 border-2 " />
               </div>
-              <FilterDialog />
+              <FilterDialog/>
             </div>
           </div>
 

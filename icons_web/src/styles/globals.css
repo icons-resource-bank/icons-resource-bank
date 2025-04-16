@@ -97,23 +97,20 @@ body {
 }
 
 @layer components {
-  .resource-card-link {
-    @apply transition-all duration-200;
-  }
-
   .resource-card-link:hover h3 {
     @apply text-primary underline decoration-1 underline-offset-2;
   }
-
+  
   .resource-card {
     @apply transition-all duration-200 hover:shadow-lg hover:border-primary/50;
   }
-
+  
+  /* Dark mode hover effects */
   .dark .resource-card {
-    @apply hover:border-purple-400 hover:border-opacity-70;
+    @apply hover:border-foreground/20;
   }
-
+  
   .dark .resource-card-link:hover h3 {
-    @apply text-purple-400 brightness-125;
+    @apply text-foreground brightness-125;
   }
 }

@@ -80,28 +80,28 @@ export function FilterDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center gap-1 border-border shadow-sm">
+        <Button variant="outline" size="sm" className="flex items-center gap-1 border-border shadow-sm ">
           <Filter className="h-4 w-4" />
           Filter
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] border-border shadow-md">
+      <DialogContent className="sm:max-w-[500px] border-border dark:border-border shadow-md ">
         <DialogHeader>
           <DialogTitle>Filter Resources</DialogTitle>
           <DialogDescription>Refine your search with the following filters</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
-          <div className="space-y-4">
+        <div className="grid gap-6 py-4 ">
+          <div className="space-y-4 ">
             <h3 className="text-sm font-medium">Resource Type</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 ">
               {resourceTypes.map((type) => (
-                <div key={type.id} className="flex items-center space-x-2">
-                  <Checkbox
+                <div key={type.id} className="flex items-center space-x-2 ">
+                  <Checkbox className="dark:border-white"
                     id={`type-${type.id}`}
                     checked={selectedTypes.includes(type.id)}
                     onCheckedChange={(checked) => handleTypeChange(type.id, checked === true)}
                   />
-                  <Label htmlFor={`type-${type.id}`} className="text-sm">
+                  <Label htmlFor={`type-${type.id}`} className="text-sm ">
                     {type.label}
                   </Label>
                 </div>
@@ -114,7 +114,7 @@ export function FilterDialog() {
             <div className="grid grid-cols-2 gap-3">
               {resourceCategories.map((category) => (
                 <div key={category.id} className="flex items-center space-x-2">
-                  <Checkbox
+                  <Checkbox className="dark:border-white"
                     id={`category-${category.id}`}
                     checked={selectedCategories.includes(category.id)}
                     onCheckedChange={(checked) => handleCategoryChange(category.id, checked === true)}
@@ -132,9 +132,9 @@ export function FilterDialog() {
             <RadioGroup value={sortBy} onValueChange={handleSortChange}>
               <div className="grid grid-cols-2 gap-3">
                 {sortOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
+                  <div key={option.id} className="flex items-center space-x-2 ">
                     <RadioGroupItem value={option.id} id={`sort-${option.id}`} />
-                    <Label htmlFor={`sort-${option.id}`} className="text-sm">
+                    <Label htmlFor={`sort-${option.id}`} className="text-sm ">
                       {option.label}
                     </Label>
                   </div>
@@ -144,10 +144,10 @@ export function FilterDialog() {
           </div>
         </div>
         <DialogFooter className="flex justify-between">
-          <Button variant="outline" onClick={handleReset} className="border-border">
+          <Button variant="outline" onClick={handleReset} className="dark:bg-white dark:border-2 dark:text-black hover:bg-foreground/20">
             Reset
           </Button>
-          <Button onClick={handleApply}>Apply Filters</Button>
+          <Button className="dark:border-2 dark:bg-white hover:bg-foreground/20 dark:text-black hover:text-white" onClick={handleApply}>Apply Filters</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

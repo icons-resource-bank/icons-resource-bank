@@ -85,7 +85,7 @@ export default function ResourceDetailPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Resources
           </Button>
-          <Card className="border-[#d8c5e9]">
+          <Card className="border-2">
             <CardContent className="p-6">
               <p>Resource not found</p>
             </CardContent>

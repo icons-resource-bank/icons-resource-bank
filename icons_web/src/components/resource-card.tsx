@@ -59,7 +59,7 @@ export function ResourceCard({ resource }: ResourceCardProps) {
         </div>
         <div className="flex flex-wrap gap-2 mt-4">
           {resource.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="bg-primary/5 text-primary border-primary/20">
+            <Badge key={tag} variant="outline" className="text-primary border-primary/20">
               {tag}
             </Badge>
           ))}

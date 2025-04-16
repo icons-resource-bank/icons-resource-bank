@@ -153,7 +153,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="bg-muted py-16">
         <div className="container text-center">
-          <h2 className="mb-6 text-3xl font-bold">Contribute to Our Resource Bank</h2>
+          <h2 className="mb-6 text-3xl font-bold dark:text-white">Contribute to Our Resource Bank</h2>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
             Help fellow students by sharing your notes, study guides, or practice problems.
           </p>

@@ -75,9 +75,7 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
           <Link href="/get-involved" className={linkClassName}>
             Get Involved
           </Link>
-          <Link href="/services" className={linkClassName}>
-            Services
-          </Link>
+          
           <Link href="/resources" className={linkClassName}>
             Resources
           </Link>

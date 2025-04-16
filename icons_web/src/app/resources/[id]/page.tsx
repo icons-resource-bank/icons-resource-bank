@@ -120,7 +120,7 @@ export default function ResourceDetailPage() {
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-6">
               {resource.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="bg-primary/5 text-primary border-primary/20">
+                <Badge key={tag} variant="outline" className="text-primary border-primary/20">
                   {tag}
                 </Badge>
               ))}

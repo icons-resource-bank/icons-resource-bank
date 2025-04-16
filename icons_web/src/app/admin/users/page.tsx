@@ -31,6 +31,7 @@ import { hasFlag, UserFlags } from "@/lib/flags";
 import { userApi, type User } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Flag filter options
 const flagFilterOptions = [
@@ -273,7 +274,9 @@ export default function ManageUsersPage() {
       const banDuration = parseInt(selectedBanDuration, 10);
       banUserMutation.mutate({
         userId: userToBan.id,
-        until: Number.isNaN(banDuration) ? null : new Date(Date.now() + banDuration * 24 * 60 * 60 * 1000).toISOString(),
+        until: Number.isNaN(banDuration)
+          ? null
+          : new Date(Date.now() + banDuration * 24 * 60 * 60 * 1000).toISOString(),
       });
     }
   };
@@ -372,8 +375,18 @@ export default function ManageUsersPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-[250px]" />
+                <Skeleton className="h-10 w-[120px]" />
+              </div>
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center py-8 text-destructive">

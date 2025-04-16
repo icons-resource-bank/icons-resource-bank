@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { type FilterTabProps, predefinedColors, MAX_FILTER_NAME_LENGTH, colorIntToHex, colorHexToInt } from "./types";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function FilterTab({
   filters,
@@ -246,8 +247,18 @@ export function FilterTab({
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-[250px]" />
+            <Skeleton className="h-10 w-[120px]" />
+          </div>
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-8 text-destructive">

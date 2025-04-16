@@ -1,13 +1,14 @@
 "use client";
 
 import type React from "react";
-import { Search, Loader2 } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { getIconByName, yearLevels, getYearLevelLabel } from "./types";
 import type { Course, Filter } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface CourseTableProps {
   courses: Course[] | undefined;
@@ -86,8 +87,18 @@ export function CourseTable({
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-[250px]" />
+          <Skeleton className="h-10 w-[120px]" />
+        </div>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex justify-between items-center">
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ))}
+        </div>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-8 text-destructive">

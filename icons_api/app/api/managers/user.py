@@ -165,7 +165,6 @@ class UserManager(BaseManager):
             sort_by = sort_by.replace("query", "created_at")
 
         where = " AND ".join(where)
-        print(f"SELECT *, COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT $1 OFFSET $2")
         result = await self.app.state.pool.fetch(
             f"SELECT *, COUNT(*) OVER() AS total FROM users WHERE {where} ORDER BY {sort_by} LIMIT {limit} OFFSET {offset}",
             *params,

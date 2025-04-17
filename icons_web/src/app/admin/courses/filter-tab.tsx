@@ -115,8 +115,8 @@ export function FilterTab({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Manage course filters</CardDescription>
+          <CardTitle>Tags</CardTitle>
+          <CardDescription>Manage resource tags</CardDescription>
         </div>
         <Dialog
           open={filterFormOpen}

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { get } from "@/lib/api";
+import { fetchApi } from "@/lib/api";
 
 
 interface User {
@@ -21,7 +21,7 @@ interface AuthState {
 }
 
 export async function fetchUserInfo() {
-  return await get("/users/@me");
+  return await fetchApi("/users/@me", { method: "GET" });
 }
 
 export const useAuthStore = create<AuthState>()(

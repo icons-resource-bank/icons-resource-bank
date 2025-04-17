@@ -1,387 +1,196 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronDown, ChevronRight, BookOpen } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown, ChevronRight, BookOpen, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { courseApi, type Course } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query"
 
-// Course data structure
-export interface Course {
-  code: string
-  name: string
-  instructor: string
-  description: string
+// Interface for grouped courses
+interface CourseGroup {
+  [year: string]: {
+    [category: string]: Course[];
+  };
 }
 
-// Fall term courses
-const fallTermCourses: Course[] = [
-  {
-    code: "APSC 101, 102, 103",
-    name: "Engineering Practice",
-    instructor: "Dr. Brian Frank",
-    description:
-      "Provides laboratory experience and professional skills fundamental to engineering. Modules: Complex problem solving (Fall), Laboratory Skills (Fall), Engineering Design Project (Winter). Covers team dynamics, presentation skills, data analysis, design methodologies, and workplace safety.",
-  },
-  {
-    code: "APSC 111",
-    name: "Physics I",
-    instructor: "Tony Noble",
-    description:
-      "Introduction to Newtonian mechanics: vectors, particle motion/dynamics, work/energy, rigid body statics/dynamics, conservation laws, collisions.",
-  },
-  {
-    code: "APSC 131",
-    name: "Chemistry and Materials",
-    instructor: "Peter Gilbert",
-    description:
-      "Thermochemistry, thermodynamics, gas laws, phase equilibria, material bonding/classification, properties of metals/polymers/ceramics.",
-  },
-  {
-    code: "APSC 141",
-    name: "Intro to Computer Programming for Engineers 1 (4-week)",
-    instructor: "Asli Sari",
-    description:
-      "Computer programming concepts with microcomputers. Focus: algorithm design, programming style, engineering applications. Part 2 in Winter.",
-  },
-  {
-    code: "APSC 151",
-    name: "Earth Systems Engineering",
-    instructor: "Mark Diederichs",
-    description:
-      "Earth System science (geosphere, hydrosphere, atmosphere, biosphere), sustainability, geo-materials, risk assessment, climate change.",
-  },
-  {
-    code: "APSC 162",
-    name: "Engineering Graphics",
-    instructor: "Gene Zak",
-    description:
-      "3D visualization, CAD software, orthographic/isometric sketching, dimensioning, product design projects.",
-  },
-  {
-    code: "APSC 171",
-    name: "Calculus I",
-    instructor: "Alan Ableson",
-    description: "Functions, derivatives, optimization, integrals, differential equations, complex numbers.",
-  },
-]
-
-// Winter term courses
-const winterTermCourses: Course[] = [
-  {
-    code: "APSC 112",
-    name: "Physics II",
-    instructor: "James Stotz",
-    description: "Electricity, oscillations/waves, electric/magnetic fields, circuits, electromagnetic induction.",
-  },
-  {
-    code: "APSC 132",
-    name: "Chemistry and Its Applications",
-    instructor: "Peter Gilbert",
-    description: "Entropy, chemical equilibrium, electrochemistry, kinetics, organic chemistry.",
-  },
-  {
-    code: "APSC 142",
-    name: "Intro to Computer Programming for Engineers 2",
-    instructor: "Sean Kauffman",
-    description: "Continuation of APSC 141. Algorithm design and engineering applications.",
-  },
-  {
-    code: "APSC 172",
-    name: "Calculus II",
-    instructor: "Ping Li",
-    description: "Multivariable functions, partial derivatives, series, integrals (polar/cylindrical).",
-  },
-  {
-    code: "APSC 174",
-    name: "Linear Algebra",
-    instructor: "Kexue Zhang",
-    description: "Linear systems, vector spaces, matrices, eigenvalues, engineering applications.",
-  },
-  {
-    code: "APSC 182",
-    name: "Applied Engineering Mechanics",
-    instructor: "Neil Hoult",
-    description: "Statics, force equilibrium, trusses, shear/bending moments, stress/strain.",
-  },
-]
-
-// Create a map of all courses for easy lookup
-export const allCourses = [...fallTermCourses, ...winterTermCourses].reduce(
-  (map, course) => {
-    map[course.code] = course
-    return map
-  },
-  {} as Record<string, Course>,
-)
-
 export function ResourceSidebar() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const courseParam = searchParams.get("course")
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseParam = searchParams.get("course");
 
-  const [expandedYears, setExpandedYears] = useState<string[]>(["Year 1"])
-  const [expandedDisciplines, setExpandedDisciplines] = useState<string[]>(["Year 1-General"])
-  const [expandedTerms, setExpandedTerms] = useState<string[]>(["Year 1-General-Fall Term Courses"])
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(courseParam)
+  const [expandedYears, setExpandedYears] = useState<string[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(courseParam);
+  const [groupedCourses, setGroupedCourses] = useState<CourseGroup>({});
+  const [_isLoading, setIsLoading] = useState(true);
+
+  // Query for courses
+  const {
+    data: coursesData,
+    isLoading: queryIsLoading,
+    error: coursesError,
+  } = useQuery({
+    queryKey: ["courses"],
+    queryFn: () => courseApi.getCourses().then(r => r.items),
+  });
+
+  // Group courses by year and category
+  useEffect(() => {
+    const grouped: CourseGroup = {};
+
+    // Ensure coursesData is defined before processing
+    if (queryIsLoading || !coursesData) {
+        return;
+    }
+
+    console.log(coursesData);
+
+    coursesData?.forEach?.((course) => {
+      const year = `Year ${course.yearLevel}`;
+      const category = course.category;
+
+      if (!grouped[year]) {
+        grouped[year] = {};
+      }
+
+      if (!grouped[year][category]) {
+        grouped[year][category] = [];
+      }
+
+      grouped[year][category].push(course);
+    });
+
+    setGroupedCourses(grouped);
+
+    // Auto-expand the first year if no years are expanded
+    if (expandedYears.length === 0 && Object.keys(grouped).length > 0) {
+      setExpandedYears([Object.keys(grouped)[0]]);
+    }
+  }, [coursesData]);
 
   // Update selected course when URL parameter changes
   useEffect(() => {
     if (courseParam) {
-      setSelectedCourse(courseParam)
+      setSelectedCourse(courseParam);
 
-      // Auto-expand the relevant sections
-      setExpandedYears((prev) => (prev.includes("Year 1") ? prev : [...prev, "Year 1"]))
-      setExpandedDisciplines((prev) => (prev.includes("Year 1-General") ? prev : [...prev, "Year 1-General"]))
+      // Find the course to get its year and category
+      const course = coursesData?.find((c) => c.id === courseParam);
+      if (course) {
+        const year = `Year ${course.yearLevel}`;
+        const category = course.category;
+        const yearCategory = `${year}-${category}`;
 
-      // Determine which term to expand based on the course code
-      const isFallCourse = fallTermCourses.some((course) => course.code === courseParam)
-      if (isFallCourse) {
-        setExpandedTerms((prev) =>
-          prev.includes("Year 1-General-Fall Term Courses") ? prev : [...prev, "Year 1-General-Fall Term Courses"],
-        )
-      } else {
-        setExpandedTerms((prev) =>
-          prev.includes("Year 1-General-Winter Term Courses") ? prev : [...prev, "Year 1-General-Winter Term Courses"],
-        )
+        // Auto-expand the relevant sections
+        setExpandedYears((prev) => (prev.includes(year) ? prev : [...prev, year]));
+        setExpandedCategories((prev) => (prev.includes(yearCategory) ? prev : [...prev, yearCategory]));
       }
     }
-  }, [courseParam])
+  }, [courseParam, coursesData]);
 
   const toggleYear = (year: string) => {
-    setExpandedYears((prev) => (prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]))
-  }
+    setExpandedYears((prev) => (prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]));
+  };
 
-  const toggleDiscipline = (discipline: string) => {
-    setExpandedDisciplines((prev) =>
-      prev.includes(discipline) ? prev.filter((d) => d !== discipline) : [...prev, discipline],
-    )
-  }
+  const toggleCategory = (yearCategory: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(yearCategory) ? prev.filter((c) => c !== yearCategory) : [...prev, yearCategory],
+    );
+  };
 
-  const toggleTerm = (term: string) => {
-    setExpandedTerms((prev) => (prev.includes(term) ? prev.filter((t) => t !== term) : [...prev, term]))
-  }
+  const handleCourseClick = (courseId: string) => {
+    setSelectedCourse(courseId);
+    router.push(`/resources?course=${courseId}`);
+  };
 
-  const handleCourseClick = (courseCode: string) => {
-    setSelectedCourse(courseCode)
-    router.push(`/resources?course=${courseCode}`)
+  if (queryIsLoading || !coursesData) {
+    return (
+      <div className="flex w-64 flex-shrink-0 items-center justify-center overflow-y-auto border-r border-primary/30 bg-primary text-white shadow-md dark:border-border dark:bg-background dark:text-foreground">
+        <div className="flex flex-col items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-white dark:text-primary" />
+          <p className="mt-4 text-sm">Loading courses...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-64 bg-primary text-white flex-shrink-0 overflow-y-auto border-r border-primary/30 shadow-md">
-      <div className="p-4 border-b border-white/20 sticky top-0 bg-primary z-10 shadow-sm">
-        <h2 className="text-lg font-semibold">Year</h2>
+    <div className="w-64 flex-shrink-0 overflow-y-auto border-r border-primary/30 bg-primary text-white shadow-md dark:border-border dark:bg-background dark:text-foreground">
+      <div className="sticky top-0 z-10 border-b border-white/20 bg-primary p-4 shadow-sm dark:border-border dark:bg-background">
+        <h2 className="text-lg font-semibold">Courses</h2>
       </div>
       <nav className="p-2">
-        {/* Year 1 */}
-        <div className="mb-1">
-          <button
-            onClick={() => toggleYear("Year 1")}
-            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-          >
-            {expandedYears.includes("Year 1") ? (
-              <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-            )}
-            <span className="truncate">Year 1</span>
-          </button>
-
-          {expandedYears.includes("Year 1") && (
-            <div className="ml-4 mt-1 space-y-1">
-              {/* General Discipline */}
-              <div>
+        {Object.keys(groupedCourses).length > 0 ? (
+          Object.entries(groupedCourses)
+            .sort(([yearA], [yearB]) => {
+              // Extract the year number and compare
+              const numA = Number.parseInt(yearA.split(" ")[1]);
+              const numB = Number.parseInt(yearB.split(" ")[1]);
+              return numA - numB;
+            })
+            .map(([year, categories]) => (
+              <div key={year} className="mb-1">
                 <button
-                  onClick={() => toggleDiscipline("Year 1-General")}
-                  className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
+                  onClick={() => toggleYear(year)}
+                  className="flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/10 dark:hover:bg-gray-800"
                 >
-                  {expandedDisciplines.includes("Year 1-General") ? (
-                    <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
+                  {expandedYears.includes(year) ? (
+                    <ChevronDown className="mr-2 h-4 w-4 flex-shrink-0" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <ChevronRight className="mr-2 h-4 w-4 flex-shrink-0" />
                   )}
-                  <span className="truncate">General</span>
+                  <span className="truncate">{year}</span>
                 </button>
 
-                {expandedDisciplines.includes("Year 1-General") && (
+                {expandedYears.includes(year) && (
                   <div className="ml-4 mt-1 space-y-1">
-                    {/* Fall Term Courses */}
-                    <div>
-                      <button
-                        onClick={() => toggleTerm("Year 1-General-Fall Term Courses")}
-                        className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-                      >
-                        {expandedTerms.includes("Year 1-General-Fall Term Courses") ? (
-                          <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-                        )}
-                        <span className="truncate">Fall Term Courses</span>
-                      </button>
+                    {Object.entries(categories).map(([category, coursesInCategory]) => {
+                      const yearCategory = `${year}-${category}`;
+                      return (
+                        <div key={yearCategory}>
+                          <button
+                            onClick={() => toggleCategory(yearCategory)}
+                            className="flex w-full items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/10 dark:hover:bg-gray-800"
+                          >
+                            {expandedCategories.includes(yearCategory) ? (
+                              <ChevronDown className="mr-2 h-4 w-4 flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="mr-2 h-4 w-4 flex-shrink-0" />
+                            )}
+                            <span className="truncate">{category}</span>
+                          </button>
 
-                      {expandedTerms.includes("Year 1-General-Fall Term Courses") && (
-                        <div className="ml-4 mt-1 space-y-1">
-                          {fallTermCourses.map((course) => (
-                            <button
-                              key={course.code}
-                              onClick={() => handleCourseClick(course.code)}
-                              className={cn(
-                                "flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors text-left",
-                                selectedCourse === course.code && "bg-white/20",
-                              )}
-                            >
-                              <BookOpen className="h-4 w-4 mr-2 flex-shrink-0" />
-                              <span className="truncate">{course.code}</span>
-                            </button>
-                          ))}
+                          {expandedCategories.includes(yearCategory) && (
+                            <div className="ml-4 mt-1 space-y-1">
+                              {coursesInCategory.map((course) => (
+                                <button
+                                  key={course.id}
+                                  onClick={() => handleCourseClick(course.id)}
+                                  className={cn(
+                                    "flex w-full items-center rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 dark:hover:bg-gray-800",
+                                    selectedCourse === course.id && "bg-white/20 dark:bg-gray-700",
+                                  )}
+                                >
+                                  <BookOpen className="mr-2 h-4 w-4 flex-shrink-0" />
+                                  <span className="truncate">{course.code}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Winter Term Courses */}
-                    <div>
-                      <button
-                        onClick={() => toggleTerm("Year 1-General-Winter Term Courses")}
-                        className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-                      >
-                        {expandedTerms.includes("Year 1-General-Winter Term Courses") ? (
-                          <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-                        )}
-                        <span className="truncate">Winter Term Courses</span>
-                      </button>
-
-                      {expandedTerms.includes("Year 1-General-Winter Term Courses") && (
-                        <div className="ml-4 mt-1 space-y-1">
-                          {winterTermCourses.map((course) => (
-                            <button
-                              key={course.code}
-                              onClick={() => handleCourseClick(course.code)}
-                              className={cn(
-                                "flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors text-left",
-                                selectedCourse === course.code && "bg-white/20",
-                              )}
-                            >
-                              <BookOpen className="h-4 w-4 mr-2 flex-shrink-0" />
-                              <span className="truncate">{course.code}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-
-              {/* Mechatronics Discipline */}
-              <div>
-                <button
-                  onClick={() => toggleDiscipline("Year 1-Mechatronics")}
-                  className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-                >
-                  {expandedDisciplines.includes("Year 1-Mechatronics") ? (
-                    <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-                  )}
-                  <span className="truncate">Mechatronics</span>
-                </button>
-
-                {expandedDisciplines.includes("Year 1-Mechatronics") && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    <div className="px-3 py-2 text-sm text-white/60 italic">Coming soon</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Computer Engineering Discipline */}
-              <div>
-                <button
-                  onClick={() => toggleDiscipline("Year 1-Computer Engineering")}
-                  className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-                >
-                  {expandedDisciplines.includes("Year 1-Computer Engineering") ? (
-                    <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-                  )}
-                  <span className="truncate">Computer Engineering</span>
-                </button>
-
-                {expandedDisciplines.includes("Year 1-Computer Engineering") && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    <div className="px-3 py-2 text-sm text-white/60 italic">Coming soon</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Year 2 */}
-        <div className="mb-1">
-          <button
-            onClick={() => toggleYear("Year 2")}
-            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-          >
-            {expandedYears.includes("Year 2") ? (
-              <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-            )}
-            <span className="truncate">Year 2</span>
-          </button>
-
-          {expandedYears.includes("Year 2") && (
-            <div className="ml-4 mt-1 space-y-1">
-              <div className="px-3 py-2 text-sm text-white/60 italic">Coming soon</div>
-            </div>
-          )}
-        </div>
-
-        {/* Year 3 */}
-        <div className="mb-1">
-          <button
-            onClick={() => toggleYear("Year 3")}
-            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-          >
-            {expandedYears.includes("Year 3") ? (
-              <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-            )}
-            <span className="truncate">Year 3</span>
-          </button>
-
-          {expandedYears.includes("Year 3") && (
-            <div className="ml-4 mt-1 space-y-1">
-              <div className="px-3 py-2 text-sm text-white/60 italic">Coming soon</div>
-            </div>
-          )}
-        </div>
-
-        {/* Year 4 */}
-        <div className="mb-1">
-          <button
-            onClick={() => toggleYear("Year 4")}
-            className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-white/10 transition-colors"
-          >
-            {expandedYears.includes("Year 4") ? (
-              <ChevronDown className="h-4 w-4 mr-2 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="h-4 w-4 mr-2 flex-shrink-0" />
-            )}
-            <span className="truncate">Year 4</span>
-          </button>
-
-          {expandedYears.includes("Year 4") && (
-            <div className="ml-4 mt-1 space-y-1">
-              <div className="px-3 py-2 text-sm text-white/60 italic">Coming soon</div>
-            </div>
-          )}
-        </div>
+            ))
+        ) : (
+          <div className="px-3 py-6 text-center">
+            <p className="text-sm text-white/70 dark:text-gray-400">No courses available</p>
+          </div>
+        )}
       </nav>
     </div>
-  )
+  );
 }
-

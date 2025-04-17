@@ -5,28 +5,20 @@ import { AdminSidebar } from "@/components/admin-sidebar";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
 import { useEffect } from "react";
-import { hasAnyFlag, UserFlags } from "@/lib/flags";
+import { RequireAuth } from "@/components/require-auth"
+import { UserFlags } from "../../lib/flags";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
-
-  const isStaff = () => {
-    if (!isAuthenticated) return false;
-    return hasAnyFlag(user?.flags ?? 0, [UserFlags.Staff, UserFlags.Admin]);
-  };
-
-  useEffect(() => {
-    // Redirect to homepage if unauthenticated
-    if (!isStaff()) router.push("/");
-  }, [isAuthenticated, user, router]);
 
   return (
+    <RequireAuth staff>
     <div className="flex min-h-screen flex-col">
       <div className="flex flex-1">
         <AdminSidebar />
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
+    </RequireAuth>
   );
 }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import enum
+import json
 from copy import copy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, overload, Self, Unpack, TypedDict, Final
@@ -319,5 +320,5 @@ class UserManager(BaseManager):
             event,
             user.id,
             reference_id,
-            kwargs,
+            json.dumps(kwargs, default=str),
         )

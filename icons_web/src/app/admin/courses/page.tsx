@@ -525,7 +525,7 @@ export default function ManageCoursesPage() {
             Courses
           </TabsTrigger>
           <TabsTrigger className="data-[state=active]:bg-white/10" value="filters">
-            Filters
+            Tags
           </TabsTrigger>
         </TabsList>
 

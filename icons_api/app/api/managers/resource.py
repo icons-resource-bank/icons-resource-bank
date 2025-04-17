@@ -32,6 +32,7 @@ class Resource(Model):
     tag_ids: list[str]
     download_count: int = 0
     pending: bool
+    ftype: str
 
     async def to_dict(self, *, with_data: bool = False) -> dict[str, Any]:
         data = Model.to_dict(self)
@@ -60,6 +61,8 @@ class _QueryArguments(TypedDict):
     query: str | None
     title: str | None
     description: str | None
+    ftype: list[str] | None
+    pending: bool | None
 
 
 class ResourceManager(BaseManager):
@@ -125,7 +128,10 @@ class ResourceManager(BaseManager):
                 continue
 
             if key in ("course_ids", "author_ids"):
-                where.append(f"resources.{key[:-1]} = ANY({index})")
+                where.append(f"resources.{key[:-1]} = ANY(${index})")
+                params.append(value)  # type: ignore
+            elif key == "ftype":
+                where.append(f"resources.ftype = ANY(${index})")
                 params.append(value)  # type: ignore
             elif key == "tag_ids":
                 for tag_id in value:  # type: ignore
@@ -167,7 +173,13 @@ class ResourceManager(BaseManager):
             sort_by = sort_by.replace("resources.query", "resources.created_at")
 
         query = self._FILTERED_QUERY.format(query=" AND ".join(where), sort=sort_by) + f" LIMIT {limit} OFFSET {offset}"
-        result = await self.app.state.pool.fetch(query, *params)
+        try:
+            result = await self.app.state.pool.fetch(query, *params)
+        except Exception as e:
+            print(query, params)
+            print(e)
+            __import__("traceback").print_exc()
+            raise e
         return [Resource.from_row(self, row) for row in result], result[0]["total_count"] if result else 0
 
     async def create(
@@ -181,9 +193,10 @@ class ResourceManager(BaseManager):
         description: str | None = None,
         tag_ids: list[str] | None = None,
         pending: bool = True,
+        ftype: str,
     ) -> Resource:
         result = await self.app.state.pool.fetchrow(
-            "INSERT INTO resources (course_id, author_id, type, title, uri, description, pending) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            "INSERT INTO resources (course_id, author_id, type, title, uri, description, pending, ftype) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
             course_id,
             author_id,
             type,
@@ -191,6 +204,7 @@ class ResourceManager(BaseManager):
             uri,
             description,
             pending,
+            ftype,
         )
         result = dict(result, tag_ids=tag_ids or [])
         resource = Resource.from_row(self, result)
@@ -231,7 +245,7 @@ class ResourceManager(BaseManager):
 
     async def _update(self, resource: Resource) -> None:
         await self.app.state.pool.execute(
-            "UPDATE resources SET title = $1, uri = $2, description = $3, pending = $4 WHERE id = $6",
+            "UPDATE resources SET title = $1, uri = $2, description = $3, pending = $4 WHERE id = $5",
             resource.title,
             resource.uri,
             resource.description,

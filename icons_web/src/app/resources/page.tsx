@@ -1,190 +1,126 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { Search, Upload, FileText, Video } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { SiteHeader } from "@/components/site-header"
-import { ResourceSidebar, allCourses } from "@/components/resource-sidebar"
-import { FilterDialog } from "./filter-dialog"
-import { ResourceCard } from "@/components/resource-card"
-import Link from "next/link"
+import type React from "react";
 
-// Sample resources data
-const resources = [
-  {
-    id: 1,
-    title: "Calculus I - Limits and Continuity",
-    course: "APSC 171",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "John Doe",
-    uploadedAt: "2024-01-15",
-    downloads: 128,
-    tags: ["Lecture Notes", "First Year"],
-  },
-  {
-    id: 2,
-    title: "Physics I - Mechanics Problem Set",
-    course: "APSC 111",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Jane Smith",
-    uploadedAt: "2024-01-20",
-    downloads: 95,
-    tags: ["Problem Set", "First Year"],
-    link: "https://example.com/physics-problem-set",
-  },
-  {
-    id: 3,
-    title: "Introduction to Computer Programming - Python Basics",
-    course: "APSC 141",
-    type: "Video",
-    icon: Video,
-    uploadedBy: "Alex Johnson",
-    uploadedAt: "2024-01-25",
-    downloads: 210,
-    tags: ["Tutorial", "First Year"],
-    link: "https://youtube.com/watch?v=example",
-  },
-  {
-    id: 4,
-    title: "Chemistry and Materials - Periodic Table Guide",
-    course: "APSC 131",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Sarah Williams",
-    uploadedAt: "2024-01-18",
-    downloads: 156,
-    tags: ["Study Guide", "First Year"],
-  },
-  {
-    id: 5,
-    title: "Calculus I - Integration Techniques",
-    course: "APSC 171",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Michael Brown",
-    uploadedAt: "2024-01-22",
-    downloads: 142,
-    tags: ["Lecture Notes", "First Year"],
-    link: "https://example.com/calculus-integration",
-  },
-  {
-    id: 6,
-    title: "Physics I - Lab Report Template",
-    course: "APSC 111",
-    type: "DOCX",
-    icon: FileText,
-    uploadedBy: "Emily Davis",
-    uploadedAt: "2024-01-17",
-    downloads: 89,
-    tags: ["Lab", "Template", "First Year"],
-  },
-  {
-    id: 7,
-    title: "Introduction to Computer Programming - Algorithms Explained",
-    course: "APSC 141",
-    type: "Video",
-    icon: Video,
-    uploadedBy: "David Wilson",
-    uploadedAt: "2024-01-28",
-    downloads: 175,
-    tags: ["Tutorial", "First Year"],
-    link: "https://youtube.com/watch?v=algorithms-explained",
-  },
-  {
-    id: 8,
-    title: "Chemistry and Materials - Molecular Bonding",
-    course: "APSC 131",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Lisa Martinez",
-    uploadedAt: "2024-01-19",
-    downloads: 132,
-    tags: ["Study Guide", "First Year"],
-  },
-  // Add more resources to demonstrate scrolling
-  {
-    id: 9,
-    title: "Engineering Graphics - CAD Fundamentals",
-    course: "APSC 162",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Robert Johnson",
-    uploadedAt: "2024-01-21",
-    downloads: 118,
-    tags: ["Tutorial", "First Year"],
-    link: "https://example.com/cad-fundamentals",
-  },
-  {
-    id: 10,
-    title: "Earth Systems Engineering - Climate Models",
-    course: "APSC 151",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Emma Thompson",
-    uploadedAt: "2024-01-23",
-    downloads: 87,
-    tags: ["Lecture Notes", "First Year"],
-  },
-  {
-    id: 11,
-    title: "Engineering Practice - Team Dynamics Workshop",
-    course: "APSC 101, 102, 103",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Brian Frank",
-    uploadedAt: "2024-01-14",
-    downloads: 203,
-    tags: ["Workshop", "First Year"],
-    link: "https://example.com/team-dynamics",
-  },
-  {
-    id: 12,
-    title: "Engineering Practice - Laboratory Safety Guidelines",
-    course: "APSC 101, 102, 103",
-    type: "PDF",
-    icon: FileText,
-    uploadedBy: "Brian Frank",
-    uploadedAt: "2024-01-16",
-    downloads: 189,
-    tags: ["Lab", "Safety", "First Year"],
-  },
-]
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Search, Upload, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ResourceSidebar } from "@/components/resource-sidebar";
+import { FilterDialog, type FilterOptions } from "./filter-dialog";
+import { ResourceCard } from "@/components/resource-card";
+import Link from "next/link";
+import { courseApi, type PaginatedResponse, resourceApi, type Resource } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ResourcesPage() {
-  const searchParams = useSearchParams()
-  const courseParam = searchParams.get("course")
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const courseParam = searchParams.get("course");
+  const searchQuery = searchParams.get("q") || "";
 
-  const [filteredResources, setFilteredResources] = useState(resources)
-  const [selectedCourse, setSelectedCourse] = useState(allCourses[courseParam || ""] || null)
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(12);
+  const [filters, setFilters] = useState<FilterOptions>({
+    resourceType: null,
+    fileTypes: [],
+    tagIds: [],
+    sortBy: "created_at:desc",
+  });
 
-  // Update filtered resources when course parameter changes
+  // Parse the sort option
+  const getSortOptions = (sortOption: string) => {
+    const [sortBy, sortOrder] = sortOption.split(":");
+    return { sortBy, sortOrder } as { sortBy: string; sortOrder: "asc" | "desc" };
+  };
+
+  const {
+    data: resourcesData,
+    isLoading: isLoadingResources,
+    error: resourcesError,
+    refetch: refetchResources,
+  }: {
+    data?: PaginatedResponse<Resource>;
+    isLoading: boolean;
+    error: any;
+    refetch: () => void;
+  } = useQuery({
+    queryKey: ["resources", courseParam, currentPage, filters, searchQuery],
+    queryFn: async () => {
+      return resourceApi.getResources({...filters, ...getSortOptions(filters.sortBy), courseIds: courseParam ? [courseParam] : undefined, query: searchQuery });
+    },
+  });
+
+  const { data: courseData, isLoading: isLoadingCourse } = useQuery({
+    queryKey: ["course", courseParam],
+    queryFn: () => courseApi.getCourse(courseParam as string),
+    enabled: !!courseParam, // Only run query if courseParam exists
+  });
+
+  // Reset to first page when filters or search changes
   useEffect(() => {
-    if (courseParam) {
-      setSelectedCourse(allCourses[courseParam] || null)
-      setFilteredResources(resources.filter((resource) => resource.course === courseParam))
+    setCurrentPage(1);
+  }, [filters, searchQuery, courseParam]);
+
+  // Handle search input
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Update URL with search query
+    const params = new URLSearchParams(searchParams);
+    if (searchInput) {
+      params.set("q", searchInput);
     } else {
-      setSelectedCourse(null)
-      setFilteredResources(resources)
+      params.delete("q");
     }
-  }, [courseParam])
+
+    // Update URL
+    router.push(`/resources?${params.toString()}`);
+  };
+
+  // Handle filter changes
+  const handleApplyFilters = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
+
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    const totalPages = Math.ceil((resourcesData?.total || 0) / limit);
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Calculate pagination info
+  const totalResources = resourcesData?.total ?? 0;
+  const totalPages = Math.ceil(totalResources / limit);
+  const startItem = totalResources === 0 ? 0 : (currentPage - 1) * limit + 1;
+  const endItem = Math.min(currentPage * limit, totalResources);
+
+  // Determine if we're in a loading state
+  const isLoading = isLoadingResources || isLoadingCourse;
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen flex-col">
       <div className="flex flex-1 overflow-hidden">
         <ResourceSidebar />
-        <main className="flex-1 flex flex-col h-full border-l border-[#d8c5e9] dark:border-border shadow-sm">
-          <div className="p-6  border-[#d8c5e9] dark:border-border ">
-            {selectedCourse ? (
+        <main className="flex h-full flex-1 flex-col border-l border-[#d8c5e9] shadow-sm dark:border-border">
+          <div className="border-[#d8c5e9] p-6 dark:border-border">
+            {courseData ? (
               <>
                 <h1 className="text-3xl font-bold">
-                  {selectedCourse.code} - {selectedCourse.name}
+                  {courseData.code} - {courseData.name}
                 </h1>
-                <p className="text-muted-foreground mt-1">Instructor: {selectedCourse.instructor}</p>
-                <p className="text-muted-foreground mt-2 max-w-3xl">{selectedCourse.description}</p>
+                <p className="mt-1 text-muted-foreground">Category: {courseData.category}</p>
+                <p className="mt-2 max-w-3xl text-muted-foreground">{courseData.description}</p>
               </>
             ) : (
               <>
@@ -194,47 +130,105 @@ export default function ResourcesPage() {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b ">
+          <div className="flex flex-col items-start justify-between border-b p-6 sm:flex-row sm:items-center">
             <div className="text-sm text-muted-foreground">
-              Showing <strong>{filteredResources.length}</strong> resources
-              {selectedCourse && <span> for {selectedCourse.code}</span>}
+              {isLoading ? (
+                <span>Loading resources...</span>
+              ) : (
+                <>
+                  Showing <strong>{startItem}</strong> to <strong>{endItem}</strong> of{" "}
+                  <strong>{totalResources}</strong> resources
+                  {courseData && <span> for {courseData.code}</span>}
+                </>
+              )}
             </div>
-            <div className="flex items-center gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+            <div className="mt-4 flex w-full items-center gap-4 sm:mt-0 sm:w-auto">
               <Button asChild variant="default" size="sm" className="text-white">
-                <Link href="/upload" className="flex items-center gap-1 dark:border-2 hover:border-foreground/20 ">
-                  <Upload className="h-4 w-4 " />
+                <Link href="/upload" className="flex items-center gap-1 hover:border-foreground/20 dark:border-2">
+                  <Upload className="h-4 w-4" />
                   Upload
                 </Link>
               </Button>
-              <div className="relative w-full sm:w-[250px]">
+              <form onSubmit={handleSearch} className="relative w-full sm:w-[250px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search resources..." className="pl-9 border-2 " />
-              </div>
-              <FilterDialog/>
+                <Input
+                  placeholder="Search resources..."
+                  className="border-[#d8c5e9] pl-9 dark:border-border"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                />
+              </form>
+              <FilterDialog onApplyFilters={handleApplyFilters} initialFilters={filters} />
             </div>
           </div>
 
-          <div className="flex-1 p-6 overflow-y-auto">
-            {filteredResources.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
+          <div className="flex-1 overflow-y-auto p-6">
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : resourcesError ? (
+              <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm dark:border-border">
+                <h3 className="mb-2 text-lg font-medium text-destructive">Error</h3>
+                <p className="text-muted-foreground">Failed to load resources. Please try again.</p>
+                <Button onClick={() => refetchResources()} className="mt-4">
+                  Try Again
+                </Button>
+              </div>
+            ) : totalResources > 0 ? (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {resourcesData?.items.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
               </div>
             ) : (
-              <div className="text-center py-12 border rounded-lg border-[#d8c5e9] shadow-sm bg-background">
-                <h3 className="text-lg font-medium mb-2">No resources found</h3>
+              <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm">
+                <h3 className="mb-2 text-lg font-medium">No resources found</h3>
                 <p className="text-muted-foreground">
-                  {selectedCourse
-                    ? `There are no resources available for ${selectedCourse.code} yet.`
-                    : "No resources match your search criteria."}
+                  {courseData
+                    ? `There are no resources available for ${courseData.code} yet.`
+                    : searchQuery
+                      ? "No resources match your search criteria."
+                      : "No resources available."}{" "}
                 </p>
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {!isLoading && totalResources > 0 && (
+            <div className="flex items-center justify-between border-t border-[#d8c5e9] px-6 py-4 dark:border-border">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-medium">{startItem}</span> to{" "}
+                <span className="font-medium">{endItem}</span> of <span className="font-medium">{totalResources}</span>{" "}
+                resources
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1 || isLoading}
+                >
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Previous
+                </Button>
+                <div className="text-sm">
+                  Page <span className="font-medium">{currentPage}</span> of{" "}
+                  <span className="font-medium">{totalPages || 1}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage >= totalPages || isLoading}
+                >
+                  Next
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
-  )
+  );
 }
-

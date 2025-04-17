@@ -91,11 +91,13 @@ CREATE TABLE IF NOT EXISTS resources (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     author_id VARCHAR(36) REFERENCES users(id) ON DELETE SET NULL,
     uri TEXT NOT NULL, -- URL or S3 resource
+    ftype VARCHAR(255) NOT NULL DEFAULT 'other',
     pending BOOLEAN NOT NULL DEFAULT TRUE
 );
 CREATE INDEX IF NOT EXISTS trgm_idx_title ON resources USING gin (title gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS trgm_idx_description ON resources USING gin (description gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS resources_course_id_idx ON resources (course_id);
+CREATE INDEX IF NOT EXISTS resources_ftype_idx ON resources (ftype);
 
 CREATE TABLE IF NOT EXISTS resource_tags (
     resource_id VARCHAR(36) NOT NULL REFERENCES resources(id) ON DELETE CASCADE,

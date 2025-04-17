@@ -1,12 +1,6 @@
 import { useAuthStore } from "@/stores/auth";
-import { eventNames } from "process";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-
-interface RequestOptions {
-  headers?: Record<string, string>;
-  body?: Record<string, unknown>;
-}
 
 class HTTPError extends Error {
   constructor(
@@ -15,50 +9,6 @@ class HTTPError extends Error {
   ) {
     super(errors.join(", "));
   }
-}
-
-async function _request(method: string, url: string, options: RequestOptions = {}) {
-  const { token } = useAuthStore.getState();
-
-  const response = await fetch(BASE_URL + url, {
-    method,
-    headers: {
-      "Authorization": token ?? "",
-      "Content-Type": typeof options.body === "object" ? "application/json" : "application/x-www-form-urlencoded",
-      ...options.headers,
-    },
-    body: typeof options.body !== "undefined" ? JSON.stringify(options.body) : undefined,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new HTTPError(errorData.errors || ["Failed to fetch"], response.status);
-  }
-
-  if (response.status === 204) {
-    return null;
-  }
-  return await response.json();
-}
-
-export function get(url: string, options?: RequestOptions) {
-  return _request("GET", url, options);
-}
-
-export function post(url: string, options?: RequestOptions) {
-  return _request("POST", url, options);
-}
-
-export function put(url: string, options?: RequestOptions) {
-  return _request("PUT", url, options);
-}
-
-export function del(url: string, options?: RequestOptions) {
-  return _request("DELETE", url, options);
-}
-
-export function patch(url: string, options?: RequestOptions) {
-  return _request("PATCH", url, options);
 }
 
 // API utility functions
@@ -311,6 +261,155 @@ export const filterApi = {
   deleteFilter: async (filterId: string): Promise<void> => {
     return fetchApi<void>(`/tags/${filterId}`, {
       method: "DELETE",
+    });
+  },
+};
+
+// Resource API functions
+export enum ResourceType {
+  URL = 1,
+  FILE = 2,
+}
+
+export interface Resource {
+  id: string;
+  course: Course;
+  type: ResourceType;
+  title: string;
+  description: string;
+  createdAt: string;
+  author: User;
+  uri: string;
+  tags: Filter[];
+  downloadCount: number;
+  pending: boolean;
+  ftype: string; // PDF, Video, etc
+}
+
+export interface GetResourcesParams {
+  limit?: number;
+  offset?: number;
+  query?: string;
+  title?: string;
+  description?: string;
+  type?: ResourceType;
+  courseIds?: string[];
+  authorIds?: string[];
+  tagIds?: string[];
+  createdBefore?: string;
+  createdAfter?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  ftype?: string | string[];
+  pending?: boolean;
+}
+
+export interface DownloadResponse {
+  url: string;
+  filename?: string;
+}
+
+export const resourceApi = {
+  getResources: async (params: GetResourcesParams = {}): Promise<PaginatedResponse<Resource>> => {
+    let endpoint = "/resources";
+    const urlParams = new URLSearchParams();
+
+    if (params.limit) urlParams.append("limit", params.limit.toString());
+    if (params.offset !== undefined) urlParams.append("offset", params.offset.toString());
+    if (params.query) urlParams.append("query", params.query);
+    if (params.title) urlParams.append("title", params.title);
+    if (params.description) urlParams.append("description", params.description);
+    if (params.type) urlParams.append("type", params.type.toString());
+    if (params.courseIds?.length) {
+      params.courseIds.forEach((id) => urlParams.append("course_ids", id));
+    }
+    if (params.authorIds?.length) {
+      params.authorIds.forEach((id) => urlParams.append("author_ids", id));
+    }
+    if (params.tagIds?.length) {
+      params.tagIds.forEach((id) => urlParams.append("tag_ids", id));
+    }
+    if (params.createdBefore) urlParams.append("created_before", params.createdBefore);
+    if (params.createdAfter) urlParams.append("created_after", params.createdAfter);
+    if (params.sortBy) urlParams.append("sort_by", params.sortBy);
+    if (params.sortOrder) urlParams.append("sort_order", params.sortOrder);
+    if (params.ftype) {
+      if (Array.isArray(params.ftype)) {
+        params.ftype.forEach((type) => urlParams.append("ftype", type));
+      } else {
+        urlParams.append("ftype", params.ftype);
+      }
+    }
+    if (params.pending !== undefined) urlParams.append("pending", params.pending.toString());
+
+    if (urlParams.toString()) {
+      endpoint += `?${urlParams.toString()}`;
+    }
+
+    return fetchApi<PaginatedResponse<Resource>>(endpoint);
+  },
+
+  getResource: async (id: string): Promise<Resource> => {
+    return fetchApi<Resource>(`/resources/${id}`);
+  },
+
+  downloadResource: async (id: string): Promise<DownloadResponse> => {
+    return fetchApi<DownloadResponse>(`/resources/${id}/download`, {
+      method: "POST",
+    });
+  },
+
+  createResource: async (payload: Partial<Resource>): Promise<Resource> => {
+    const url = `${BASE_URL}/resources`;
+    const { token } = useAuthStore.getState();
+
+    const formData = new FormData();
+    if (payload.file) {
+      formData.append("file", payload.file);
+      payload.file = undefined; // Remove file from payload to avoid duplication
+    }
+    formData.append("payload_json", JSON.stringify(camelToSnakeCase(payload)));
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: token ?? "",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new HTTPError(errorData.errors || [`API error ${response.status}`], response.status);
+    }
+
+    const data = await response.json();
+    return snakeToCamelCase(data) as Resource;
+  },
+
+  updateResource: async (id: string, resource: Partial<Resource>): Promise<Resource> => {
+    return fetchApi<Resource>(`/resources/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(resource),
+    });
+  },
+
+  approveResource: async (id: string): Promise<Resource> => {
+    return fetchApi<Resource>(`/resources/${id}/approve`, {
+      method: "POST",
+    });
+  },
+
+  denyResource: async (id: string): Promise<Resource> => {
+    return fetchApi<Resource>(`/resources/${id}/deny`, {
+      method: "POST",
+    });
+  },
+
+  trackDownload: async (id: string): Promise<void> => {
+    return fetchApi<void>(`/track`, {
+      method: "POST",
+      body: JSON.stringify({ event: "download", reference_id: id }),
     });
   },
 };

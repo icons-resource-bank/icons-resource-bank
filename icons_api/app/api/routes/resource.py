@@ -5,6 +5,7 @@ from os import urandom
 from typing import Annotated, Literal
 
 from pydantic import AwareDatetime
+import yarl
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
@@ -12,6 +13,7 @@ from ...core.s3 import *
 from ...utils.decorators import *
 from ..models.resource import *
 from ..managers.resource import ResourceType
+from ..managers.user import UserFlags
 from ...request import Request
 
 __all__ = ("setup",)
@@ -21,15 +23,15 @@ router = APIRouter(prefix="/resources")
 
 @router.get("")
 @limiter.limit("10/5 seconds")
-@flag_check(staff=True)
+@auth_check
 async def get_resources(
     request: Request,
-    limit: Annotated[int, Query(ge=0, le=100)] = 10,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
     offset: Annotated[int, Query(ge=0)] = 0,
     query: Annotated[str | None, Query(max_length=4096)] = None,
     title: Annotated[str | None, Query(max_length=64)] = None,
     description: Annotated[str | None, Query(max_length=4096)] = None,
-    type: Annotated[ResourceType | None, Query(max_length=255)] = None,
+    type: ResourceType | None = None,
     course_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
     author_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
     tag_ids: Annotated[list[str] | None, Query(max_length=255)] = None,
@@ -37,7 +39,15 @@ async def get_resources(
     created_after: Annotated[AwareDatetime | None, Query(max_length=255)] = None,
     sort_by: Annotated[Literal["query", "created_at"], Query(max_length=255)] = "query",
     sort_order: Annotated[Literal["asc", "desc"], Query(max_length=255)] = "desc",
+    ftype: Annotated[list[str] | None, Query(max_length=255)] = None,
+    pending: bool = False,
 ):
+    if pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+        raise CustomValidationError("You are not allowed to view pending resources", 403)
+
+    if author_ids == [request.state.user.id]:  # type: ignore
+        pending = None  # type: ignore # pending will be set
+
     resources, total = await request.app.state.resources.query(
         limit=limit,
         offset=offset,
@@ -51,11 +61,13 @@ async def get_resources(
         tag_ids=tag_ids,
         created_before=created_before,
         created_after=created_after,
+        ftype=ftype,
+        pending=pending,
     )
     return JSONResponse(
         {
             "total": total,
-            "resources": [resource.to_dict(with_data=True) for resource in resources],
+            "items": [await resource.to_dict(with_data=True) for resource in resources],
         }
     )
 
@@ -70,6 +82,9 @@ async def create_resource(
 ):
     data = ResourceCreateRequest.model_validate_json(payload_json.decode("utf-8"))
 
+    if file and not file.filename:
+        raise CustomValidationError("File must have a filename")
+
     if data.url and file:
         raise CustomValidationError("Resource must only have one of url or file")
     if not data.url and not file:
@@ -80,11 +95,27 @@ async def create_resource(
     else:
         uri = data.url
 
+    if not uri:
+        raise CustomValidationError("Resource must have a url or file")
+
+    if file:
+        ftype = file.filename.split(".")[-1]  # type: ignore # filename will be set
+    else:
+        parsed = yarl.URL(uri)
+        # We need to unwrap youtu.be URLs
+        if parsed.host == "youtu.be":
+            uri = f"https://www.youtube.com/watch?v={parsed.path[1:]}"
+            ftype = "video"
+        elif parsed.host == "www.youtube.com" or parsed.host == "youtube.com":
+            ftype = "video"
+        ftype = "other"
+
     resource = await request.app.state.resources.create(
         **{k: v for k, v in data.model_dump().items() if v is not None and k != "url"},
         uri=uri,  # type: ignore # uri will be set
         type=ResourceType.file if file else ResourceType.url,
         author_id=request.state.user.id,  # type: ignore # author_id will be set
+        ftype=ftype,
     )
 
     return JSONResponse(await resource.to_dict(with_data=True), status_code=201)
@@ -97,6 +128,8 @@ async def get_resource(request: Request, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
+    if resource.pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+        raise CustomValidationError("Resource is pending approval", 403)
     return JSONResponse(await resource.to_dict(with_data=True))
 
 
@@ -107,6 +140,8 @@ async def download_resource(request: Request, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
+    if resource.pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+        raise CustomValidationError("Resource is pending approval", 403)
 
     if resource.type == ResourceType.url:
         # Fallback I guess
@@ -114,7 +149,7 @@ async def download_resource(request: Request, id: str):
     else:
         uri = await generate_presigned_url(request.app, resource.uri)
 
-    response = {"uri": uri}
+    response = {"url": uri}
     if resource.type == ResourceType.file:
         response["filename"] = resource.uri.split("/")[-1]
     return JSONResponse(response)
@@ -161,7 +196,7 @@ async def deny_resource(request: Request, id: str):
         # Delete the file from S3
         await delete_object(request.app, resource.uri)
     await request.app.state.resources.delete(id)
-    return JSONResponse(resource.to_dict())  # For consistency
+    return JSONResponse(await resource.to_dict())  # For consistency
 
 
 @router.delete("/{id}")

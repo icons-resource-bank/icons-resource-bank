@@ -143,11 +143,9 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/account_management")}>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>
-                    <Link href="/account_management">Settings</Link>
-                  </span>
+                  <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>

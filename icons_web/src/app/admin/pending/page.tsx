@@ -117,7 +117,7 @@ export default function PendingContentPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
+                  <TableHead></TableHead>
                   <TableHead>Course</TableHead>
                   <TableHead>Submitted By</TableHead>
                   <TableHead>Date</TableHead>
@@ -128,7 +128,12 @@ export default function PendingContentPage() {
               <TableBody>
                 {pendingResources?.items.map((resource) => (
                   <TableRow key={resource.id}>
-                    <TableCell className="font-medium">{resource.title}</TableCell>
+                    {/* link to /resources/id in title */}
+                    <TableCell className="font-medium">
+                        <a href={`/resources/${resource.id}`} className="text-blue-600 hover:underline">
+                            {resource.title}
+                        </a>
+                    </TableCell>
                     <TableCell>{resource.course.code}</TableCell>
                     <TableCell>{resource.author.name}</TableCell>
                     <TableCell>{formatDate(resource.createdAt)}</TableCell>

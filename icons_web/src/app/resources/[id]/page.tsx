@@ -95,7 +95,6 @@ export default function ResourceDetailPage() {
   if (isLoadingResource) {
     return (
       <div className="flex min-h-screen flex-col">
-        \{" "}
         <main className="container flex flex-1 items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </main>

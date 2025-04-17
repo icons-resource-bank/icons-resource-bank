@@ -29,7 +29,7 @@ export default function ResourceSharingPage() {
               <CardDescription>Create sources for others to use!</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/new_source">
+              <Link href="/upload/new_source">
                 <Button className="w-full py-6 text-lg" size="lg">
                   <PlusCircle className="mr-2 h-5 w-5" />
                   New Source

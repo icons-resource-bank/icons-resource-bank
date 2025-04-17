@@ -18,9 +18,6 @@ import { useAuthStore } from "@/stores/auth";
 import { hasAnyFlag, UserFlags } from "@/lib/flags";
 import { cn } from "@/lib/utils";
 
-const linkClassName =
-  "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
-
 const AUTH_REDIRECT_URI =
   typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "http://localhost:3000/auth/callback";
 
@@ -75,9 +72,9 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
             priority
           />
         </Link>
-        <nav
-          className="mx-6 flex flex-1 items-center justify-center space-x-8">
-          <Link href="/about"
+        <nav className="mx-6 flex flex-1 items-center justify-center space-x-8">
+          <Link
+            href="/about"
             className={cn(
               "text-sm font-medium transition-colors",
               pathname === "/about"
@@ -87,36 +84,50 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
           >
             About
           </Link>
-          <Link href="/get-involved"
+          <Link
+            href="/get-involved"
             className={cn(
               "text-sm font-medium transition-colors",
               pathname === "/get-involved"
                 ? "text-primary dark:text-white"
                 : "text-muted-foreground hover:text-primary dark:hover:text-white",
-            )}>
+            )}
+          >
             Get Involved
           </Link>
 
-          <Link href="/resources"
+          <Link
+            href="/resources"
             className={cn(
               "text-sm font-medium transition-colors",
               pathname === "/resources"
                 ? "text-primary dark:text-white"
                 : "text-muted-foreground hover:text-primary dark:hover:text-white",
-            )}>
+            )}
+          >
             Resources
           </Link>
-          <Link href="/upload"
+          <Link
+            href="/upload"
             className={cn(
               "text-sm font-medium transition-colors",
-              pathname === "/upload"
+              pathname.startsWith("/upload")
                 ? "text-primary dark:text-white"
                 : "text-muted-foreground hover:text-primary dark:hover:text-white",
-            )}>
+            )}
+          >
             Upload
           </Link>
           {isStaff() && (
-            <Link href="/admin/pending" className={linkClassName}>
+            <Link
+              href="/admin/pending"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname.startsWith("/admin")
+                  ? "text-primary dark:text-white"
+                  : "text-muted-foreground hover:text-primary dark:hover:text-white",
+              )}
+            >
               Admin
             </Link>
           )}
@@ -134,7 +145,9 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span><Link href="/account_management">Settings</Link></span>
+                  <span>
+                    <Link href="/account_management">Settings</Link>
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>

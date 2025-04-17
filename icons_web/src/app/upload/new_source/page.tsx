@@ -202,7 +202,7 @@ export default function NewSourcePage() {
               </div>
 
               <div className="flex justify-center pt-4">
-              <Link href="../upload">
+              <Link href="/upload/approval_confirmation">
                 <Button type="submit" size="lg">
                   Save
                 </Button>

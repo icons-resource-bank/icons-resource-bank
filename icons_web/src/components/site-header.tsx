@@ -16,6 +16,7 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuthStore } from "@/stores/auth";
 import { hasAnyFlag, UserFlags } from "@/lib/flags";
+import { cn } from "@/lib/utils";
 
 const linkClassName =
   "text-sm font-medium text-muted-foreground transition-colors hover:text-primary dark:hover:text-white";
@@ -74,18 +75,44 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
             priority
           />
         </Link>
-        <nav className="mx-6 flex flex-1 items-center justify-center space-x-8">
-          <Link href="/about" className={linkClassName}>
+        <nav
+          className="mx-6 flex flex-1 items-center justify-center space-x-8">
+          <Link href="/about"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/about"
+                ? "text-primary dark:text-white"
+                : "text-muted-foreground hover:text-primary dark:hover:text-white",
+            )}
+          >
             About
           </Link>
-          <Link href="/get-involved" className={linkClassName}>
+          <Link href="/get-involved"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/get-involved"
+                ? "text-primary dark:text-white"
+                : "text-muted-foreground hover:text-primary dark:hover:text-white",
+            )}>
             Get Involved
           </Link>
-          
-          <Link href="/resources" className={linkClassName}>
+
+          <Link href="/resources"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/resources"
+                ? "text-primary dark:text-white"
+                : "text-muted-foreground hover:text-primary dark:hover:text-white",
+            )}>
             Resources
           </Link>
-          <Link href="/upload" className={linkClassName}>
+          <Link href="/upload"
+            className={cn(
+              "text-sm font-medium transition-colors",
+              pathname === "/upload"
+                ? "text-primary dark:text-white"
+                : "text-muted-foreground hover:text-primary dark:hover:text-white",
+            )}>
             Upload
           </Link>
           {isStaff() && (

@@ -186,12 +186,11 @@ export default function GetInvolvedPage() {
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center mb-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 mb-4"></div>
-                  <h3 className="font-bold">Alex Johnson</h3>
-                  <p className="text-sm">3rd Year Mechanical Engineering</p>
+                  <h3 className="font-bold">Current Icons Member</h3>
+                  <p className="text-sm">4th Year Mechanical Engineering</p>
                 </div>
                 <p className="text-center italic text-muted-foreground">
-                  "Being an iCon has been one of the most rewarding experiences of my university career. I've met
-                  amazing people and developed skills that will help me in my future career."
+                  "Being an iCon has been one of my favourite experiences at Queen’s so far! It has been a great way to connect with new people and learn lots of skills. I love being able to support first years in their classes as the iCons were so helpful for me in my first year. The intrapersonal skills I have developed as an iCon also helped me in securing my QUIP internship!"
                 </p>
               </CardContent>
             </Card>
@@ -200,12 +199,11 @@ export default function GetInvolvedPage() {
               <CardContent className="pt-6">
                 <div className="flex flex-col items-center mb-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 mb-4"></div>
-                  <h3 className="font-bold">Sarah Williams</h3>
-                  <p className="text-sm">4th Year Electrical Engineering</p>
+                  <h3 className="font-bold">Lucy Jardine</h3>
+                  <p className="text-sm">3rd Year Mechanical Engineering</p>
                 </div>
                 <p className="text-center italic text-muted-foreground">
-                  "I joined the iCons team in my second year, and it's been incredible to help fellow students while
-                  also deepening my understanding of engineering concepts."
+                  "Being an iCon has been a very valuable experience. I know it can be difficult in first year finding helpful resources, so it has been incredibly rewarding to get to help fellow students even in small ways. I also got to work with some amazing coworkers and made great friends through being an iCon!"
                 </p>
               </CardContent>
             </Card>

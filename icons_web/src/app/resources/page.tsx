@@ -13,6 +13,7 @@ import { ResourceCard } from "@/components/resource-card";
 import Link from "next/link";
 import { courseApi, type PaginatedResponse, resourceApi, type Resource } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import { RequireAuth } from "@/components/require-auth";
 
 export default function ResourcesPage() {
   const searchParams = useSearchParams();
@@ -49,7 +50,12 @@ export default function ResourcesPage() {
   } = useQuery({
     queryKey: ["resources", courseParam, currentPage, filters, searchQuery],
     queryFn: async () => {
-      return resourceApi.getResources({...filters, ...getSortOptions(filters.sortBy), courseIds: courseParam ? [courseParam] : undefined, query: searchQuery });
+      return resourceApi.getResources({
+        ...filters,
+        ...getSortOptions(filters.sortBy),
+        courseIds: courseParam ? [courseParam] : undefined,
+        query: searchQuery,
+      });
     },
   });
 
@@ -109,126 +115,128 @@ export default function ResourcesPage() {
   const isLoading = isLoadingResources || isLoadingCourse;
 
   return (
-    <div className="flex h-screen flex-col">
-      <div className="flex flex-1 overflow-hidden">
-        <ResourceSidebar />
-        <main className="flex h-full flex-1 flex-col border-l border-[#d8c5e9] shadow-sm dark:border-border">
-          <div className="border-[#d8c5e9] p-6 dark:border-border">
-            {courseData ? (
-              <>
-                <h1 className="text-3xl font-bold">
-                  {courseData.code} - {courseData.name}
-                </h1>
-                <p className="mt-1 text-muted-foreground">Category: {courseData.category}</p>
-                <p className="mt-2 max-w-3xl text-muted-foreground">{courseData.description}</p>
-              </>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold">Resources</h1>
-                <p className="text-muted-foreground">Browse and download course materials</p>
-              </>
-            )}
-          </div>
-
-          <div className="flex flex-col items-start justify-between border-b p-6 sm:flex-row sm:items-center">
-            <div className="text-sm text-muted-foreground">
-              {isLoading ? (
-                <span>Loading resources...</span>
+    <RequireAuth>
+      <div className="flex h-screen flex-col">
+        <div className="flex flex-1 overflow-hidden">
+          <ResourceSidebar />
+          <main className="flex h-full flex-1 flex-col border-l border-[#d8c5e9] shadow-sm dark:border-border">
+            <div className="border-[#d8c5e9] p-6 dark:border-border">
+              {courseData ? (
+                <>
+                  <h1 className="text-3xl font-bold">
+                    {courseData.code} - {courseData.name}
+                  </h1>
+                  <p className="mt-1 text-muted-foreground">Category: {courseData.category}</p>
+                  <p className="mt-2 max-w-3xl text-muted-foreground">{courseData.description}</p>
+                </>
               ) : (
                 <>
-                  Showing <strong>{startItem}</strong> to <strong>{endItem}</strong> of{" "}
-                  <strong>{totalResources}</strong> resources
-                  {courseData && <span> for {courseData.code}</span>}
+                  <h1 className="text-3xl font-bold">Resources</h1>
+                  <p className="text-muted-foreground">Browse and download course materials</p>
                 </>
               )}
             </div>
-            <div className="mt-4 flex w-full items-center gap-4 sm:mt-0 sm:w-auto">
-              <Button asChild variant="default" size="sm" className="text-white">
-                <Link href="/upload" className="flex items-center gap-1 hover:border-foreground/20 dark:border-2">
-                  <Upload className="h-4 w-4" />
-                  Upload
-                </Link>
-              </Button>
-              <form onSubmit={handleSearch} className="relative w-full sm:w-[250px]">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search resources..."
-                  className="border-[#d8c5e9] pl-9 dark:border-border"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-              </form>
-              <FilterDialog onApplyFilters={handleApplyFilters} initialFilters={filters} />
-            </div>
-          </div>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            {isLoading ? (
-              <div className="flex h-full items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex flex-col items-start justify-between border-b p-6 sm:flex-row sm:items-center">
+              <div className="text-sm text-muted-foreground">
+                {isLoading ? (
+                  <span>Loading resources...</span>
+                ) : (
+                  <>
+                    Showing <strong>{startItem}</strong> to <strong>{endItem}</strong> of{" "}
+                    <strong>{totalResources}</strong> resources
+                    {courseData && <span> for {courseData.code}</span>}
+                  </>
+                )}
               </div>
-            ) : resourcesError ? (
-              <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm dark:border-border">
-                <h3 className="mb-2 text-lg font-medium text-destructive">Error</h3>
-                <p className="text-muted-foreground">Failed to load resources. Please try again.</p>
-                <Button onClick={() => refetchResources()} className="mt-4">
-                  Try Again
+              <div className="mt-4 flex w-full items-center gap-4 sm:mt-0 sm:w-auto">
+                <Button asChild variant="default" size="sm" className="text-white">
+                  <Link href="/upload" className="flex items-center gap-1 hover:border-foreground/20 dark:border-2">
+                    <Upload className="h-4 w-4" />
+                    Upload
+                  </Link>
                 </Button>
+                <form onSubmit={handleSearch} className="relative w-full sm:w-[250px]">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search resources..."
+                    className="border-[#d8c5e9] pl-9 dark:border-border"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
+                </form>
+                <FilterDialog onApplyFilters={handleApplyFilters} initialFilters={filters} />
               </div>
-            ) : totalResources > 0 ? (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {resourcesData?.items.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm">
-                <h3 className="mb-2 text-lg font-medium">No resources found</h3>
-                <p className="text-muted-foreground">
-                  {courseData
-                    ? `There are no resources available for ${courseData.code} yet.`
-                    : searchQuery
-                      ? "No resources match your search criteria."
-                      : "No resources available."}{" "}
-                </p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {isLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : resourcesError ? (
+                <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm dark:border-border">
+                  <h3 className="mb-2 text-lg font-medium text-destructive">Error</h3>
+                  <p className="text-muted-foreground">Failed to load resources. Please try again.</p>
+                  <Button onClick={() => refetchResources()} className="mt-4">
+                    Try Again
+                  </Button>
+                </div>
+              ) : totalResources > 0 ? (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {resourcesData?.items.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm">
+                  <h3 className="mb-2 text-lg font-medium">No resources found</h3>
+                  <p className="text-muted-foreground">
+                    {courseData
+                      ? `There are no resources available for ${courseData.code} yet.`
+                      : searchQuery
+                        ? "No resources match your search criteria."
+                        : "No resources available."}{" "}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {!isLoading && totalResources > 0 && (
+              <div className="flex items-center justify-between border-t border-[#d8c5e9] px-6 py-4 dark:border-border">
+                <div className="text-sm text-muted-foreground">
+                  Showing <span className="font-medium">{startItem}</span> to{" "}
+                  <span className="font-medium">{endItem}</span> of{" "}
+                  <span className="font-medium">{totalResources}</span> resources
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1 || isLoading}
+                  >
+                    <ChevronLeft className="mr-1 h-4 w-4" />
+                    Previous
+                  </Button>
+                  <div className="text-sm">
+                    Page <span className="font-medium">{currentPage}</span> of{" "}
+                    <span className="font-medium">{totalPages || 1}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages || isLoading}
+                  >
+                    Next
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
-          </div>
-
-          {/* Pagination */}
-          {!isLoading && totalResources > 0 && (
-            <div className="flex items-center justify-between border-t border-[#d8c5e9] px-6 py-4 dark:border-border">
-              <div className="text-sm text-muted-foreground">
-                Showing <span className="font-medium">{startItem}</span> to{" "}
-                <span className="font-medium">{endItem}</span> of <span className="font-medium">{totalResources}</span>{" "}
-                resources
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreviousPage}
-                  disabled={currentPage === 1 || isLoading}
-                >
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Previous
-                </Button>
-                <div className="text-sm">
-                  Page <span className="font-medium">{currentPage}</span> of{" "}
-                  <span className="font-medium">{totalPages || 1}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNextPage}
-                  disabled={currentPage >= totalPages || isLoading}
-                >
-                  Next
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+    </RequireAuth>
   );
 }

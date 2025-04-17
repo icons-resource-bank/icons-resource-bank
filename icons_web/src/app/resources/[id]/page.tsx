@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getIcon } from "../utils";
+import { RequireAuth } from "@/components/require-auth";
 
 // Add this function at the top of the file, after the imports
 const isYouTubeUrl = (url: string): boolean => {
@@ -104,108 +105,112 @@ export default function ResourceDetailPage() {
 
   if (resourceLoadError || !resource) {
     return (
-      <div className="flex min-h-screen flex-col">
-        <main className="container flex-1 py-8">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Resources
-          </Button>
-          <Card className="border-[#d8c5e9]">
-            <CardContent className="p-6">
-              <div className="py-8 text-center">
-                <h2 className="mb-2 text-xl font-semibold text-destructive">Resource not found</h2>
-                <p className="mb-4 text-muted-foreground">{resourceLoadError}</p>
-                <Button onClick={() => router.push("/resources")}>Browse Resources</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+      <RequireAuth>
+        <div className="flex min-h-screen flex-col">
+          <main className="container flex-1 py-8">
+            <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Resources
+            </Button>
+            <Card className="border-[#d8c5e9]">
+              <CardContent className="p-6">
+                <div className="py-8 text-center">
+                  <h2 className="mb-2 text-xl font-semibold text-destructive">Resource not found</h2>
+                  <p className="mb-4 text-muted-foreground">{resourceLoadError}</p>
+                  <Button onClick={() => router.push("/resources")}>Browse Resources</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </RequireAuth>
     );
   }
 
   const IconComponent = getIcon(resource);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="container flex-1 py-8">
-        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Resources
-        </Button>
+    <RequireAuth>
+      <div className="flex min-h-screen flex-col">
+        <main className="container flex-1 py-8">
+          <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Resources
+          </Button>
 
-        <Card className="border-[#d8c5e9]">
-          <CardHeader className="flex flex-row items-start gap-4 pb-2">
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <IconComponent className="h-8 w-8 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl">{resource.title}</CardTitle>
-              <p className="mt-1 text-lg font-medium">{`${resource.course.code} - ${resource.course.name}`}</p>{" "}
-              <p className="mt-1 text-sm text-muted-foreground">
-                Uploaded by {resource.author.name} on {formatDate(resource.createdAt)}
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6 flex flex-wrap gap-2">
-              {resource.tags.map((tag) => (
-                <Badge key={tag.id} variant="outline" className="border-primary/20 text-primary">
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <h3 className="text-lg font-semibold">Description</h3>
-              <p className="whitespace-pre-line text-muted-foreground">{resource.description}</p>
-            </div>
-
-            <div className="mt-6 rounded-md border border-[#d8c5e9] bg-muted/30 p-4">
-              {resource.type === ResourceType.URL && isYouTubeUrl(resource.uri) && (
-                <YouTubeEmbed videoId={getYouTubeVideoId(resource.uri) || ""} />
-              )}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">
-                    Resource Type: <span className="text-muted-foreground">{resource.ftype}</span>
-                  </p>
-                  <p className="mt-1 text-sm font-medium">
-                    {resource.type === ResourceType.URL
-                      ? "Click"
-                      : "Download" + (resource.downloadCount === 1 ? "" : "s")}
-                    : <span className="text-muted-foreground">{resource.downloadCount}</span>
-                  </p>
-                </div>
-                {resource.type === ResourceType.URL ? (
-                  <Button
-                    className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                    asChild
-                  >
-                    <a href={resource.uri} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4" />
-                      Open Resource
-                    </a>
-                  </Button>
-                ) : (
-                  <Button
-                    className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                    onClick={handleDownload}
-                  >
-                    <Download className="h-4 w-4" />
-                    Download
-                  </Button>
-                )}
+          <Card className="border-[#d8c5e9]">
+            <CardHeader className="flex flex-row items-start gap-4 pb-2">
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <IconComponent className="h-8 w-8 text-primary" />
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className="border-t border-[#d8c5e9] pt-6">
-            <p className="text-sm text-muted-foreground">
-              If you find this resource helpful, please consider uploading your own materials to help other students.
-            </p>
-          </CardFooter>
-        </Card>
-      </main>
-    </div>
+              <div>
+                <CardTitle className="text-2xl">{resource.title}</CardTitle>
+                <p className="mt-1 text-lg font-medium">{`${resource.course.code} - ${resource.course.name}`}</p>{" "}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Uploaded by {resource.author.name} on {formatDate(resource.createdAt)}
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 flex flex-wrap gap-2">
+                {resource.tags.map((tag) => (
+                  <Badge key={tag.id} variant="outline" className="border-primary/20 text-primary">
+                    {tag.name}
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <h3 className="text-lg font-semibold">Description</h3>
+                <p className="whitespace-pre-line text-muted-foreground">{resource.description}</p>
+              </div>
+
+              <div className="mt-6 rounded-md border border-[#d8c5e9] bg-muted/30 p-4">
+                {resource.type === ResourceType.URL && isYouTubeUrl(resource.uri) && (
+                  <YouTubeEmbed videoId={getYouTubeVideoId(resource.uri) || ""} />
+                )}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">
+                      Resource Type: <span className="text-muted-foreground">{resource.ftype}</span>
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {resource.type === ResourceType.URL
+                        ? "Click"
+                        : "Download" + (resource.downloadCount === 1 ? "" : "s")}
+                      : <span className="text-muted-foreground">{resource.downloadCount}</span>
+                    </p>
+                  </div>
+                  {resource.type === ResourceType.URL ? (
+                    <Button
+                      className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                      asChild
+                    >
+                      <a href={resource.uri} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4" />
+                        Open Resource
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button
+                      className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                      onClick={handleDownload}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="border-t border-[#d8c5e9] pt-6">
+              <p className="text-sm text-muted-foreground">
+                If you find this resource helpful, please consider uploading your own materials to help other students.
+              </p>
+            </CardFooter>
+          </Card>
+        </main>
+      </div>
+    </RequireAuth>
   );
 }

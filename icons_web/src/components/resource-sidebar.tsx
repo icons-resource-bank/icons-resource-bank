@@ -24,7 +24,6 @@ export function ResourceSidebar() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(courseParam);
   const [groupedCourses, setGroupedCourses] = useState<CourseGroup>({});
-  const [_isLoading, setIsLoading] = useState(true);
 
   // Query for courses
   const {
@@ -33,7 +32,7 @@ export function ResourceSidebar() {
     error: coursesError,
   } = useQuery({
     queryKey: ["courses"],
-    queryFn: () => courseApi.getCourses().then(r => r.items),
+    queryFn: () => courseApi.getCourses(),
   });
 
   // Group courses by year and category
@@ -41,13 +40,11 @@ export function ResourceSidebar() {
     const grouped: CourseGroup = {};
 
     // Ensure coursesData is defined before processing
-    if (queryIsLoading || !coursesData) {
+    if (queryIsLoading || typeof coursesData?.items === "undefined") {
         return;
     }
 
-    console.log(coursesData);
-
-    coursesData?.forEach?.((course) => {
+    coursesData?.items?.forEach?.((course) => {
       const year = `Year ${course.yearLevel}`;
       const category = course.category;
 
@@ -76,7 +73,7 @@ export function ResourceSidebar() {
       setSelectedCourse(courseParam);
 
       // Find the course to get its year and category
-      const course = coursesData?.find((c) => c.id === courseParam);
+      const course = coursesData?.items?.find((c) => c.id === courseParam);
       if (course) {
         const year = `Year ${course.yearLevel}`;
         const category = course.category;

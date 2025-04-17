@@ -107,7 +107,7 @@ export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | 
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <span><Link href="/account_management">Settings</Link></span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>

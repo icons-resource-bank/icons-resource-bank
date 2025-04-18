@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse, Response
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
-from ...request import Request
+from ...request import AuthedRequest
 from ...utils.decorators import *
 from ..models.user import *
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/feedback")
 @limiter.limit("10/5 seconds")
 @flag_check(staff=True)
 async def get_feedbacks(
-    request: Request,
+    request: AuthedRequest,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
     offset: Annotated[int, Query(ge=0)] = 0,
     query: Annotated[str | None, Query(max_length=1000)] = None,
@@ -36,7 +36,7 @@ async def get_feedbacks(
 @router.get("/{id}")
 @limiter.limit("30/5 seconds")
 @flag_check(staff=True)
-async def get_feedback(request: Request, id: str):
+async def get_feedback(request: AuthedRequest, id: str):
     fb = await request.app.state.users.get_feedback(id)
     if not fb:
         raise CustomValidationError("Feedback not found", 404)
@@ -46,7 +46,7 @@ async def get_feedback(request: Request, id: str):
 @router.delete("/{id}")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
-async def delete_feedback(request: Request, id: str):
+async def delete_feedback(request: AuthedRequest, id: str):
     await request.app.state.users.delete_feedback(id)
     return Response(status_code=204)
 
@@ -54,7 +54,7 @@ async def delete_feedback(request: Request, id: str):
 @router.post("")
 @limiter.limit("2/5 minutes")
 @auth_check
-async def post_feedback(request: Request, feedback: FeedbackRequest):
+async def post_feedback(request: AuthedRequest, feedback: FeedbackRequest):
     user = request.state.user
     if not user.can_track():  # type: ignore
         raise CustomValidationError("Analytics are disabled", 403)

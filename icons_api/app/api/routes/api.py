@@ -1,3 +1,12 @@
+"""
+Some common conventions for API routes:
+- Use plural nouns for resource names (e.g., `/users`, `/products`).
+- Properly use RESTful conventions
+- Prefer idempotent PATCH over PUT
+- Pagination should be implemented using ?limit and ?offset, and the response should always be {"total": 0, "items": []}
+- Use JSON for request and response bodies, unless receiving files; in that case, payload_json should be used as a form field
+"""
+
 import importlib
 import os
 

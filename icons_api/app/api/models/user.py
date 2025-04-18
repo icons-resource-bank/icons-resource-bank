@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, FutureDatetime, field_serializer
 
 from ..managers.user import UserFlags
 
-__all__ = ("UserRequest", "ConsentRequest", "BanRequest", "AnalyticsRequest", "FeedbackRequest")
+__all__ = ("UserRequest", "ConsentRequest", "BanRequest", "AnalyticsRequest", "FeedbackRequest", "UserSettingsRequest")
 
 
 class UserRequest(BaseModel):
@@ -27,9 +27,13 @@ class BanRequest(BaseModel):
 
 
 class AnalyticsRequest(BaseModel):
-    event: Annotated[Literal["download"], Field(max_length=255)]
-    reference_id: Annotated[str, Field(max_length=255)]
+    event: Literal["download"]
+    reference_id: Annotated[str, Field(min_length=36, max_length=36)]
 
 
 class FeedbackRequest(BaseModel):
     comment: Annotated[str, Field(min_length=10, max_length=1000)]
+
+
+class UserSettingsRequest(BaseModel):
+    theme: Literal["light", "dark", "system"] | None = None

@@ -9,7 +9,7 @@ from pydantic import AwareDatetime
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
 from ...core.s3 import *
-from ...request import Request
+from ...request import AuthedRequest
 from ...utils.decorators import *
 from ..managers.resource import ResourceType
 from ..managers.user import UserFlags
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/resources")
 @limiter.limit("10/5 seconds")
 @auth_check
 async def get_resources(
-    request: Request,
+    request: AuthedRequest,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
     offset: Annotated[int, Query(ge=0)] = 0,
     query: Annotated[str | None, Query(max_length=4096)] = None,
@@ -41,11 +41,11 @@ async def get_resources(
     ftype: Annotated[list[str] | None, Query(max_length=255)] = None,
     pending: bool = False,
 ):
-    if pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+    if pending and not request.state.user.has_flag(UserFlags.staff):
         raise CustomValidationError("You are not allowed to view pending resources", 403)
 
-    if author_ids == [request.state.user.id]:  # type: ignore
-        pending = None  # type: ignore # pending will be set
+    if author_ids == [request.state.user.id]:
+        pending = None  # type: ignore # typehack
 
     resources, total = await request.app.state.resources.query(
         limit=limit,
@@ -75,7 +75,7 @@ async def get_resources(
 @limiter.limit("5/5 seconds")
 @ban_check
 async def create_resource(
-    request: Request,
+    request: AuthedRequest,
     payload_json: Annotated[bytes, Form(max_length=1024 * 1024)],  # 1 KiB is probably enough for JSON
     file: Annotated[UploadFile | None, File()] = None,
 ):
@@ -98,7 +98,7 @@ async def create_resource(
         raise CustomValidationError("Resource must have a url or file")
 
     if file:
-        ftype = file.filename.split(".")[-1]  # type: ignore # filename will be set
+        ftype = file.filename.split(".")[-1]  # type: ignore # checked above
     else:
         parsed = yarl.URL(uri)
         # We need to unwrap youtu.be URLs
@@ -113,8 +113,9 @@ async def create_resource(
         **{k: v for k, v in data.model_dump().items() if v is not None and k != "url"},
         uri=uri,  # type: ignore # uri will be set
         type=ResourceType.file if file else ResourceType.url,
-        author_id=request.state.user.id,  # type: ignore # author_id will be set
+        author_id=request.state.user.id,
         ftype=ftype,
+        pending=not request.state.user.has_flag(UserFlags.trusted),
     )
 
     return JSONResponse(await resource.to_dict(with_data=True), status_code=201)
@@ -123,11 +124,11 @@ async def create_resource(
 @router.get("/{id}")
 @limiter.limit("10/5 seconds")
 @auth_check
-async def get_resource(request: Request, id: str):
+async def get_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
-    if resource.pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+    if resource.pending and not request.state.user.has_flag(UserFlags.staff):
         raise CustomValidationError("Resource is pending approval", 403)
     return JSONResponse(await resource.to_dict(with_data=True))
 
@@ -135,11 +136,11 @@ async def get_resource(request: Request, id: str):
 @router.post("/{id}/download")
 @limiter.limit("10/5 seconds")
 @auth_check
-async def download_resource(request: Request, id: str):
+async def download_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
-    if resource.pending and not request.state.user.has_flag(UserFlags.staff):  # type: ignore
+    if resource.pending and not request.state.user.has_flag(UserFlags.staff):
         raise CustomValidationError("Resource is pending approval", 403)
 
     if resource.type == ResourceType.url:
@@ -157,21 +158,26 @@ async def download_resource(request: Request, id: str):
 @router.patch("/{id}")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
-async def update_resource(request: Request, id: str, data: ResourceUpdateRequest):
+async def update_resource(request: AuthedRequest, id: str, data: ResourceUpdateRequest):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
 
-    resource = await request.app.state.resources.update(
-        id=resource.id, **{k: v for k, v in data.model_dump().items() if v is not None}
-    )
-    return JSONResponse(await resource.to_dict())
+    if data.url and resource.type == ResourceType.file:
+        raise CustomValidationError("Cannot update file uri")
+
+    dumped = {k: v for k, v in data.model_dump().items() if v is not None}
+    if "url" in dumped:
+        dumped["uri"] = dumped.pop("url")
+
+    resource = await request.app.state.resources.update(id=resource.id, **dumped)
+    return JSONResponse(await resource.to_dict(with_data=True))
 
 
 @router.post("/{id}/approve")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
-async def approve_resource(request: Request, id: str):
+async def approve_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
@@ -183,7 +189,7 @@ async def approve_resource(request: Request, id: str):
 @router.post("/{id}/deny")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
-async def deny_resource(request: Request, id: str):
+async def deny_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
@@ -193,13 +199,13 @@ async def deny_resource(request: Request, id: str):
         # Delete the file from S3
         await delete_object(request.app, resource.uri)
     await request.app.state.resources.delete(id)
-    return JSONResponse(await resource.to_dict())  # For consistency
+    return JSONResponse(await resource.to_dict())
 
 
 @router.delete("/{id}")
 @limiter.limit("5/5 seconds")
 @flag_check(staff=True)
-async def delete_resource(request: Request, id: str):
+async def delete_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         return Response(status_code=204)

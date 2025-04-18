@@ -47,13 +47,11 @@ class Resource(Model):
 
 
 class ResourceType(enum.IntEnum):
-    """Resource types."""
-
     url = 1
     file = 2
 
 
-class _QueryArguments(TypedDict):
+class _QueryArguments(TypedDict, total=False):
     course_ids: list[str] | None
     author_ids: list[str] | None
     type: ResourceType | None
@@ -67,10 +65,19 @@ class _QueryArguments(TypedDict):
     pending: bool | None
 
 
+class _UpdateArguments(TypedDict, total=False):
+    title: str
+    uri: str
+    description: str
+    pending: bool
+    tag_ids: list[str]
+
+
 class ResourceManager(BaseManager):
     def __init__(self, app: Application):
         self.app = app
 
+    # Hairy query
     _FILTERED_QUERY = """
         SELECT
             resources.*,
@@ -87,7 +94,7 @@ class ResourceManager(BaseManager):
 
     async def get(self, id: str) -> Resource | None:
         result = await self.app.state.pool.fetchrow(
-            self._FILTERED_QUERY.format(query="resources.id = $1", sort="id"),
+            self._FILTERED_QUERY.format(query="resources.id = $1", sort="resources.id"),
             id,
         )
         if not result:
@@ -175,7 +182,7 @@ class ResourceManager(BaseManager):
             for key in ("title", "description"):
                 if kwargs.get(key) or kwargs.get("query"):
                     greatest.append(f"similarity(resources.{key}, ${index})")
-                    params.append(kwargs[key])
+                    params.append(kwargs[key] if kwargs.get(key) else kwargs["query"])  # type: ignore
                     index += 1
             sort_by = f"greatest({', '.join(greatest)}) {sort_by.split()[-1]}"
         elif sort_by.startswith("resources.query "):
@@ -226,7 +233,7 @@ class ResourceManager(BaseManager):
 
         return resource
 
-    async def update(self, id: str, **kwargs: Any) -> Resource:
+    async def update(self, id: str, **kwargs: Unpack[_UpdateArguments]) -> Resource:
         resource = await self.get(id)
         if not resource:
             raise ValueError("Resource not found")

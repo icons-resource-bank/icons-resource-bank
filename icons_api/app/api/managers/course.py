@@ -39,14 +39,28 @@ class Tag(Model):
     created_at: datetime.datetime
 
 
-class _CourseQueryArguments(TypedDict):
+class _CourseQueryArguments(TypedDict, total=False):
     query: str | None
     code: str | None
     name: str | None
-    year_level: int | None
+    year_level: Literal[1, 2, 3, 4] | None
     category: str | None
     icon: str | None
     description: str | None
+
+
+class _CourseUpdateArguments(TypedDict, total=False):
+    code: str
+    name: str
+    year_level: Literal[1, 2, 3, 4]
+    category: str
+    icon: str
+    description: str
+
+
+class _TagUpdateArguments(TypedDict, total=False):
+    name: str
+    color: int
 
 
 class CourseManager(BaseManager):
@@ -113,6 +127,7 @@ class CourseManager(BaseManager):
                 params.append(value)
             index += 1
         if not where:
+            # Removed because i cba to handle sorting
             # if limit == 0:
             #     limit = len(self.courses)
             # return list(self.courses.values())[offset : limit + offset], len(self.courses)
@@ -125,7 +140,7 @@ class CourseManager(BaseManager):
             for key in ("code", "name", "category", "description"):
                 if kwargs.get(key) or kwargs.get("query"):
                     greatest.append(f"similarity({key}, ${index})")
-                    params.append(kwargs[key])
+                    params.append(kwargs[key] if kwargs.get(key) else kwargs["query"])  # type: ignore
                     index += 1
             sort_by = f"greatest({', '.join(greatest)}) {sort_by.split()[-1]}"
         elif sort_by.startswith("query "):
@@ -182,7 +197,7 @@ class CourseManager(BaseManager):
         self.tags[tag.id] = tag
         return tag
 
-    async def update_course(self, *, id: str, **kwargs: Any) -> Course:
+    async def update_course(self, *, id: str, **kwargs: Unpack[_CourseUpdateArguments]) -> Course:
         course = await self.get_course(id)
         if not course:
             raise ValueError("Course not found")
@@ -193,7 +208,7 @@ class CourseManager(BaseManager):
         await self._update_course(_inst)
         return _inst
 
-    async def update_tag(self, *, id: str, **kwargs: Any) -> Tag:
+    async def update_tag(self, *, id: str, **kwargs: Unpack[_TagUpdateArguments]) -> Tag:
         tag = await self.get_tag(id)
         if not tag:
             raise ValueError("Tag not found")

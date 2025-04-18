@@ -1,11 +1,8 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter
 from fastapi.responses import Response
 
-from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
-from ...request import Request
+from ...request import AuthedRequest
 from ...utils.decorators import *
 from ..managers.user import User
 from ..models.user import AnalyticsRequest
@@ -19,8 +16,8 @@ router = APIRouter()
 @router.post("/track")
 @limiter.limit("10/5 seconds")
 @auth_check
-async def track(request: Request, body: AnalyticsRequest):
-    user: User = request.state.user  # type: ignore
+async def track(request: AuthedRequest, body: AnalyticsRequest):
+    user = request.state.user
     if user.can_track():
         await request.app.state.users.track(user, body.event, body.reference_id)
 

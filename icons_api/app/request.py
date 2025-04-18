@@ -9,12 +9,19 @@ if TYPE_CHECKING:
     class RequestState:
         user: User | None
 
+    class AuthedRequestState(RequestState):
+        user: User
+
     class Request(FastAPIRequest):
         app: Application
         state: RequestState
 
+    class AuthedRequest(FastAPIRequest):
+        app: Application
+        state: AuthedRequestState
+
 else:
-    Request = FastAPIRequest
+    Request = AuthedRequest = FastAPIRequest
 
 
-__all__ = ("Request",)
+__all__ = ("Request", "AuthedRequest")

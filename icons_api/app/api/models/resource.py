@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from pydantic_core import PydanticCustomError
 
 __all__ = (
     "MAX_FILE_LENGTH_MIB",
@@ -23,4 +24,12 @@ class ResourceUpdateRequest(BaseModel):
     title: Annotated[str | None, Field(min_length=4, max_length=64)] = None
     description: Annotated[str | None, Field(min_length=8, max_length=4096)] = None
     url: Annotated[str | None, Field(min_length=10, max_length=2048)] = None
-    tag_ids: Annotated[list[str], Field(max_length=10, default_factory=list)] = []
+    tag_ids: Annotated[list[str], Field(max_length=10, default_factory=list)]
+
+    @field_validator("tag_ids")
+    @classmethod
+    def validate_tag_ids(cls, v: list[str]) -> list[str]:
+        for tag_id in v:
+            if len(tag_id) != 36:
+                raise PydanticCustomError("tag_ids", "Invalid tag ID provided")
+        return v

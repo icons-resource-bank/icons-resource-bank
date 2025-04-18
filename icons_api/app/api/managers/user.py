@@ -5,7 +5,7 @@ import enum
 import json
 from copy import copy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Final, Self, TypedDict, Unpack, overload
+from typing import TYPE_CHECKING, Any, Final, Literal, Self, TypedDict, Unpack, overload
 
 from ...utils.dequedict import DequeDict
 from .base import *
@@ -79,6 +79,14 @@ class UserSettings(Model):
     theme: str
 
 
+class UserFlags(enum.IntFlag):
+    admin = 1
+    staff = 2
+    trusted = 4
+    banned = 8
+    analytics_opt_out = 16  # Opt-out system here
+
+
 @dataclass(slots=True, kw_only=True)
 class Feedback(Model):
     _manager: UserManager
@@ -97,19 +105,15 @@ class Feedback(Model):
         return data
 
 
-class UserFlags(enum.IntFlag):
-    admin = 1
-    staff = 2
-    trusted = 4
-    banned = 8
-    analytics_opt_out = 16  # Opt-out system here
-
-
-class _QueryArguments(TypedDict):
+class _QueryArguments(TypedDict, total=False):
     flags: UserFlags | None
     query: str | None
     name: str | None
     email: str | None
+
+
+class _SettingsArguments(TypedDict, total=False):
+    theme: Literal["dark", "light", "system"]
 
 
 class UserManager(BaseManager):
@@ -151,7 +155,7 @@ class UserManager(BaseManager):
             if value is None:
                 continue
             if key == "flags":
-                for flag in value:
+                for flag in value:  # type: ignore
                     if flag == UserFlags.banned:
                         where.append(f"has_flag(flags, ${index}) OR temp_banned_until > NOW()")
                     else:
@@ -179,7 +183,7 @@ class UserManager(BaseManager):
             for key in ("name", "email"):
                 if kwargs.get(key) in kwargs or kwargs.get("query"):
                     greatest.append(f"similarity({key}, ${index})")
-                    params.append(kwargs[key])
+                    params.append(kwargs[key] if kwargs.get(key) else kwargs["query"])  # type: ignore
                     index += 1
             sort_by = f"greatest({', '.join(greatest)}) {sort_by.split()[-1]}"
         elif sort_by.startswith("query "):
@@ -242,12 +246,10 @@ class UserManager(BaseManager):
         return feedback
 
     @overload
-    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User:
-        ...
+    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User: ...
 
     @overload
-    async def create(self, *, ignore_conflict: bool = False, **kwargs: Any) -> User:
-        ...
+    async def create(self, *, ignore_conflict: bool = False, **kwargs: Unpack[_QueryArguments]) -> User: ...
 
     async def create(self, *, ignore_conflict: bool = False, **kwargs) -> User:
         query = f"INSERT INTO users ({', '.join(kwargs)}) VALUES ({', '.join(f'${i + 1}' for i in range(len(kwargs)))})"
@@ -276,7 +278,7 @@ class UserManager(BaseManager):
         feedback = Feedback.from_row(self, result)
         return feedback
 
-    async def update(self, *, id: str | None = None, **kwargs: Any) -> User:
+    async def update(self, *, id: str | None = None, **kwargs: Unpack[_QueryArguments]) -> User:
         user = await self.get(id=id, email=kwargs.pop("email", None) if not id else None)
         if not user:
             raise ValueError("User not found")
@@ -287,7 +289,7 @@ class UserManager(BaseManager):
         await self._update(_inst)
         return _inst
 
-    async def update_settings(self, settings: UserSettings, **kwargs: Any) -> UserSettings:
+    async def update_settings(self, settings: UserSettings, **kwargs: Unpack[_SettingsArguments]) -> UserSettings:
         _inst = copy(settings)
         for key, value in kwargs.items():
             setattr(_inst, key, value)

@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from ...core.errors import CustomValidationError
 from ..models.auth import AuthCallbackRequest
-from ...core.auth import generate_token, handle_oauth2_token, revoke_token
+from ...core.auth import generate_token, handle_oauth2_token, revoke_token, revoke_bearer
 from ...request import Request
 from ...utils import utcnow
 
@@ -67,6 +67,7 @@ async def logout(request: Request, current_url: str | None = None):
 
     token = request.headers.get("Authorization", "").removeprefix("Bearer ")
     await revoke_token(request.app, token)
+    await revoke_bearer(request.app, me.email)
     return JSONResponse(
         {
             "url": f"https://login.microsoftonline.com/{request.app.state.settings.microsoft_tenant_id}/oauth2/v2.0/logout?post_logout_redirect_uri={current_url or request.app.state.settings.frontend_url}"

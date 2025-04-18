@@ -109,11 +109,28 @@ async def refresh_bearer(app: Application, email: str) -> dict[str, Any]:
         },
     ) as response:
         if not response.ok:
-            logger.info(f"Refreshing bearer for {email} returned {response.status} with {await response.text()}")
+            logger.info(f"Refreshing bearer for {email!r} returned {response.status} with {await response.text()}")
             response.raise_for_status()
         payload = await response.json()
         await update_bearer(app, email, payload)
         return payload
+
+
+async def revoke_bearer(app: Application, email: str) -> None:
+    bearer = await app.state.pool.fetchrow("SELECT * FROM bearers WHERE email = $1", email)
+    if not bearer:
+        raise ValueError("Bearer not found")
+    async with app.state.session.post(
+        f"https://login.microsoftonline.com/{app.state.settings.microsoft_tenant_id}/oauth2/v2.0/revoke",
+        data={
+            "client_id": app.state.settings.microsoft_client_id,
+            "client_secret": app.state.settings.microsoft_client_secret.get_secret_value(),
+            "token": bearer["refresh_token"],
+        },
+    ) as response:
+        if not response.ok:
+            logger.info(f"Revoking bearer for {email!r} returned {response.status} with {await response.text()}")
+    await app.state.pool.execute("DELETE FROM bearers WHERE email = $1", email)
 
 
 async def handle_oauth2_token(app: Application, payload: dict[str, Any]) -> User:
@@ -133,7 +150,7 @@ async def handle_oauth2_token(app: Application, payload: dict[str, Any]) -> User
     )
     email = _jwt["email"]
     if not email.endswith("@queensu.ca"):
-        logger.warning(f"Rejecting registration request for {email} as it is not a Queen's University email. This shouldn't happen!")
+        logger.warning(f"Rejecting registration request for {email!r} as it is not a Queen's University email. This shouldn't happen!")
         raise ValueError("Only Queen's University members are allowed to access this service")
 
     user = await app.state.users.create(email=email, name=_jwt["name"], ignore_conflict=True)

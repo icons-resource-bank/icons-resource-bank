@@ -24,6 +24,11 @@ export async function fetchUserInfo() {
   return await fetchApi("/users/@me", { method: "GET" });
 }
 
+export async function logout() {
+    await fetchApi("/auth/logout", { method: "POST" });
+    useAuthStore.getState().logout();
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({

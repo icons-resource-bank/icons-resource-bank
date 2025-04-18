@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore, logout } from "@/stores/auth";
 import { hasAnyFlag, UserFlags } from "@/lib/flags";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const AUTH_REDIRECT_URI =
   typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : "http://localhost:3000/auth/callback";
 
 export function SiteHeader({ themeSetting }: { themeSetting: "light" | "dark" | "system" }) {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
 

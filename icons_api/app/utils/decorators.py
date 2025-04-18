@@ -1,10 +1,10 @@
-from typing import Callable, TypeVar, Any, Awaitable
 from functools import wraps
+from typing import Any, Awaitable, Callable, TypeVar
 
-from . import utcnow
-from ..core.errors import CustomValidationError
 from ..api.managers.user import UserFlags
+from ..core.errors import CustomValidationError
 from ..request import Request
+from . import utcnow
 
 T = TypeVar("T", bound=Callable[..., Any])
 

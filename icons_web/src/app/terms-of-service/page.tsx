@@ -1,17 +1,16 @@
-import { SiteHeader } from "@/components/site-header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
+import { SiteHeader } from "@/components/site-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function TermsOfServicePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-
-      <main className="flex-1 container py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-primary dark:text-white">Terms of Service</h1>
+    <div className="flex min-h-screen flex-col">
+      <main className="container flex-1 py-12">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="mb-8 text-4xl font-bold text-primary dark:text-white">Terms of Service</h1>
 
           <div className="space-y-8">
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Introduction</CardTitle>
               </CardHeader>
@@ -31,7 +30,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Eligibility</CardTitle>
               </CardHeader>
@@ -40,7 +39,7 @@ export default function TermsOfServicePage() {
                   The iCons Resource Bank is primarily intended for use by Queen's University students, faculty, and
                   staff. To access certain features of our services, you must:
                 </p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>Be a current student, faculty member, or staff of Queen's University</li>
                   <li>Have a valid Queen's University email address</li>
                   <li>Be at least 18 years of age or the age of majority in your jurisdiction</li>
@@ -53,7 +52,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>User Accounts</CardTitle>
               </CardHeader>
@@ -62,7 +61,7 @@ export default function TermsOfServicePage() {
                   When you create an account with us, you must provide accurate, complete, and current information. You
                   are responsible for:
                 </p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>Maintaining the confidentiality of your account credentials</li>
                   <li>All activities that occur under your account</li>
                   <li>Notifying us immediately of any unauthorized use of your account</li>
@@ -73,7 +72,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>User Content and Conduct</CardTitle>
               </CardHeader>
@@ -86,7 +85,7 @@ export default function TermsOfServicePage() {
                   providing and improving our services.
                 </p>
                 <p>You represent and warrant that:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>You own or have the necessary rights to your User Content</li>
                   <li>
                     Your User Content does not infringe upon the intellectual property rights or other rights of any
@@ -95,7 +94,7 @@ export default function TermsOfServicePage() {
                   <li>Your User Content complies with these Terms and all applicable laws, including copyright laws</li>
                 </ul>
                 <p>You agree not to:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>
                     Upload or share content that is illegal, harmful, threatening, abusive, defamatory, or otherwise
                     objectionable
@@ -131,7 +130,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Intellectual Property</CardTitle>
               </CardHeader>
@@ -153,7 +152,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Academic Integrity</CardTitle>
               </CardHeader>
@@ -162,7 +161,7 @@ export default function TermsOfServicePage() {
                   The iCons Resource Bank is committed to upholding Queen's University's principles of academic
                   integrity. Users are expected to:
                 </p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>Use resources ethically and in accordance with course guidelines</li>
                   <li>Properly cite and attribute all sources used in their work</li>
                   <li>Not use our services to engage in plagiarism, cheating, or other forms of academic dishonesty</li>
@@ -178,7 +177,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Disclaimer of Warranties</CardTitle>
               </CardHeader>
@@ -196,7 +195,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Limitation of Liability</CardTitle>
               </CardHeader>
@@ -215,7 +214,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Changes to Terms</CardTitle>
               </CardHeader>
@@ -232,7 +231,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Governing Law</CardTitle>
               </CardHeader>
@@ -250,7 +249,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
@@ -264,7 +263,7 @@ export default function TermsOfServicePage() {
               </CardContent>
             </Card>
 
-            <div className="text-sm text-muted-foreground text-center pt-6">
+            <div className="pt-6 text-center text-sm text-muted-foreground">
               <p>Last Updated: April 15, 2024</p>
               <p className="mt-2">
                 <Link href="/privacy-policy" className="text-primary hover:underline dark:text-white">
@@ -276,5 +275,5 @@ export default function TermsOfServicePage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

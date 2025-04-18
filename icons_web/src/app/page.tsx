@@ -86,7 +86,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            <Button asChild variant="outline" className="mt-4 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+            <Button
+              asChild
+              variant="outline"
+              className="mt-4 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+            >
               <Link href="/about">
                 Learn More <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -113,12 +117,12 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="dark:bg-footer py-16">
+      <section className="py-16 dark:bg-footer">
         <div className="container">
           <h2 className="mb-12 text-center text-3xl font-bold">Our Services</h2>
           <div className="grid gap-8 md:grid-cols-3">
             <Card className="dark:rounded-sm dark:border-2">
-              <CardContent className="dark:bg-footer pt-6">
+              <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Clock className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
@@ -129,7 +133,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
             <Card className="dark:rounded-sm dark:border-2">
-              <CardContent className="dark:bg-footer pt-6">
+              <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <Users className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>
@@ -138,7 +142,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
             <Card className="dark:rounded-sm dark:border-2">
-              <CardContent className="dark:bg-footer pt-6">
+              <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                   <BookOpen className="h-6 w-6 text-primary dark:text-gray-400" />
                 </div>

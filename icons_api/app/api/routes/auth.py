@@ -1,13 +1,14 @@
+from datetime import timedelta
+
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 from loguru import logger
-from datetime import timedelta
 
+from ...core.auth import generate_token, handle_oauth2_token, revoke_bearer, revoke_token
 from ...core.errors import CustomValidationError
-from ..models.auth import AuthCallbackRequest
-from ...core.auth import generate_token, handle_oauth2_token, revoke_token, revoke_bearer
 from ...request import Request
 from ...utils import utcnow
+from ..models.auth import AuthCallbackRequest
 
 __all__ = ("setup",)
 

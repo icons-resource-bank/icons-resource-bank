@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from copy import copy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Unpack, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, Unpack
 
 from .base import *
 
@@ -92,7 +92,9 @@ class CourseManager(BaseManager):
         where, params = [], []
         index = 1
 
-        if kwargs.get("query") and (kwargs.get("code") or kwargs.get("name") or kwargs.get("category") or kwargs.get("description")):
+        if kwargs.get("query") and (
+            kwargs.get("code") or kwargs.get("name") or kwargs.get("category") or kwargs.get("description")
+        ):
             raise ValueError("Cannot use query and code/name/category/description at the same time")
 
         for key, value in kwargs.items():
@@ -116,7 +118,9 @@ class CourseManager(BaseManager):
             # return list(self.courses.values())[offset : limit + offset], len(self.courses)
             where.append("TRUE")
 
-        if any(kwargs.get(key) for key in ("query", "code", "name", "category", "description")) and sort_by.startswith("query "):
+        if any(kwargs.get(key) for key in ("query", "code", "name", "category", "description")) and sort_by.startswith(
+            "query "
+        ):
             greatest = []
             for key in ("code", "name", "category", "description"):
                 if kwargs.get(key) or kwargs.get("query"):
@@ -145,7 +149,16 @@ class CourseManager(BaseManager):
         # No cache lookup needed
         return self.tags.get(id)
 
-    async def create_course(self, *, code: str, name: str, year_level: Literal[1, 2, 3, 4], category: str, icon: str, description: str | None = None) -> Course:
+    async def create_course(
+        self,
+        *,
+        code: str,
+        name: str,
+        year_level: Literal[1, 2, 3, 4],
+        category: str,
+        icon: str,
+        description: str | None = None,
+    ) -> Course:
         result = await self.app.state.pool.fetchrow(
             "INSERT INTO courses (code, name, year_level, category, icon, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
             code,

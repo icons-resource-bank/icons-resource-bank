@@ -1,14 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
+from ...request import Request
 from ...utils.decorators import *
 from ..managers.user import User
 from ..models.user import AnalyticsRequest
-from ...request import Request
 
 __all__ = ("setup",)
 

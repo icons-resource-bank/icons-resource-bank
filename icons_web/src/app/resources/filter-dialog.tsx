@@ -220,15 +220,11 @@ export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogPro
           </div>
         </div>
         <DialogFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            className="hover:bg-foreground/20"
-          >
+          <Button variant="outline" onClick={handleReset} className="hover:bg-foreground/20">
             Reset
           </Button>
           <Button
-            className="text-primary-foreground text-white hover:bg-primary/90 hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+            className="text-primary-foreground text-white hover:bg-primary/90 hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
             onClick={handleApply}
           >
             Apply Filters

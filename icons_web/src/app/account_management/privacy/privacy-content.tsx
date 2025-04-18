@@ -53,7 +53,8 @@ export function PrivacyContent() {
                 <Link href="/privacy-policy" className="hover:underline">
                   Privacy Policy
                 </Link>
-              </span><br/>
+              </span>
+              <br />
               <span>
                 <Link href="/terms-of-service" className="hover:underline">
                   Terms of Service

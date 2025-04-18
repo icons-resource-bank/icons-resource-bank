@@ -66,7 +66,7 @@ export default function AuthCallback() {
     }
 
     handleCallback();
-  }, [router, login, update]);
+  }, [router, login, update, pathname]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">

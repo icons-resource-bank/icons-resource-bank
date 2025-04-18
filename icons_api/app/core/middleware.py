@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from slowapi import Limiter
-
 from starlette.middleware.cors import CORSMiddleware
 
 from .auth import verify_token

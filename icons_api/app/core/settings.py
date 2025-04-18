@@ -69,7 +69,13 @@ class Settings(BaseSettings):
         logger.configure(
             handlers=[
                 {"sink": sys.stderr, "level": self.logging_level},
-                {"sink": "logs/app.log", "level": self.logging_level, "rotation": "1 day", "compression": "zip", "enqueue": True},
+                {
+                    "sink": "logs/app.log",
+                    "level": self.logging_level,
+                    "rotation": "1 day",
+                    "compression": "zip",
+                    "enqueue": True,
+                },
             ]
         )
 

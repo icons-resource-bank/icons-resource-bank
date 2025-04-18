@@ -373,7 +373,13 @@ export default function FeedbackPage() {
               <Trash2 className="mr-1 h-4 w-4" />
               Delete Feedback
             </Button>
-            <Button size="sm" className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20" onClick={() => setDetailsDialogOpen(false)}>Close</Button>
+            <Button
+              size="sm"
+              className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+              onClick={() => setDetailsDialogOpen(false)}
+            >
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

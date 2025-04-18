@@ -4,7 +4,7 @@ import datetime
 import enum
 from copy import copy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Unpack, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, Unpack
 
 from .base import *
 
@@ -39,7 +39,9 @@ class Resource(Model):
         if with_data:
             manager = self._manager
             data["course"] = (await manager.app.state.courses.get_course(id=data.pop("course_id"))).to_dict()  # type: ignore
-            data["author"] = (await manager.app.state.users.get(id=data.pop("author_id")) or manager.app.state.users.DELETED).to_dict()
+            data["author"] = (
+                await manager.app.state.users.get(id=data.pop("author_id")) or manager.app.state.users.DELETED
+            ).to_dict()
             data["tags"] = [(await manager.app.state.courses.get_tag(id=tag_id)).to_dict() for tag_id in filter(None, data.pop("tag_ids"))]  # type: ignore
         return data
 
@@ -93,7 +95,9 @@ class ResourceManager(BaseManager):
 
         return Resource.from_row(self, result)
 
-    async def get_count(self, *, course_id: str | None = None, author_id: str | None = None, tag_id: str | None = None) -> int:
+    async def get_count(
+        self, *, course_id: str | None = None, author_id: str | None = None, tag_id: str | None = None
+    ) -> int:
         if not course_id and not author_id and not tag_id:
             raise TypeError("get_count() missing 1 required keyword-only argument")
         if len(list(filter(None, (course_id, author_id, tag_id)))) > 1:
@@ -115,7 +119,12 @@ class ResourceManager(BaseManager):
         return result["count"]
 
     async def query(
-        self, *, limit: int = 100, offset: int = 0, sort_by: str = "resources.created_at DESC", **kwargs: Unpack[_QueryArguments]
+        self,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+        sort_by: str = "resources.created_at DESC",
+        **kwargs: Unpack[_QueryArguments],
     ) -> tuple[list[Resource], int]:
         where, params = [], []
         index = 1
@@ -217,9 +226,7 @@ class ResourceManager(BaseManager):
 
         return resource
 
-    async def update(
-        self, id: str, **kwargs: Any
-    ) -> Resource:
+    async def update(self, id: str, **kwargs: Any) -> Resource:
         resource = await self.get(id)
         if not resource:
             raise ValueError("Resource not found")

@@ -32,7 +32,7 @@ import { userApi, type User } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import {formatDate, formatDateTime} from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
 
 // Flag filter options
 const flagFilterOptions = [

@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse, Response
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
+from ...request import Request
 from ...utils.decorators import *
 from ..models.user import *
-from ...request import Request
 
 __all__ = ("setup",)
 

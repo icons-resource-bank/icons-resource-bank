@@ -1,31 +1,29 @@
-import Image from "next/image"
-import { SiteHeader } from "@/components/site-header"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, Users, Calendar, Mail } from "lucide-react"
-import Link from "next/link"
+import Image from "next/image";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, Users, Calendar, Mail } from "lucide-react";
+import Link from "next/link";
 
 export default function GetInvolvedPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      
-
+    <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
-      <section className="bg-primary text-white py-16 dark:bg-primary">
+      <section className="bg-primary py-16 text-white dark:bg-primary">
         <div className="container">
-          <h1 className="text-4xl md:text-5xl text-center font-bold mb-4">Get Involved</h1>
-          <p className="text-xl text-center max-w-3xl mx-auto">
+          <h1 className="mb-4 text-center text-4xl font-bold md:text-5xl">Get Involved</h1>
+          <p className="mx-auto max-w-3xl text-center text-xl">
             There are multiple ways to contribute to the iCons community and help fellow engineering students succeed.
           </p>
         </div>
       </section>
 
       {/* Contribute Resources Section */}
-      <section className="py-16 bg-background dark:bg-footer">
+      <section className="bg-background py-16 dark:bg-footer">
         <div className="container">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid items-center gap-12 md:grid-cols-2">
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-primary dark:text-white">Contribute Resources</h2>
+              <h2 className="mb-6 text-3xl font-bold text-primary dark:text-white">Contribute Resources</h2>
               <div className="space-y-4">
                 <p className="text-lg text-muted-foreground">
                   Our resource bank thrives on contributions from students like you. By sharing your notes, study
@@ -38,7 +36,10 @@ export default function GetInvolvedPage() {
                 </p>
                 <div className="pt-4">
                   <Button asChild size="lg" className="bg-primary hover:bg-primary/90 dark:text-white">
-                    <Link href="/upload" className="flex items-center gap-2 dark:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
+                    <Link
+                      href="/upload"
+                      className="flex items-center gap-2 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                    >
                       <Upload className="h-5 w-5 dark:text-white" />
                       Upload Resources
                     </Link>
@@ -47,7 +48,7 @@ export default function GetInvolvedPage() {
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden shadow-lg">
+              <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg shadow-lg">
                 <Image
                   src="/images/beamish-munro.jpg?height=600&width=800"
                   alt="Contributing Resources"
@@ -61,12 +62,12 @@ export default function GetInvolvedPage() {
       </section>
 
       {/* Become an iCon Section */}
-      <section className="py-16 bg-muted">
+      <section className="bg-muted py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">Become an iCon</h2>
+          <h2 className="mb-10 text-center text-3xl font-bold text-primary dark:text-white">Become an iCon</h2>
 
-          <div className="max-w-3xl mx-auto">
-            <Card className="border-2 mb-8">
+          <div className="mx-auto max-w-3xl">
+            <Card className="mb-8 border-2">
               <CardHeader>
                 <CardTitle>Join Our Team</CardTitle>
               </CardHeader>
@@ -75,7 +76,7 @@ export default function GetInvolvedPage() {
                   Becoming an iCon is a rewarding way to get involved with the engineering community at Queen's
                   University. As an iCon, you'll:
                 </p>
-                <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
                   <li>Help maintain the ILC during extended hours</li>
                   <li>Assist fellow students with accessing resources</li>
                   <li>Contribute to the development and organization of the resource bank</li>
@@ -85,22 +86,17 @@ export default function GetInvolvedPage() {
                 </ul>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </section>
 
       {/* Application Process */}
-      <section className="py-16 bg-white dark:bg-footer">
+      <section className="bg-white py-16 dark:bg-footer">
         <div className="container">
-        
+          <div className="mx-auto max-w-3xl">
+            <h3 className="mb-10 text-center text-3xl font-bold text-primary dark:text-white">Application Process</h3>
 
-          <div className="max-w-3xl mx-auto">
-          
-
-            <h3 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">Application Process</h3>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="mb-8 grid gap-6 md:grid-cols-3">
               <Card className="border-2 dark:bg-footer">
                 <CardHeader>
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -162,11 +158,14 @@ export default function GetInvolvedPage() {
             </div>
 
             <div className="text-center">
-              <p className="text-lg mb-6">
+              <p className="mb-6 text-lg">
                 Interested in becoming an iCon? Contact us for more information about upcoming application periods.
               </p>
-              <Button asChild className="bg-primary hover:bg-primary/90 ">
-                <a href="mailto:icon@engsoc.queensu.ca" className="flex items-center gap-2 dark:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
+              <Button asChild className="bg-primary hover:bg-primary/90">
+                <a
+                  href="mailto:icon@engsoc.queensu.ca"
+                  className="flex items-center gap-2 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                >
                   <Mail className="h-5 w-5 dark:text-white" />
                   Contact Us
                 </a>
@@ -177,45 +176,50 @@ export default function GetInvolvedPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-background">
+      <section className="bg-background py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">What Our iCons Say</h2>
+          <h2 className="mb-10 text-center text-3xl font-bold text-primary dark:text-white">What Our iCons Say</h2>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <Card className="border-2">
               <CardContent className="pt-6">
-                <div className="flex flex-col items-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 mb-4"></div>
+                <div className="mb-4 flex flex-col items-center">
+                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
                   <h3 className="font-bold">Current Icons Member</h3>
                   <p className="text-sm">4th Year Mechanical Engineering</p>
                 </div>
                 <p className="text-center italic text-muted-foreground">
-                  "Being an iCon has been one of my favourite experiences at Queen’s so far! It has been a great way to connect with new people and learn lots of skills. I love being able to support first years in their classes as the iCons were so helpful for me in my first year. The intrapersonal skills I have developed as an iCon also helped me in securing my QUIP internship!"
+                  "Being an iCon has been one of my favourite experiences at Queen’s so far! It has been a great way to
+                  connect with new people and learn lots of skills. I love being able to support first years in their
+                  classes as the iCons were so helpful for me in my first year. The intrapersonal skills I have
+                  developed as an iCon also helped me in securing my QUIP internship!"
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-2">
               <CardContent className="pt-6">
-                <div className="flex flex-col items-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 mb-4"></div>
+                <div className="mb-4 flex flex-col items-center">
+                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
                   <h3 className="font-bold">Lucy Jardine</h3>
                   <p className="text-sm">3rd Year Mechanical Engineering</p>
                 </div>
                 <p className="text-center italic text-muted-foreground">
-                  "Being an iCon has been a very valuable experience. I know it can be difficult in first year finding helpful resources, so it has been incredibly rewarding to get to help fellow students even in small ways. I also got to work with some amazing coworkers and made great friends through being an iCon!"
+                  "Being an iCon has been a very valuable experience. I know it can be difficult in first year finding
+                  helpful resources, so it has been incredibly rewarding to get to help fellow students even in small
+                  ways. I also got to work with some amazing coworkers and made great friends through being an iCon!"
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-2">
               <CardContent className="pt-6">
-                <div className="flex flex-col items-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 mb-4"></div>
+                <div className="mb-4 flex flex-col items-center">
+                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
                   <h3 className="font-bold">Michael Chen</h3>
                   <p className="text-sm">2nd Year Computer Engineering</p>
                 </div>
-                <p className="text-center italic  text-muted-foreground">
+                <p className="text-center italic text-muted-foreground">
                   "Working as an iCon has given me the opportunity to contribute to the engineering community while
                   building valuable connections and friendships."
                 </p>
@@ -225,6 +229,5 @@ export default function GetInvolvedPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
-

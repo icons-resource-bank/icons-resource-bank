@@ -2,17 +2,17 @@ from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 
-from .core.errors import setup_errors
 from .api.routes.api import router as api_router
 from .core.config import get_app_settings
+from .core.errors import setup_errors
 from .core.events import create_start_app_handler, create_stop_app_handler
 from .core.middleware import setup_middleware
 
 if TYPE_CHECKING:
-    from types_aiobotocore_s3 import S3Client
     from aiohttp import ClientSession
     from asyncpg import Pool
     from slowapi import Limiter
+    from types_aiobotocore_s3 import S3Client
 
     from .api.managers import *
     from .core.settings import Settings

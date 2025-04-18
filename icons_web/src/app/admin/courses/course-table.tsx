@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { getIconByName, yearLevels, getYearLevelLabel } from "./types";
 import type { Course, Filter } from "@/lib/api";
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CourseTableProps {
   courses: Course[] | undefined;
@@ -44,7 +44,7 @@ export function CourseTable({
   const handleYearLevelChange = (value: string) => {
     const yearLevel = parseInt(value, 10);
     setYearLevelFilter(yearLevel);
-  }
+  };
 
   return (
     <>
@@ -63,7 +63,9 @@ export function CourseTable({
             <SelectValue placeholder="Filter by year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem key={0} value="0">All Years</SelectItem>
+            <SelectItem key={0} value="0">
+              All Years
+            </SelectItem>
             {yearLevels.map((year) => (
               <SelectItem key={year.value} value={year.value.toString()}>
                 {year.label}
@@ -88,17 +90,17 @@ export function CourseTable({
 
       {isLoading ? (
         <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-5 w-[250px]" />
-          <Skeleton className="h-10 w-[120px]" />
-        </div>
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ))}
-        </div>
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-[250px]" />
+            <Skeleton className="h-10 w-[120px]" />
+          </div>
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-8 text-destructive">

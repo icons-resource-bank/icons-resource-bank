@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { fetchApi } from "@/lib/api";
 
-
 interface User {
   id: string;
   name: string;
@@ -25,8 +24,8 @@ export async function fetchUserInfo() {
 }
 
 export async function logout() {
-    await fetchApi("/auth/logout", { method: "POST" });
-    useAuthStore.getState().logout();
+  await fetchApi("/auth/logout", { method: "POST" });
+  useAuthStore.getState().logout();
 }
 
 export const useAuthStore = create<AuthState>()(

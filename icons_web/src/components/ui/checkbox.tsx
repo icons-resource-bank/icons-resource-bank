@@ -18,7 +18,7 @@ const Checkbox = React.forwardRef<
       "disabled:cursor-not-allowed disabled:opacity-50",
       "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
       "dark:border-white/20 dark:bg-white/10 dark:data-[state=checked]:bg-primary dark:data-[state=checked]:text-white",
-      className
+      className,
     )}
     {...props}
   >

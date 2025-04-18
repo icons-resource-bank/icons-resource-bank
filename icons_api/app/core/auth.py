@@ -150,7 +150,9 @@ async def handle_oauth2_token(app: Application, payload: dict[str, Any]) -> User
     )
     email = _jwt["email"]
     if not email.endswith("@queensu.ca"):
-        logger.warning(f"Rejecting registration request for {email!r} as it is not a Queen's University email. This shouldn't happen!")
+        logger.warning(
+            f"Rejecting registration request for {email!r} as it is not a Queen's University email. This shouldn't happen!"
+        )
         raise ValueError("Only Queen's University members are allowed to access this service")
 
     user = await app.state.users.create(email=email, name=_jwt["name"], ignore_conflict=True)

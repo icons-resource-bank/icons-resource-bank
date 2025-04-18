@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Response, Query
-from fastapi.responses import JSONResponse
-
 from typing import Annotated, Literal
+
+from fastapi import APIRouter, Query, Response
+from fastapi.responses import JSONResponse
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
+from ...request import Request
 from ...utils.decorators import *
 from ..models.course import *
-from ...request import Request
 
 __all__ = ("setup",)
 

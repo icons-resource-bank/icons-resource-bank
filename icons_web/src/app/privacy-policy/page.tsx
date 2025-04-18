@@ -1,17 +1,16 @@
-import { SiteHeader } from "@/components/site-header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
+import { SiteHeader } from "@/components/site-header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-
-      <main className="flex-1 container py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-primary dark:text-white">Privacy Policy</h1>
+    <div className="flex min-h-screen flex-col">
+      <main className="container flex-1 py-12">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="mb-8 text-4xl font-bold text-primary dark:text-white">Privacy Policy</h1>
 
           <div className="space-y-8">
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Introduction</CardTitle>
               </CardHeader>
@@ -30,13 +29,13 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Information We Collect</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>We may collect several types of information from and about users of our website, including:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>
                     <strong>Personal Information:</strong> Information that identifies you as an individual, such as
                     your name, email address, and Queen's University student ID when you register for an account or
@@ -58,13 +57,13 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>How We Use Your Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>We use information that we collect about you or that you provide to us:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>To provide, maintain, and improve our services</li>
                   <li>To verify your identity and eligibility to use our services</li>
                   <li>To process and manage your account and user profile</li>
@@ -76,13 +75,13 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Disclosure of Your Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>We may disclose personal information that we collect or you provide:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>To Queen's University officials and Engineering Society representatives as necessary</li>
                   <li>To contractors, service providers, and other third parties we use to support our services</li>
                   <li>To comply with any court order, law, or legal process</li>
@@ -101,7 +100,7 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent dark:bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none dark:bg-transparent">
               <CardHeader>
                 <CardTitle>Data Security</CardTitle>
               </CardHeader>
@@ -123,13 +122,13 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Your Rights and Choices</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>You have the right to:</p>
-                <ul className="list-disc pl-6 space-y-2">
+                <ul className="list-disc space-y-2 pl-6">
                   <li>Access, update, or delete your personal information</li>
                   <li>Object to the processing of your personal information</li>
                   <li>Request that we restrict the processing of your personal information</li>
@@ -145,7 +144,7 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Changes to Our Privacy Policy</CardTitle>
               </CardHeader>
@@ -162,7 +161,7 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-none bg-transparent">
+            <Card className="border-0 bg-transparent shadow-none">
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
@@ -188,7 +187,7 @@ export default function PrivacyPolicyPage() {
               </CardContent>
             </Card>
 
-            <div className="text-sm text-muted-foreground text-center pt-6">
+            <div className="pt-6 text-center text-sm text-muted-foreground">
               <p>Last Updated: April 15, 2024</p>
               <p className="mt-2">
                 <Link href="/terms-of-service" className="text-primary hover:underline dark:text-white">
@@ -200,5 +199,5 @@ export default function PrivacyPolicyPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

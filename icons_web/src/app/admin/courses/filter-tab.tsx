@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { type FilterTabProps, predefinedColors, MAX_FILTER_NAME_LENGTH, colorIntToHex, colorHexToInt } from "./types";
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function FilterTab({
   filters,
@@ -248,17 +248,17 @@ export function FilterTab({
       <CardContent>
         {isLoading ? (
           <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-5 w-[250px]" />
-            <Skeleton className="h-10 w-[120px]" />
-          </div>
-          <div className="space-y-2">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <Skeleton className="h-12 w-full" />
-              </div>
-            ))}
-          </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-5 w-[250px]" />
+              <Skeleton className="h-10 w-[120px]" />
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-8 text-destructive">
@@ -320,7 +320,11 @@ export function FilterTab({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmFilterDelete} disabled={isPending}>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmFilterDelete}
+              disabled={isPending}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

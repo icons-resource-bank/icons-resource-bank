@@ -1,20 +1,19 @@
-from fastapi import APIRouter, Response, UploadFile, File, Form, Query
-from fastapi.responses import JSONResponse
 from os import urandom
-
 from typing import Annotated, Literal
 
-from pydantic import AwareDatetime
 import yarl
+from fastapi import APIRouter, File, Form, Query, Response, UploadFile
+from fastapi.responses import JSONResponse
+from pydantic import AwareDatetime
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
 from ...core.s3 import *
+from ...request import Request
 from ...utils.decorators import *
-from ..models.resource import *
 from ..managers.resource import ResourceType
 from ..managers.user import UserFlags
-from ...request import Request
+from ..models.resource import *
 
 __all__ = ("setup",)
 
@@ -177,9 +176,7 @@ async def approve_resource(request: Request, id: str):
     if not resource:
         raise CustomValidationError("Resource not found", 404)
 
-    resource = await request.app.state.resources.update(
-        id=resource.id, pending=False
-    )
+    resource = await request.app.state.resources.update(id=resource.id, pending=False)
     return JSONResponse(await resource.to_dict())
 
 

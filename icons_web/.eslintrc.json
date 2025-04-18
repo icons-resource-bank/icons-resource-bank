@@ -7,6 +7,7 @@
   "rules": {
     "no-eq-null": "off",
     "prefer-object-has-own": "off",
-    "no-negated-condition": "off"
+    "no-negated-condition": "off",
+    "react/no-unescaped-entities": "off"
   }
 }

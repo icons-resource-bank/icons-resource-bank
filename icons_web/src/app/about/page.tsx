@@ -1,20 +1,18 @@
-import Image from "next/image"
-import { SiteHeader } from "@/components/site-header"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Clock, MapPin, Mail } from "lucide-react"
-import Link from "next/link"
+import Image from "next/image";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Clock, MapPin, Mail } from "lucide-react";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      
-
+    <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
-      <section className="bg-primary text-white py-16">
+      <section className="bg-primary py-16 text-white">
         <div className="container">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">About iCons</h1>
-          <p className="text-xl max-w-3xl  mx-auto ">
+          <h1 className="mb-4 text-center text-4xl font-bold md:text-5xl">About iCons</h1>
+          <p className="mx-auto max-w-3xl text-xl">
             Queen's University Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro
             Hall, home of the Integrated Learning Centre (ILC).
           </p>
@@ -22,11 +20,11 @@ export default function AboutPage() {
       </section>
 
       {/* Who We Are Section */}
-      <section className="py-16 bg-background dark:bg-footer">
+      <section className="bg-background py-16 dark:bg-footer">
         <div className="container">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid items-center gap-12 md:grid-cols-2">
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-primary dark:text-white">Who We Are</h2>
+              <h2 className="mb-6 text-3xl font-bold text-primary dark:text-white">Who We Are</h2>
               <div className="space-y-4 text-lg">
                 <p className="text-muted-foreground">
                   The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home
@@ -43,8 +41,13 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden shadow-lg">
-                <Image src="/images/iCons-Hub.jpg?height=1080&width=1920" alt="Engineering Society" fill className="h-12 w-auto" />
+              <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg shadow-lg">
+                <Image
+                  src="/images/iCons-Hub.jpg?height=1080&width=1920"
+                  alt="Engineering Society"
+                  fill
+                  className="h-12 w-auto"
+                />
               </div>
             </div>
           </div>
@@ -52,11 +55,11 @@ export default function AboutPage() {
       </section>
 
       {/* What We Do Section */}
-      <section className="py-16 bg-muted">
+      <section className="bg-muted py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">What We Do</h2>
+          <h2 className="mb-10 text-center text-3xl font-bold text-primary dark:text-white">What We Do</h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-3">
             <Card className="border-2 dark:bg-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 dark:text-white">
@@ -102,7 +105,7 @@ export default function AboutPage() {
 
             <Card className="border-2 dark:bg-primary">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 ">
+                <CardTitle className="flex items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -133,21 +136,21 @@ export default function AboutPage() {
       </section>
 
       {/* Hours of Service Section */}
-      <section className="py-16 bg-background dark:bg-footer">
+      <section className="bg-background py-16 dark:bg-footer">
         <div className="container">
-          <h2 className="text-3xl font-bold mb-10 text-center text-primary dark:text-white">Hours of Service</h2>
+          <h2 className="mb-10 text-center text-3xl font-bold text-primary dark:text-white">Hours of Service</h2>
 
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid gap-12 md:grid-cols-2">
             <Card className="border-2 dark:bg-footer">
               <CardHeader>
                 <CardTitle>Regular Operating Hours</CardTitle>
-                <p className="mb-4 text-muted-foreground ">
+                <p className="mb-4 text-muted-foreground">
                   Hours in effect from September to April (excluding holidays and exam periods)
                 </p>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  <div className="font-semibold ">Monday</div>
+                  <div className="font-semibold">Monday</div>
                   <div>5:00 PM - 11:00 PM</div>
 
                   <div className="font-semibold">Tuesday</div>
@@ -174,12 +177,9 @@ export default function AboutPage() {
             <Card className="border-2 dark:bg-footer">
               <CardHeader>
                 <CardTitle>Exam Season Extended Hours</CardTitle>
-                <p className="mb-4 text-muted-foreground ">
-                  Hours in effect from December 4th to December 21st
-                </p>
+                <p className="mb-4 text-muted-foreground">Hours in effect from December 4th to December 21st</p>
               </CardHeader>
               <CardContent>
-
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                   <div className="font-semibold">Monday</div>
                   <div>5:00 PM - 12:00 AM</div>
@@ -209,32 +209,30 @@ export default function AboutPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 bg-muted">
+      <section className="bg-muted py-16">
         <div className="container">
-          <h2 className="text-3xl font-bold text-center text-primary dark:text-white">Find Us</h2>
+          <h2 className="text-center text-3xl font-bold text-primary dark:text-white">Find Us</h2>
 
-          <div className="grid md:grid-cols-1 gap-8 items-center">
-          
+          <div className="grid items-center gap-8 md:grid-cols-1">
             {/* Google Maps Embed */}
-        <div className="container mt-12">
-          <div className="h-[300px] w-full overflow-hidden rounded-lg shadow-lg">
-            <iframe
-              src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
-              width="100%"
-              height="100%"
-              style={{ border: 0, filter: "invert(var(--maps-invert)) hue-rotate(var(--maps-hue-rotate))" }}
-              allowFullScreen={false}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Beamish-Munro Hall Map"
-              className="h-full w-full"
-            />
-          </div>
-        </div>
+            <div className="container mt-12">
+              <div className="h-[300px] w-full overflow-hidden rounded-lg shadow-lg">
+                <iframe
+                  src="https://maps.google.com/maps?q=Beamish-Munro%20Hall%2045%20Union%20St%20Kingston%2C%20ON%20K7L%203N6&#038;t=m&#038;z=16&#038;output=embed&#038;iwloc=near"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, filter: "invert(var(--maps-invert)) hue-rotate(var(--maps-hue-rotate))" }}
+                  allowFullScreen={false}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Beamish-Munro Hall Map"
+                  className="h-full w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
     </div>
-  )
+  );
 }
-

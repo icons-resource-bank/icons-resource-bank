@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import type * as React from "react"
-import { X } from "lucide-react"
-import { cva, type VariantProps } from "class-variance-authority"
+import type * as React from "react";
+import { X } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const toastVariants = cva(
   "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full",
@@ -23,24 +23,24 @@ const toastVariants = cva(
       variant: "default",
     },
   },
-)
+);
 
 export interface ToastProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof toastVariants> {
-  id: string
-  title?: string
-  description?: string
-  visible?: boolean
+  id: string;
+  title?: string;
+  description?: string;
+  visible?: boolean;
 }
 
 export function Toast({ id, className, variant, title, description, visible = true, ...props }: ToastProps) {
-  const { dismiss } = useToast()
+  const { dismiss } = useToast();
 
   return (
     <div
       className={cn(
         toastVariants({ variant }),
         "max-w-md",
-        visible ? "opacity-100" : "opacity-0 translate-y-2",
+        visible ? "opacity-100" : "translate-y-2 opacity-0",
         "transition-all duration-300 ease-in-out",
         className,
       )}
@@ -58,14 +58,14 @@ export function Toast({ id, className, variant, title, description, visible = tr
         <span className="sr-only">Close</span>
       </button>
     </div>
-  )
+  );
 }
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToast();
 
   return (
-    <div className="fixed top-0 right-0 z-[100] flex flex-col gap-2 p-4 max-h-screen overflow-hidden">
+    <div className="fixed right-0 top-0 z-[100] flex max-h-screen flex-col gap-2 overflow-hidden p-4">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
@@ -77,5 +77,5 @@ export function Toaster() {
         />
       ))}
     </div>
-  )
+  );
 }

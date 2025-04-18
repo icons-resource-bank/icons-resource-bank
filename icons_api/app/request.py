@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from fastapi import Request as FastAPIRequest
 
 if TYPE_CHECKING:
-    from .app import Application
     from .api.managers import *
+    from .app import Application
 
     class RequestState:
         user: User | None
@@ -17,6 +17,4 @@ else:
     Request = FastAPIRequest
 
 
-__all__ = (
-    "Request",
-)
+__all__ = ("Request",)

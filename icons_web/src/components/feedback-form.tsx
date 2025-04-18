@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,22 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Loader2, MessageSquare } from "lucide-react"
-import { feedbackApi } from "@/lib/api"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { toast } from "@/hooks/use-toast"
-import { useAuthStore } from "@/stores/auth"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Loader2, MessageSquare } from "lucide-react";
+import { feedbackApi } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/stores/auth";
 
 // Validation constants
-const MIN_FEEDBACK_LENGTH = 10
-const MAX_FEEDBACK_LENGTH = 1000
+const MIN_FEEDBACK_LENGTH = 10;
+const MAX_FEEDBACK_LENGTH = 1000;
 
 export function FeedbackForm() {
-  const [open, setOpen] = useState(false)
-  const [feedback, setFeedback] = useState("")
-  const { isAuthenticated } = useAuthStore()
+  const [open, setOpen] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const { isAuthenticated } = useAuthStore();
 
   const submitMutation = useMutation({
     mutationFn: feedbackApi.submitFeedback,
@@ -34,18 +34,18 @@ export function FeedbackForm() {
         title: "Feedback submitted",
         description: "Thank you for your feedback!",
         variant: "success",
-      })
-      setFeedback("")
-      setOpen(false)
+      });
+      setFeedback("");
+      setOpen(false);
     },
     onError: (error) => {
       toast({
         title: "Error",
         description: `Failed to submit feedback: ${error.message}`,
         variant: "destructive",
-      })
+      });
     },
-  })
+  });
 
   const handleSubmit = () => {
     if (feedback.trim().length < MIN_FEEDBACK_LENGTH) {
@@ -53,17 +53,20 @@ export function FeedbackForm() {
         title: "Error",
         description: `Feedback must be at least ${MIN_FEEDBACK_LENGTH} characters.`,
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    submitMutation.mutate(feedback)
-  }
+    submitMutation.mutate(feedback);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20" size="sm">
+        <Button
+          className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+          size="sm"
+        >
           <MessageSquare className="h-4 w-4" />
           <span>Submit Feedback</span>
         </Button>
@@ -77,7 +80,7 @@ export function FeedbackForm() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {!isAuthenticated ? (
-            <div className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 p-3 rounded-md text-sm">
+            <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
               Please sign in to submit feedback.
             </div>
           ) : (
@@ -125,7 +128,7 @@ export function FeedbackForm() {
           >
             {submitMutation.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
             ) : (
@@ -135,5 +138,5 @@ export function FeedbackForm() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

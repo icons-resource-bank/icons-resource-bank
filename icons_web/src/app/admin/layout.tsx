@@ -5,7 +5,7 @@ import { AdminSidebar } from "@/components/admin-sidebar";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
 import { useEffect } from "react";
-import { RequireAuth } from "@/components/require-auth"
+import { RequireAuth } from "@/components/require-auth";
 import { UserFlags } from "../../lib/flags";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -13,12 +13,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <RequireAuth staff>
-    <div className="flex min-h-screen flex-col">
-      <div className="flex flex-1">
-        <AdminSidebar />
-        <main className="flex-1 p-6">{children}</main>
+      <div className="flex min-h-screen flex-col">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <main className="flex-1 p-6">{children}</main>
+        </div>
       </div>
-    </div>
     </RequireAuth>
   );
 }

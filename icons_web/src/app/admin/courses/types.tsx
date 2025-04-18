@@ -97,7 +97,7 @@ export function colorHexToInt(colorHex: string): number {
 }
 
 // Validation constants
-export const MIN_DESCRIPTION_LENGTH = 8
+export const MIN_DESCRIPTION_LENGTH = 8;
 export const MAX_DESCRIPTION_LENGTH = 4096;
 export const MAX_CATEGORY_LENGTH = 64;
 export const MIN_COURSE_CODE_LENGTH = 4;

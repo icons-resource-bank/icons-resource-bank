@@ -1,7 +1,7 @@
 from typing import Annotated, Any, Self
 
+from pydantic import BaseModel, Field, ModelWrapValidatorHandler, model_validator
 from pydantic_core import PydanticCustomError
-from pydantic import BaseModel, Field, model_validator, ModelWrapValidatorHandler
 
 __all__ = ("AuthCallbackRequest",)
 

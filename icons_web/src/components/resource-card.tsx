@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Download, FileText, Video, FileAudio, File, ExternalLink } from "lucide-react"
-import Link from "next/link"
-import { type Resource, ResourceType, resourceApi } from "@/lib/api"
-import { formatDate } from "@/lib/utils"
-import { toast } from "@/hooks/use-toast"
-import { useMutation } from "@tanstack/react-query"
-import {getIcon } from "@/app/resources/utils"
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Download, FileText, Video, FileAudio, File, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { type Resource, ResourceType, resourceApi } from "@/lib/api";
+import { formatDate } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { getIcon } from "@/app/resources/utils";
 
 const isYouTubeUrl = (url: string): boolean => {
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)/.test(url);

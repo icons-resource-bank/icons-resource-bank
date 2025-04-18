@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight, BookOpen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { courseApi, type Course } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query";
 
 // Interface for grouped courses
 interface CourseGroup {
@@ -41,7 +41,7 @@ export function ResourceSidebar() {
 
     // Ensure coursesData is defined before processing
     if (queryIsLoading || typeof coursesData?.items === "undefined") {
-        return;
+      return;
     }
 
     coursesData?.items?.forEach?.((course) => {
@@ -65,7 +65,7 @@ export function ResourceSidebar() {
     if (expandedYears.length === 0 && Object.keys(grouped).length > 0) {
       setExpandedYears([Object.keys(grouped)[0]]);
     }
-  }, [coursesData]);
+  }, [coursesData, queryIsLoading, expandedYears]);
 
   // Update selected course when URL parameter changes
   useEffect(() => {

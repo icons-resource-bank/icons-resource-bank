@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, field_serializer, FutureDatetime
+from pydantic import BaseModel, Field, FutureDatetime, field_serializer
 
 from ..managers.user import UserFlags
 

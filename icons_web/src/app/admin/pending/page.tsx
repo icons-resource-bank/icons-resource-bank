@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { resourceApi } from "@/lib/api"
-import { toast } from "@/hooks/use-toast"
-import { Skeleton } from "@/components/ui/skeleton"
-import { FileText, CheckCircle, XCircle, Loader2 } from "lucide-react"
-import { formatDate } from "@/lib/utils"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { resourceApi } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 export default function PendingContentPage() {
-  const queryClient = useQueryClient()
-  const [isApproving, setIsApproving] = useState<string | null>(null)
-  const [isRejecting, setIsRejecting] = useState<string | null>(null)
+  const queryClient = useQueryClient();
+  const [isApproving, setIsApproving] = useState<string | null>(null);
+  const [isRejecting, setIsRejecting] = useState<string | null>(null);
 
   // Fetch pending resources
   const {
@@ -28,62 +28,62 @@ export default function PendingContentPage() {
         pending: true,
         limit: 100,
       }),
-  })
+  });
 
   // Approve resource mutation
   const approveResourceMutation = useMutation({
     mutationFn: resourceApi.approveResource,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resources"] })
+      queryClient.invalidateQueries({ queryKey: ["resources"] });
       toast({
         title: "Resource approved",
         description: "The resource has been approved and is now available to users.",
         variant: "success",
-      })
-      setIsApproving(null)
+      });
+      setIsApproving(null);
     },
     onError: (error) => {
       toast({
         title: "Error",
         description: `Failed to approve resource: ${error.message}`,
         variant: "destructive",
-      })
-      setIsApproving(null)
+      });
+      setIsApproving(null);
     },
-  })
+  });
 
   // Reject resource mutation
   const rejectResourceMutation = useMutation({
     mutationFn: resourceApi.denyResource,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resources"] })
+      queryClient.invalidateQueries({ queryKey: ["resources"] });
       toast({
         title: "Resource rejected",
         description: "The resource has been rejected.",
-      })
-      setIsRejecting(null)
+      });
+      setIsRejecting(null);
     },
     onError: (error) => {
       toast({
         title: "Error",
         description: `Failed to reject resource: ${error.message}`,
         variant: "destructive",
-      })
-      setIsRejecting(null)
+      });
+      setIsRejecting(null);
     },
-  })
+  });
 
   // Handle approve resource
   const handleApproveResource = (id: string) => {
-    setIsApproving(id)
-    approveResourceMutation.mutate(id)
-  }
+    setIsApproving(id);
+    approveResourceMutation.mutate(id);
+  };
 
   // Handle reject resource
   const handleRejectResource = (id: string) => {
-    setIsRejecting(id)
-    rejectResourceMutation.mutate(id)
-  }
+    setIsRejecting(id);
+    rejectResourceMutation.mutate(id);
+  };
 
   return (
     <div className="space-y-6">
@@ -104,12 +104,12 @@ export default function PendingContentPage() {
               ))}
             </div>
           ) : error ? (
-            <div className="flex justify-center items-center py-8 text-destructive">
+            <div className="flex items-center justify-center py-8 text-destructive">
               <p>Error loading pending resources: {(error as Error).message}</p>
             </div>
           ) : pendingResources?.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+              <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="text-lg font-medium">No pending resources</h3>
               <p className="text-muted-foreground">There are no resources waiting for approval at this time.</p>
             </div>
@@ -130,9 +130,9 @@ export default function PendingContentPage() {
                   <TableRow key={resource.id}>
                     {/* link to /resources/id in title */}
                     <TableCell className="font-medium">
-                        <a href={`/resources/${resource.id}`} className="text-blue-600 hover:underline">
-                            {resource.title}
-                        </a>
+                      <a href={`/resources/${resource.id}`} className="text-blue-600 hover:underline">
+                        {resource.title}
+                      </a>
                     </TableCell>
                     <TableCell>{resource.course.code}</TableCell>
                     <TableCell>{resource.author.name}</TableCell>
@@ -147,9 +147,9 @@ export default function PendingContentPage() {
                         disabled={isApproving === resource.id || isRejecting === resource.id}
                       >
                         {isApproving === resource.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                         ) : (
-                          <CheckCircle className="h-4 w-4 mr-1" />
+                          <CheckCircle className="mr-1 h-4 w-4" />
                         )}
                         Approve
                       </Button>
@@ -160,9 +160,9 @@ export default function PendingContentPage() {
                         disabled={isApproving === resource.id || isRejecting === resource.id}
                       >
                         {isRejecting === resource.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                         ) : (
-                          <XCircle className="h-4 w-4 mr-1" />
+                          <XCircle className="mr-1 h-4 w-4" />
                         )}
                         Deny
                       </Button>
@@ -175,5 +175,5 @@ export default function PendingContentPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

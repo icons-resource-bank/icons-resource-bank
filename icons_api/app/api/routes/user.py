@@ -1,14 +1,14 @@
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
 from ...core.errors import CustomValidationError
 from ...core.middleware import limiter
+from ...request import Request
 from ...utils.decorators import *
 from ..managers.user import User, UserFlags
 from ..models.user import *
-from ...request import Request
 
 __all__ = ("setup",)
 
@@ -32,12 +32,20 @@ async def get_users(
 ):
     users, total = await request.app.state.users.query(
         # convert flags int bitfield to list of UserFlag
-        limit=limit, offset=offset or 0, query=query, name=name, email=email, sort_by=f"{sort_by} {sort_order.upper()}", flags=UserFlags(flags) if flags else None
+        limit=limit,
+        offset=offset or 0,
+        query=query,
+        name=name,
+        email=email,
+        sort_by=f"{sort_by} {sort_order.upper()}",
+        flags=UserFlags(flags) if flags else None,
     )
-    return JSONResponse({
-        "total": total,
-        "items": [user.to_dict() for user in users],
-    })
+    return JSONResponse(
+        {
+            "total": total,
+            "items": [user.to_dict() for user in users],
+        }
+    )
 
 
 @router.get("/@me")

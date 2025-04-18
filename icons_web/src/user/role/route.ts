@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
 // These should match your UserFlags enum in Python
 const USER_FLAGS = {
@@ -6,7 +6,7 @@ const USER_FLAGS = {
   STAFF: 2,
   TRUSTED: 4,
   BANNED: 8,
-}
+};
 
 export async function GET() {
   try {
@@ -19,7 +19,7 @@ export async function GET() {
         trusted: false,
         banned: false,
       },
-    })
+    });
 
     /* 
     // The code below is commented out until we confirm the basic route works
@@ -45,13 +45,13 @@ export async function GET() {
     })
     */
   } catch (error) {
-    console.error("Error in role API:", error)
+    console.error("Error in role API:", error);
     return NextResponse.json(
       {
         error: "Failed to fetch user role",
         message: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
-    )
+    );
   }
 }

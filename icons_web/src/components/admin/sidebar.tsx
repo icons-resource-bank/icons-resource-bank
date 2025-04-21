@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { BookCheck, FileCheck, LayoutDashboard, Users, MessageSquare } from "lucide-react";
 
@@ -34,30 +33,34 @@ const sidebarItems = [
 ];
 
 export function AdminSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
 
   return (
-    <div className="h-100 flex w-64 flex-col bg-[#273655] text-white dark:bg-background">
-      <div className="flex h-16 items-center border-b border-white/10 px-6">
-        <h2 className="text-lg font-semibold">Admin Panel</h2>
-      </div>
-      <nav className="flex-1 space-y-1 p-4">
-        {sidebarItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                isActive ? "bg-white/10 text-white" : "text-white/70 hover:bg-white/10 hover:text-white",
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.title}
-            </Link>
-          );
-        })}
+    <div className="w-full rounded-lg bg-gray-50 p-4 shadow-md md:min-h-[calc(100vh-80px)] md:w-64 dark:bg-footer">
+      <h2 className="mb-6 text-xl font-bold text-primary dark:text-white">Admin Panel</h2>
+      <nav>
+        <ul className="space-y-2">
+          {sidebarItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <li key={item.title}>
+                <button
+                  onClick={() => router.push(item.href)}
+                  className={cn(
+                    "flex w-full items-center rounded-md p-2 text-left",
+                    isActive
+                      ? "bg-primary text-white dark:bg-white/10"
+                      : "text-muted-foreground hover:bg-gray-200 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white",
+                  )}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  <span>{item.title}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </div>
   );

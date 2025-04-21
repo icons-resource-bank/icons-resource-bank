@@ -1,7 +1,7 @@
 import { User, Settings, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const menuItems = [
+const sidebarItems = [
   {
     id: "account",
     title: "Account Information",
@@ -30,13 +30,13 @@ export function AccountSidebar({ activeItem, setActiveItem }: AccountSidebarProp
       <h2 className="mb-6 text-xl font-bold text-primary dark:text-white">Account Management</h2>
       <nav>
         <ul className="space-y-2">
-          {menuItems.map((item) => (
+          {sidebarItems.map((item) => (
             <li key={item.title}>
               <button
                 onClick={() => setActiveItem(item.id)}
                 className={cn(
                   "flex w-full items-center rounded-md p-2 text-left",
-                  activeItem === item.id ? "bg-primary text-white" : "text-muted-foreground hover:bg-gray-200 dark:hover:bg-white/10",
+                  activeItem === item.id ? "bg-primary text-white dark:bg-white/10" : "text-muted-foreground hover:bg-gray-200 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white",
                 )}
               >
                 <item.icon className="mr-3 h-5 w-5" />

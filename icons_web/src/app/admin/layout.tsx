@@ -8,10 +8,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <RequireAuth staff showMessage>
       <div className="flex min-h-screen flex-col">
-        <div className="flex flex-1">
-          <AdminSidebar />
-          <main className="flex-1 p-6">{children}</main>
-        </div>
+        <main className="container mx-auto flex-1 pt-8">
+          <div className="flex flex-row flex-1 gap-6">
+            <AdminSidebar />
+            <div className="flex-1">{children}</div>
+          </div>
+        </main>
       </div>
     </RequireAuth>
   );

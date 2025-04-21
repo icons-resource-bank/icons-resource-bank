@@ -72,8 +72,14 @@ export default function PrivacyContent() {
                   <AccordionContent>
                     <p className="text-sm text-muted-foreground">
                       The Engineering Society of Queen's University is committed to providing a welcoming and inclusive
-                      environment for all members. This Code of Conduct outlines our expectations for participant
-                      behavior as well as the consequences for unacceptable behavior.
+                      environment for all members. We do not tolerate harassment of any kind, including but not limited
+                      to harassment based on protected characteristics such as race, ethnicity, religion, gender, sexual
+                      orientation, gender identity, disability, age, or any other status outlined by applicable human
+                      rights legislation.
+                      <br />
+                      <br />
+                      By using this platform, you agree to abide by our Code of Conduct and report any violations to the
+                      Engineering Society. We reserve the right to remove any content or user that violates this policy.
                     </p>
                   </AccordionContent>
                 </AccordionItem>
@@ -84,13 +90,13 @@ export default function PrivacyContent() {
               <div className="space-y-1">
                 <p className="text-sm font-medium leading-none">Analytics Tracking</p>
                 <p className="text-sm text-muted-foreground">
-                  Allow collection of usage data to improve the app experience.
+                  Allow collection of usage data to improve the app experience
                 </p>
               </div>
               <Switch
                 checked={settings.analytics}
                 onCheckedChange={(value) => setSettings((prev) => ({ ...prev, analytics: value }))}
-                className="dark:data-[state=unchecked]:bg-white/10 dark:data-[state=checked]:bg-white/90"
+                className="dark:data-[state=checked]:bg-white/90 dark:data-[state=unchecked]:bg-white/10"
               />
             </div>
 
@@ -98,7 +104,12 @@ export default function PrivacyContent() {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20" onClick={handleSave}>Save Settings</Button>
+              <Button
+                className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                onClick={handleSave}
+              >
+                Save Settings
+              </Button>
             </div>
           </div>
         </CardContent>

@@ -86,16 +86,6 @@ export const predefinedColors = [
   { name: "Indigo", value: 0x4f46e5, hexValue: "#4F46E5" },
 ];
 
-// Helper function to convert integer color to hex string
-export function colorIntToHex(colorInt: number): string {
-  return `#${colorInt.toString(16).padStart(6, "0")}`;
-}
-
-// Helper function to convert hex string to integer color
-export function colorHexToInt(colorHex: string): number {
-  return Number.parseInt(colorHex.replace("#", ""), 16);
-}
-
 // Validation constants
 export const MIN_DESCRIPTION_LENGTH = 8;
 export const MAX_DESCRIPTION_LENGTH = 4096;
@@ -111,7 +101,7 @@ export const MAX_FILTER_NAME_LENGTH = 32;
 export interface FilterTabProps {
   filters: Filter[];
   onEdit: (filter: Filter) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
   filterForm: FilterFormData;
   filterFormOpen: boolean;
   setFilterFormOpen: (open: boolean) => void;

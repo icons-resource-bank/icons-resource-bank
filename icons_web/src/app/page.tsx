@@ -11,7 +11,7 @@ export default function HomePage() {
       <section className="relative h-[500px] overflow-hidden">
         <Image
           src="/images/queens-campus.webp?height=1080&width=1920"
-          alt="Queen's University Campus"
+          alt="Queen’s University Campus"
           fill
           className="object-cover brightness-75"
           priority
@@ -44,7 +44,7 @@ export default function HomePage() {
         <div className="container grid items-center gap-8 md:grid-cols-2">
           <div>
             <Image
-              src="/images/beamish-munro.jpg?height=600&width=800"
+              src="/images/beamish-munro.jpg"
               alt="Beamish-Munro Hall"
               width={690}
               height={500}
@@ -121,10 +121,10 @@ export default function HomePage() {
         <div className="container">
           <h2 className="mb-12 text-center text-3xl font-bold">Our Services</h2>
           <div className="grid gap-8 md:grid-cols-3">
-            <Card className="dark:rounded-sm dark:border-2">
+            <Card className="border-2 dark:bg-primary dark:rounded-sm">
               <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Clock className="h-6 w-6 text-primary dark:text-gray-400" />
+                  <Clock className="h-6 w-6 text-primary dark:text-muted-foreground" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Extended Hours</h3>
                 <p className="text-muted-foreground">
@@ -132,19 +132,19 @@ export default function HomePage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="dark:rounded-sm dark:border-2">
+            <Card className="border-2 dark:bg-primary dark:rounded-sm">
               <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Users className="h-6 w-6 text-primary dark:text-gray-400" />
+                  <Users className="h-6 w-6 text-primary dark:text-muted-foreground" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Equipment</h3>
                 <p className="text-muted-foreground">Need a calculator, laptop, or charger? iCons has you covered.</p>
               </CardContent>
             </Card>
-            <Card className="dark:rounded-sm dark:border-2">
+            <Card className="border-2 dark:bg-primary dark:rounded-sm">
               <CardContent className="pt-6 dark:bg-footer">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <BookOpen className="h-6 w-6 text-primary dark:text-gray-400" />
+                  <BookOpen className="h-6 w-6 text-primary dark:text-muted-foreground" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold">Resource Bank</h3>
                 <p className="text-muted-foreground">Access to course materials, past exams, and study resources.</p>

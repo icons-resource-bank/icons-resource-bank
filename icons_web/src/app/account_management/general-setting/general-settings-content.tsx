@@ -7,15 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-export function GeneralSettingsContent() {
+export default function GeneralSettingsContent() {
   const { toast } = useToast();
 
-  // Initial state
   const [settings, setSettings] = useState({
     language: "english",
   });
-
-  // Sync theme with the theme provider on component mount
 
   // Backup state for cancel functionality
   const [initialSettings, setInitialSettings] = useState({ ...settings });
@@ -26,20 +23,20 @@ export function GeneralSettingsContent() {
 
   // Save changes
   const handleSave = () => {
-    // In a real app, you would send settings to an API
+    if (JSON.stringify(settings) === JSON.stringify(initialSettings)) return;
     setInitialSettings({ ...settings });
     toast({
       title: "Settings saved",
-      description: "Your general settings have been updated successfully.",
+      description: "Your general settings have been updated successfully",
     });
   };
 
-  // Cancel changes
   const handleCancel = () => {
+    if (JSON.stringify(settings) === JSON.stringify(initialSettings)) return;
     setSettings({ ...initialSettings });
     toast({
       title: "Changes discarded",
-      description: "Your changes have been reverted.",
+      description: "Your changes have been reverted",
       variant: "destructive",
     });
   };
@@ -48,7 +45,7 @@ export function GeneralSettingsContent() {
     <div className="flex-1 p-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-primary">General Settings</CardTitle>
+          <CardTitle className="text-primary dark:text-white">General Settings</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -60,7 +57,7 @@ export function GeneralSettingsContent() {
                     <Label htmlFor="language" className="text-base">
                       Language
                     </Label>
-                    <p className="text-sm text-gray-500">Select your preferred language</p>
+                    <p className="text-sm text-muted-foreground">Select your preferred language</p>
                   </div>
                   <Select value={settings.language} onValueChange={handleSelectChange("language")}>
                     <SelectTrigger className="w-[180px]">
@@ -78,7 +75,7 @@ export function GeneralSettingsContent() {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>Save Changes</Button>
+              <Button className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20" onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </CardContent>

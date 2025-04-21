@@ -1,4 +1,3 @@
-import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
@@ -24,8 +23,8 @@ export default function TermsOfServicePage() {
                   Policy. If you do not agree to these Terms, you may not access or use our services.
                 </p>
                 <p>
-                  The iCons Resource Bank is a service provided by the Engineering Society of Queen's University
-                  ("EngSoc") and operates in accordance with Queen's University policies and regulations.
+                  The iCons Resource Bank is a service provided by the Engineering Society of Queen’s University
+                  ("EngSoc") and operates in accordance with Queen’s University policies and regulations.
                 </p>
               </CardContent>
             </Card>
@@ -36,12 +35,12 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The iCons Resource Bank is primarily intended for use by Queen's University students, faculty, and
+                  The iCons Resource Bank is primarily intended for use by Queen’s University students, faculty, and
                   staff. To access certain features of our services, you must:
                 </p>
                 <ul className="list-disc space-y-2 pl-6">
-                  <li>Be a current student, faculty member, or staff of Queen's University</li>
-                  <li>Have a valid Queen's University email address</li>
+                  <li>Be a current student, faculty member, or staff of Queen’s University</li>
+                  <li>Have a valid Queen’s University email address</li>
                   <li>Be at least 18 years of age or the age of majority in your jurisdiction</li>
                   <li>Comply with all applicable laws and regulations</li>
                 </ul>
@@ -101,16 +100,7 @@ export default function TermsOfServicePage() {
                   </li>
                   <li>Upload or share content that contains personal information of others without their consent</li>
                   <li>
-                    Upload or share content that violates Queen's University's{" "}
-                    <a
-                      href="https://www.queensu.ca/secretariat/policies/senate/code-conduct"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline dark:text-white"
-                    >
-                      Code of Conduct
-                    </a>{" "}
-                    or{" "}
+                    Upload or share content that violates Queen’s University’s{" "}
                     <a
                       href="https://www.queensu.ca/academicintegrity/"
                       target="_blank"
@@ -137,12 +127,12 @@ export default function TermsOfServicePage() {
               <CardContent className="space-y-4">
                 <p>
                   The iCons Resource Bank and its original content, features, and functionality are owned by the
-                  Engineering Society of Queen's University and are protected by international copyright, trademark, and
+                  Engineering Society of Queen’s University and are protected by international copyright, trademark, and
                   other intellectual property laws.
                 </p>
                 <p>
                   Our name, logo, and all related names, logos, product and service names, designs, and slogans are
-                  trademarks of the Engineering Society of Queen's University or its affiliates. You may not use these
+                  trademarks of the Engineering Society of Queen’s University or its affiliates. You may not use these
                   marks without our prior written permission.
                 </p>
                 <p>
@@ -158,7 +148,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The iCons Resource Bank is committed to upholding Queen's University's principles of academic
+                  The iCons Resource Bank is committed to upholding Queen’s University’s principles of academic
                   integrity. Users are expected to:
                 </p>
                 <ul className="list-disc space-y-2 pl-6">
@@ -171,7 +161,7 @@ export default function TermsOfServicePage() {
                   </li>
                 </ul>
                 <p>
-                  Violations of academic integrity may result in account termination and may be reported to Queen's
+                  Violations of academic integrity may result in account termination and may be reported to Queen’s
                   University for further action.
                 </p>
               </CardContent>
@@ -201,7 +191,7 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  To the fullest extent permitted by applicable law, the Engineering Society of Queen's University and
+                  To the fullest extent permitted by applicable law, the Engineering Society of Queen’s University and
                   its officers, directors, employees, and agents shall not be liable for any indirect, incidental,
                   special, consequential, or punitive damages, including but not limited to, loss of profits, data, or
                   use, arising out of or in connection with your use of our services.
@@ -264,9 +254,9 @@ export default function TermsOfServicePage() {
             </Card>
 
             <div className="pt-6 text-center text-sm text-muted-foreground">
-              <p>Last Updated: April 15, 2024</p>
+              <p>Last Updated: April 20, 2025</p>
               <p className="mt-2">
-                <Link href="/privacy-policy" className="text-primary hover:underline dark:text-white">
+                <Link href="/privacy-policy" className="text-primary hover:underline dark:text-blue-400">
                   Privacy Policy
                 </Link>
               </p>

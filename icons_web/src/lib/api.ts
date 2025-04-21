@@ -1,59 +1,15 @@
 import { useAuthStore } from "@/stores/auth";
+import { snakeToCamelCase, camelToSnakeCase } from "./utils";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-class HTTPError extends Error {
+export class HTTPError extends Error {
   constructor(
     public errors: string[],
     public status: number,
   ) {
     super(errors.join(", "));
   }
-}
-
-// API utility functions
-
-// Utility functions to convert between camelCase and snake_case
-function toSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-}
-
-function toCamelCase(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-}
-
-// Convert object keys from camelCase to snake_case
-function camelToSnakeCase(obj: any): any {
-  if (obj === null || obj === undefined || typeof obj !== "object") {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(camelToSnakeCase);
-  }
-
-  return Object.keys(obj).reduce((acc, key) => {
-    const snakeKey = toSnakeCase(key);
-    acc[snakeKey] = camelToSnakeCase(obj[key]);
-    return acc;
-  }, {} as any);
-}
-
-// Convert object keys from snake_case to camelCase
-function snakeToCamelCase(obj: any): any {
-  if (obj === null || obj === undefined || typeof obj !== "object") {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(snakeToCamelCase);
-  }
-
-  return Object.keys(obj).reduce((acc, key) => {
-    const camelKey = toCamelCase(key);
-    acc[camelKey] = snakeToCamelCase(obj[key]);
-    return acc;
-  }, {} as any);
 }
 
 // Generic fetch function with error handling
@@ -87,7 +43,7 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
 
   // For DELETE requests that return 204 No Content
   if (response.status === 204) {
-    return {} as T;
+    return null as T;
   }
 
   // Convert response from snake_case to camelCase
@@ -148,6 +104,10 @@ export const userApi = {
     return fetchApi<User>(`/users/${id}`);
   },
 
+  getCurrentUser: async (): Promise<User> => {
+    return fetchApi<User>("/users/@me");
+  },
+
   banUser: async ({ userId, until }: BanUserParams): Promise<User> => {
     return fetchApi<User>(`/users/${userId}/ban`, {
       method: "POST",
@@ -168,9 +128,10 @@ export const userApi = {
     });
   },
 
-  deleteUser: async (userId: string): Promise<void> => {
-    return fetchApi<void>(`/users/${userId}`, {
-      method: "DELETE",
+  toggleUserConsents: async (analytics: boolean): Promise<User> => {
+    return fetchApi<User>("/users/@me/consent", {
+      method: "PATCH",
+      body: JSON.stringify({ analytics }),
     });
   },
 };
@@ -286,13 +247,22 @@ export interface Resource {
   ftype: string; // PDF, Video, etc
 }
 
+interface CreateResourcePayload {
+  title: string;
+  description: string;
+  courseId: string;
+  url?: string | null;
+  file?: File | null;
+  tagIds?: string[];
+}
+
 export interface GetResourcesParams {
   limit?: number;
   offset?: number;
   query?: string;
   title?: string;
   description?: string;
-  type?: ResourceType;
+  type?: ResourceType | null;
   courseIds?: string[];
   authorIds?: string[];
   tagIds?: string[];
@@ -306,7 +276,7 @@ export interface GetResourcesParams {
 
 export interface DownloadResponse {
   url: string;
-  filename?: string;
+  filename?: string; // Missing for URLs
 }
 
 export const resourceApi = {
@@ -359,7 +329,7 @@ export const resourceApi = {
     });
   },
 
-  createResource: async (payload: Partial<Resource>): Promise<Resource> => {
+  createResource: async (payload: CreateResourcePayload): Promise<Resource> => {
     const url = `${BASE_URL}/resources`;
     const { token } = useAuthStore.getState();
 
@@ -403,6 +373,12 @@ export const resourceApi = {
   denyResource: async (id: string): Promise<Resource> => {
     return fetchApi<Resource>(`/resources/${id}/deny`, {
       method: "POST",
+    });
+  },
+
+  deleteResource: async (id: string): Promise<void> => {
+    return fetchApi<void>(`/resources/${id}`, {
+      method: "DELETE",
     });
   },
 

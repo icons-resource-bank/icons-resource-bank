@@ -26,7 +26,7 @@ python -m app
 
 #### Database
 
-The PostgreSQL database can be managed with a builtin CLI. To migrate the database, run the following command:
+The PostgreSQL database can be managed with a built-in CLI. To migrate the database, run the following command:
 
 ```bash
 python -m app.db migrate
@@ -37,6 +37,14 @@ See additional commands by running:
 ```bash
 python -m app.db --help
 ```
+
+For example, to assign a user as admin, run:
+
+```bash
+python -m app.db execute "UPDATE users SET flags = 1 WHERE email = '23abc1@queensu.ca'"
+```
+
+Keep in note that the backend must be restarted after any database changes are made.
 
 #### S3 Bucket
 

@@ -1,14 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { fetchApi } from "@/lib/api";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  flags: number;
-  created_at: string;
-}
+import { fetchApi, type User } from "@/lib/api";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -17,10 +9,6 @@ interface AuthState {
   login: (token: string) => void;
   logout: () => void;
   update: (user: User) => void;
-}
-
-export async function fetchUserInfo() {
-  return await fetchApi("/users/@me", { method: "GET" });
 }
 
 export async function logout() {

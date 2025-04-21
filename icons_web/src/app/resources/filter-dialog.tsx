@@ -17,33 +17,37 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Filter, Loader2 } from "lucide-react";
 import { type Filter as FilterType, filterApi, ResourceType } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { colorIntToHex } from "../admin/courses/types";
+import { colorIntToHex } from "@/lib/utils";
 
-// Sample resource types
 const resourceTypes = [
   { id: "all", label: "All" },
   { id: ResourceType.URL.toString(), label: "Link" },
   { id: ResourceType.FILE.toString(), label: "File" },
 ];
 
-// File type options
-const fileTypes = [
-  { id: "pdf", label: "Documents", types: ["pdf", "docx", "doc", "txt"] },
-  { id: "xlsx", label: "Spreadsheets", types: ["xlsx", "xls"] },
-  { id: "pptx", label: "Presentations", types: ["pptx", "ppt"] },
+interface FileType {
+  id: string;
+  label: string;
+  types: string[];
+}
+
+const fileTypes: FileType[] = [
+  { id: "docs", label: "Documents", types: ["pdf", "docx", "doc", "txt"] },
+  { id: "sheets", label: "Spreadsheets", types: ["xlsx", "xls"] },
+  { id: "slides", label: "Presentations", types: ["pptx", "ppt"] },
   { id: "video", label: "Videos", types: ["mp4", "mov", "avi", "video"] },
   { id: "audio", label: "Audio", types: ["mp3", "wav", "audio"] },
 ];
 
 const sortOptions = [
-  { id: "created_at:desc", label: "Most Recent" },
-  { id: "created_at:asc", label: "Oldest First" },
   { id: "query:desc", label: "Most Relevant" },
+  { id: "created_at:desc", label: "Newest First" },
+  { id: "created_at:asc", label: "Oldest First" },
 ];
 
 export interface FilterOptions {
-  resourceType: string | null;
-  fileTypes: string[];
+  type: string | null;
+  ftype: FileType[];
   tagIds: string[];
   sortBy: string;
 }
@@ -54,12 +58,10 @@ interface FilterDialogProps {
 }
 
 export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogProps) {
-  const [selectedResourceType, setSelectedResourceType] = useState<string | null>(
-    initialFilters?.resourceType || "all",
-  );
-  const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(initialFilters?.fileTypes || []);
+  const [selectedResourceType, setSelectedResourceType] = useState<string | null>(initialFilters?.type || "all");
+  const [selectedFileTypes, setSelectedFileTypes] = useState<FileType[]>(initialFilters?.ftype || []);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialFilters?.tagIds || []);
-  const [sortBy, setSortBy] = useState(initialFilters?.sortBy || "created_at:desc");
+  const [sortBy, setSortBy] = useState(initialFilters?.sortBy || "query:desc");
   const [tags, setTags] = useState<FilterType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -93,9 +95,11 @@ export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogPro
 
   const handleFileTypeChange = (typeId: string, checked: boolean) => {
     if (checked) {
-      setSelectedFileTypes([...selectedFileTypes, typeId]);
+      const selectedType = fileTypes.find((type) => type.id === typeId);
+      if (!selectedType) return;
+      setSelectedFileTypes([...selectedFileTypes, selectedType]);
     } else {
-      setSelectedFileTypes(selectedFileTypes.filter((id) => id !== typeId));
+      setSelectedFileTypes(selectedFileTypes.filter((type) => type.id !== typeId));
     }
   };
 
@@ -113,15 +117,15 @@ export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogPro
 
   const handleReset = () => {
     setSelectedResourceType("all");
-    setSelectedFileTypes([]);
     setSelectedTagIds([]);
     setSortBy("created_at:desc");
+    setSelectedFileTypes([]);
   };
 
   const handleApply = () => {
     onApplyFilters({
-      resourceType: selectedResourceType,
-      fileTypes: selectedFileTypes,
+      type: selectedResourceType,
+      ftype: selectedFileTypes,
       tagIds: selectedTagIds,
       sortBy,
     });
@@ -131,7 +135,7 @@ export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogPro
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center gap-1 border-border shadow-sm">
+        <Button variant="outline" className="flex items-center  border-border shadow-sm">
           <Filter className="h-4 w-4" />
           Filter
         </Button>
@@ -165,7 +169,7 @@ export function FilterDialog({ onApplyFilters, initialFilters }: FilterDialogPro
                 <div key={type.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`ftype-${type.id}`}
-                    checked={selectedFileTypes.includes(type.id)}
+                    checked={selectedFileTypes.includes(type)}
                     onCheckedChange={(checked) => handleFileTypeChange(type.id, checked === true)}
                   />
                   <Label htmlFor={`ftype-${type.id}`} className="text-sm">

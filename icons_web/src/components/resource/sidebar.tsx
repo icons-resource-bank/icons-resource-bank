@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronRight, BookOpen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { courseApi, type Course } from "@/lib/api";
-import { toast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
 // Interface for grouped courses
@@ -105,7 +104,7 @@ export function ResourceSidebar() {
     return (
       <div className="flex w-64 flex-shrink-0 items-center justify-center overflow-y-auto border-r border-primary/30 bg-primary text-white shadow-md dark:border-border dark:bg-background dark:text-foreground">
         <div className="flex flex-col items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-white dark:text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
           <p className="mt-4 text-sm">Loading courses...</p>
         </div>
       </div>
@@ -115,13 +114,12 @@ export function ResourceSidebar() {
   return (
     <div className="w-64 flex-shrink-0 overflow-y-auto border-r border-primary/30 bg-primary text-white shadow-md dark:border-border dark:bg-background dark:text-foreground">
       <div className="sticky top-0 z-10 border-b border-white/20 bg-primary p-4 shadow-sm dark:border-border dark:bg-background">
-        <h2 className="text-lg font-semibold">Courses</h2>
+        <h2 className="text-lg font-semibold hover:underline cursor-pointer" onClick={() => router.push("/resources")}>Courses</h2>
       </div>
       <nav className="p-2">
         {Object.keys(groupedCourses).length > 0 ? (
           Object.entries(groupedCourses)
             .sort(([yearA], [yearB]) => {
-              // Extract the year number and compare
               const numA = Number.parseInt(yearA.split(" ")[1]);
               const numB = Number.parseInt(yearB.split(" ")[1]);
               return numA - numB;
@@ -184,7 +182,7 @@ export function ResourceSidebar() {
             ))
         ) : (
           <div className="px-3 py-6 text-center">
-            <p className="text-sm text-white/70 dark:text-gray-400">No courses available</p>
+            <p className="text-sm text-white/70 dark:text-muted-foreground">No courses available</p>
           </div>
         )}
       </nav>

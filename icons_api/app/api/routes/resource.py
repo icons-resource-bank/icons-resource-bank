@@ -79,7 +79,7 @@ async def create_resource(
     payload_json: Annotated[bytes, Form(max_length=1024 * 1024)],  # 1 KiB is probably enough for JSON
     file: Annotated[UploadFile | None, File()] = None,
 ):
-    data = ResourceCreateRequest.model_validate_json(payload_json.decode("utf-8"))
+    data = ResourceCreateRequest.model_validate_json(payload_json)
 
     if file and not file.filename:
         raise CustomValidationError("File must have a filename")
@@ -89,6 +89,9 @@ async def create_resource(
     if not data.url and not file:
         raise CustomValidationError("Resource must have one of url or file")
     if file:
+        if not file.size or file.size > MAX_FILE_LENGTH:
+            raise CustomValidationError("File is too large", 413)
+
         uri = f"files/{data.course_id}/{urandom(16).hex()}/{file.filename}"
         await upload_object(request.app, uri, file.file.read())
     else:
@@ -102,12 +105,10 @@ async def create_resource(
     else:
         parsed = yarl.URL(uri)
         # We need to unwrap youtu.be URLs
-        if parsed.host == "youtu.be":
-            uri = f"https://www.youtube.com/watch?v={parsed.path[1:]}"
+        if parsed.host in ("youtu.be", "youtube.com", "www.youtube.com"):
             ftype = "video"
-        elif parsed.host == "www.youtube.com" or parsed.host == "youtube.com":
-            ftype = "video"
-        ftype = "other"
+        else:
+            ftype = "other"
 
     resource = await request.app.state.resources.create(
         **{k: v for k, v in data.model_dump().items() if v is not None and k != "url"},
@@ -128,7 +129,9 @@ async def get_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
-    if resource.pending and not request.state.user.has_flag(UserFlags.staff):
+    if (
+        resource.pending and not request.state.user.has_flag(UserFlags.staff)
+    ) and not resource.author_id == request.state.user.id:
         raise CustomValidationError("Resource is pending approval", 403)
     return JSONResponse(await resource.to_dict(with_data=True))
 
@@ -140,7 +143,9 @@ async def download_resource(request: AuthedRequest, id: str):
     resource = await request.app.state.resources.get(id=id)
     if not resource:
         raise CustomValidationError("Resource not found", 404)
-    if resource.pending and not request.state.user.has_flag(UserFlags.staff):
+    if (
+        resource.pending and not request.state.user.has_flag(UserFlags.staff)
+    ) and not resource.author_id == request.state.user.id:
         raise CustomValidationError("Resource is pending approval", 403)
 
     if resource.type == ResourceType.url:

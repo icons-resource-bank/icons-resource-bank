@@ -23,7 +23,7 @@ interface CourseTableProps {
   setCategoryFilter: React.Dispatch<React.SetStateAction<string>>;
   categories: string[];
   onEdit: (course: Course) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export function CourseTable({
@@ -127,7 +127,7 @@ export function CourseTable({
                   <TableRow key={course.id}>
                     <TableCell>
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 dark:bg-white/10">
-                        <IconComponent className="h-5 w-5 text-primary dark:text-gray-400" />
+                        <IconComponent className="h-5 w-5 text-primary dark:text-muted-foreground" />
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{course.code}</TableCell>

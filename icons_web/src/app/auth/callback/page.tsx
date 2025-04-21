@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
-import { useAuthStore, fetchUserInfo } from "@/stores/auth";
+import { userApi } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth";
 
 export default function AuthCallback() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -49,7 +50,7 @@ export default function AuthCallback() {
 
         // Store token and user info
         login(data.token);
-        const userInfo = await fetchUserInfo();
+        const userInfo = await userApi.getCurrentUser();
         update(userInfo);
 
         setStatus("success");
@@ -57,7 +58,7 @@ export default function AuthCallback() {
         // Redirect back to the original page
         const redirectPath = decodeURIComponent(urlParams.get("state") || "/");
         // Short delay to show success message
-        setTimeout(() => router.push(redirectPath), 1000);
+        setTimeout(() => router.push(redirectPath), 500);
       } catch (error) {
         console.error("Authentication error:", error);
         setStatus("error");

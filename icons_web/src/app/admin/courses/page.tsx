@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { courseApi, filterApi, type Course, type Filter } from "@/lib/api";
+import { colorHexToInt } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { CourseForm } from "./course-form";
@@ -35,7 +36,6 @@ import {
   MIN_FILTER_NAME_LENGTH,
   MAX_FILTER_NAME_LENGTH,
   predefinedColors,
-  colorHexToInt,
 } from "./types";
 
 export default function ManageCoursesPage() {
@@ -68,19 +68,11 @@ export default function ManageCoursesPage() {
   });
 
   // State for validation
-  const [courseFormErrors, setCourseFormErrors] = useState<Record<string, string>>({});
   const [filterFormErrors, setFilterFormErrors] = useState<Record<string, string>>({});
 
-  // State for description character count
-  const [descriptionCharCount, setDescriptionCharCount] = useState(0);
-
-  // State for category suggestions
-  const [categoryInputValue, setCategoryInputValue] = useState("");
-  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
-
   // State for confirmation dialogs
-  const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
-  const [filterToDelete, setFilterToDelete] = useState<number | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+  const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteFilterDialogOpen, setDeleteFilterDialogOpen] = useState(false);
 
@@ -96,7 +88,6 @@ export default function ManageCoursesPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch courses
   const {
     data: courses,
     isLoading: isLoadingCourses,
@@ -106,7 +97,6 @@ export default function ManageCoursesPage() {
     queryFn: () => courseApi.getCourses(debouncedSearch, yearLevelFilter, categoryFilter).then((r) => r.items),
   });
 
-  // Fetch filters
   const {
     data: filters,
     isLoading: isLoadingFilters,
@@ -132,7 +122,6 @@ export default function ManageCoursesPage() {
     enabled: !!courses,
   });
 
-  // Create course mutation
   const createCourseMutation = useMutation({
     mutationFn: courseApi.createCourse,
     onSuccess: () => {
@@ -154,7 +143,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Update course mutation
   const updateCourseMutation = useMutation({
     mutationFn: courseApi.updateCourse,
     onSuccess: () => {
@@ -176,7 +164,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Delete course mutation
   const deleteCourseMutation = useMutation({
     mutationFn: courseApi.deleteCourse,
     onSuccess: () => {
@@ -197,7 +184,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Create filter mutation
   const createFilterMutation = useMutation({
     mutationFn: filterApi.createFilter,
     onSuccess: () => {
@@ -224,7 +210,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Update filter mutation
   const updateFilterMutation = useMutation({
     mutationFn: filterApi.updateFilter,
     onSuccess: () => {
@@ -251,7 +236,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Delete filter mutation
   const deleteFilterMutation = useMutation({
     mutationFn: filterApi.deleteFilter,
     onSuccess: () => {
@@ -278,7 +262,6 @@ export default function ManageCoursesPage() {
     },
   });
 
-  // Check if course form is valid
   const isCourseFormValid = () => {
     return (
       courseForm.code.trim().length >= MIN_COURSE_CODE_LENGTH &&
@@ -288,12 +271,10 @@ export default function ManageCoursesPage() {
     );
   };
 
-  // Check if filter form is valid
   const isFilterFormValid = () => {
     return filterForm.name.trim().length >= MIN_FILTER_NAME_LENGTH && filterForm.color !== undefined;
   };
 
-  // Handle filter form input change
   const handleFilterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
 
@@ -309,7 +290,6 @@ export default function ManageCoursesPage() {
     }
   };
 
-  // Validate course field
   const validateCourseField = (field: string, value: string) => {
     let error = "";
 
@@ -339,15 +319,9 @@ export default function ManageCoursesPage() {
       }
     }
 
-    setCourseFormErrors((prev) => ({
-      ...prev,
-      [field]: error,
-    }));
-
     return error === "";
   };
 
-  // Validate filter field
   const validateFilterField = (field: string, value: string) => {
     let error = "";
 
@@ -367,7 +341,6 @@ export default function ManageCoursesPage() {
     return error === "";
   };
 
-  // Validate course form
   const validateCourseForm = () => {
     const codeValid = validateCourseField("code", courseForm.code);
     const nameValid = validateCourseField("name", courseForm.name);
@@ -377,12 +350,10 @@ export default function ManageCoursesPage() {
     return codeValid && nameValid && categoryValid && descriptionValid;
   };
 
-  // Validate filter form
   const validateFilterForm = () => {
     return validateFilterField("name", filterForm.name);
   };
 
-  // Handle course form submit
   const handleCourseSubmit = () => {
     if (validateCourseForm()) {
       if (isEditingCourse && courseForm.id) {
@@ -393,7 +364,6 @@ export default function ManageCoursesPage() {
     }
   };
 
-  // Handle filter form submit
   const handleFilterSubmit = () => {
     if (validateFilterForm()) {
       if (isEditingFilter && filterForm.id) {
@@ -404,7 +374,6 @@ export default function ManageCoursesPage() {
     }
   };
 
-  // Reset course form
   const resetCourseForm = () => {
     setCourseForm({
       code: "",
@@ -414,14 +383,9 @@ export default function ManageCoursesPage() {
       icon: "book-open",
       description: "",
     });
-    setDescriptionCharCount(0);
-    setCourseFormErrors({});
     setIsEditingCourse(false);
-    setCategoryInputValue("");
-    setShowCategorySuggestions(false);
   };
 
-  // Reset filter form
   const resetFilterForm = () => {
     setFilterForm({
       name: "",
@@ -431,7 +395,6 @@ export default function ManageCoursesPage() {
     setIsEditingFilter(false);
   };
 
-  // Open course edit dialog
   const openCourseEditDialog = (course: Course) => {
     setCourseForm({
       id: course.id,
@@ -442,13 +405,10 @@ export default function ManageCoursesPage() {
       icon: course.icon,
       description: course.description,
     });
-    setCategoryInputValue(course.category);
-    setDescriptionCharCount(course.description.length);
     setIsEditingCourse(true);
     setCourseFormOpen(true);
   };
 
-  // Open filter edit dialog
   const openFilterEditDialog = (filter: Filter) => {
     setFilterForm({
       id: filter.id,
@@ -459,26 +419,22 @@ export default function ManageCoursesPage() {
     setFilterFormOpen(true);
   };
 
-  // Handle course delete
-  const handleCourseDelete = (id: number) => {
+  const handleCourseDelete = (id: string) => {
     setCourseToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  // Confirm course delete
   const confirmCourseDelete = () => {
     if (courseToDelete !== null) {
       deleteCourseMutation.mutate(courseToDelete);
     }
   };
 
-  // Handle filter delete
-  const handleFilterDelete = (id: number) => {
+  const handleFilterDelete = (id: string) => {
     setFilterToDelete(id);
     setDeleteFilterDialogOpen(true);
   };
 
-  // Confirm filter delete
   const confirmFilterDelete = () => {
     if (filterToDelete !== null) {
       deleteFilterMutation.mutate(filterToDelete);
@@ -501,9 +457,6 @@ export default function ManageCoursesPage() {
       ) {
         return;
       }
-
-      // Close if clicking elsewhere
-      setShowCategorySuggestions(false);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -516,7 +469,7 @@ export default function ManageCoursesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Manage Courses</h1>
-        <p className="text-muted-foreground">Manage courses and filters</p>
+        <p className="text-muted-foreground">Manage courses and tags</p>
       </div>
 
       <Tabs defaultValue="courses" className="space-y-6">
@@ -532,7 +485,7 @@ export default function ManageCoursesPage() {
         <TabsContent value="courses">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <div>
+              <div className="flex flex-col gap-1">
                 <CardTitle>Courses</CardTitle>
                 <CardDescription>Manage engineering courses</CardDescription>
               </div>
@@ -629,9 +582,7 @@ export default function ManageCoursesPage() {
             isFilterFormValid={isFilterFormValid}
             isLoading={isLoadingFilters}
             error={filtersError}
-            isPending={
-              createFilterMutation.isPending || updateFilterMutation.isPending || deleteFilterMutation.isPending
-            }
+            isPending={isPending}
           />
         </TabsContent>
       </Tabs>

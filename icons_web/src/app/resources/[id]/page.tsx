@@ -4,20 +4,20 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, ExternalLink, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Download, ExternalLink, Loader2 } from "lucide-react";
 import { ResourceType, resourceApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getIcon } from "../utils";
 import { RequireAuth } from "@/components/require-auth";
+import { hasAnyFlag, UserFlags } from "@/lib/flags";
+import { useAuthStore } from "@/stores/auth";
 
-// Add this function at the top of the file, after the imports
 const isYouTubeUrl = (url: string): boolean => {
   return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)/.test(url);
 };
 
-// Add this function to extract the YouTube video ID
 const getYouTubeVideoId = (url: string): string | null => {
   const youtubeRegex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(youtubeRegex);
@@ -27,7 +27,7 @@ const getYouTubeVideoId = (url: string): string | null => {
 // Add this component for YouTube embeds
 const YouTubeEmbed = ({ videoId }: { videoId: string }) => {
   return (
-    <div className="mb-6 aspect-video w-full overflow-hidden rounded-md border border-[#d8c5e9] dark:border-border">
+    <div className="mb-6 aspect-video w-full overflow-hidden rounded-md border border-primary/20 dark:border-border">
       <iframe
         width="100%"
         height="100%"
@@ -44,9 +44,9 @@ const YouTubeEmbed = ({ videoId }: { videoId: string }) => {
 export default function ResourceDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuthStore();
   const resourceId = params.id as string;
 
-  // Query for resource data
   const {
     data: resource,
     isLoading: isLoadingResource,
@@ -56,21 +56,20 @@ export default function ResourceDetailPage() {
     queryFn: () => resourceApi.getResource(resourceId),
   });
 
-  // Download mutation
   const downloadMutation = useMutation({
     mutationFn: resourceApi.downloadResource,
     onSuccess: ({ url, filename }) => {
       // Create a temporary anchor element to trigger the download
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename || resource?.title || "download";
+      link.download = filename ?? resource?.title ?? "download";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       toast({
         title: "Download started",
-        description: `Downloading ${filename || resource?.title}`,
+        description: `Downloading ${filename ?? resource?.title}`,
       });
     },
     onError: (error) => {
@@ -83,10 +82,30 @@ export default function ResourceDetailPage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: resourceApi.deleteResource,
+    onSuccess: () => {
+      toast({
+        title: "Resource deleted",
+        description: "The resource has been successfully deleted",
+      });
+      router.push("/resources");
+    },
+    onError: (error) => {
+      console.error("Delete error:", error);
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting this resource",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDownload = async () => {
     if (!resource) return;
     downloadMutation.mutate(resource.id);
     await resourceApi.trackDownload(resource.id); // Track the download
+    resource.downloadCount++;
   };
 
   const resourceLoadError = resourceError
@@ -97,7 +116,7 @@ export default function ResourceDetailPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <main className="container flex flex-1 items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary dark:text-white" />
         </main>
       </div>
     );
@@ -105,19 +124,24 @@ export default function ResourceDetailPage() {
 
   if (resourceLoadError || !resource) {
     return (
-      <RequireAuth>
+      <RequireAuth showMessage>
         <div className="flex min-h-screen flex-col">
           <main className="container flex-1 py-8">
-            <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+            <Button variant="ghost" onClick={router.back} className="mb-6">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Resources
             </Button>
-            <Card className="border-[#d8c5e9]">
+            <Card className="border-primary/20 dark:border-white/20">
               <CardContent className="p-6">
                 <div className="py-8 text-center">
                   <h2 className="mb-2 text-xl font-semibold text-destructive">Resource not found</h2>
                   <p className="mb-4 text-muted-foreground">{resourceLoadError}</p>
-                  <Button onClick={() => router.push("/resources")}>Browse Resources</Button>
+                  <Button
+                    className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                    onClick={() => router.push("/resources")}
+                  >
+                    Browse Resources
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -130,18 +154,18 @@ export default function ResourceDetailPage() {
   const IconComponent = getIcon(resource);
 
   return (
-    <RequireAuth>
+    <RequireAuth showMessage>
       <div className="flex min-h-screen flex-col">
         <main className="container flex-1 py-8">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+          <Button variant="ghost" onClick={router.back} className="mb-6">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Resources
           </Button>
 
-          <Card className="border-[#d8c5e9]">
+          <Card className="border-primary/20 dark:border-white/20">
             <CardHeader className="flex flex-row items-start gap-4 pb-2">
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <IconComponent className="h-8 w-8 text-primary" />
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 dark:bg-white/10">
+                <IconComponent className="h-8 w-8 text-primary dark:text-muted-foreground" />
               </div>
               <div>
                 <CardTitle className="text-2xl">{resource.title}</CardTitle>
@@ -158,6 +182,12 @@ export default function ResourceDetailPage() {
                     {tag.name}
                   </Badge>
                 ))}
+                {resource.pending && (
+                  <Badge variant="outline" className="border-amber-200 bg-amber-100 text-amber-800">
+                    <AlertTriangle className="mr-1 h-3 w-3" />
+                    Pending
+                  </Badge>
+                )}
               </div>
 
               <div className="mt-4 space-y-4">
@@ -165,45 +195,55 @@ export default function ResourceDetailPage() {
                 <p className="whitespace-pre-line text-muted-foreground">{resource.description}</p>
               </div>
 
-              <div className="mt-6 rounded-md border border-[#d8c5e9] bg-muted/30 p-4">
+              <div className="mt-6 rounded-md border border-primary/20 bg-muted/30 p-4 dark:border-white/20">
                 {resource.type === ResourceType.URL && isYouTubeUrl(resource.uri) && (
                   <YouTubeEmbed videoId={getYouTubeVideoId(resource.uri) || ""} />
                 )}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">
-                      Resource Type: <span className="text-muted-foreground">{resource.ftype}</span>
-                    </p>
+                    {resource.type === ResourceType.FILE && (
+                      <p className="text-sm font-medium">
+                        Resource Type: <span className="text-muted-foreground">{resource.ftype}</span>
+                      </p>
+                    )}
                     <p className="mt-1 text-sm font-medium">
-                      {resource.type === ResourceType.URL
-                        ? "Click"
-                        : "Download" + (resource.downloadCount === 1 ? "" : "s")}
+                      {(resource.type === ResourceType.URL ? "Click" : "Download") +
+                        (resource.downloadCount === 1 ? "" : "s")}
                       : <span className="text-muted-foreground">{resource.downloadCount}</span>
                     </p>
                   </div>
-                  {resource.type === ResourceType.URL ? (
-                    <Button
-                      className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                      asChild
-                    >
-                      <a href={resource.uri} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                        Open Resource
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button
-                      className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-                      onClick={handleDownload}
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {resource.type === ResourceType.URL ? (
+                      <Button
+                        className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                        asChild
+                        onClick={() => resourceApi.trackDownload(resource.id)}
+                      >
+                        <a href={resource.uri} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                          Open Resource
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button
+                        className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                        onClick={handleDownload}
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </Button>
+                    )}
+                    {hasAnyFlag(user?.flags ?? 0, [UserFlags.Admin, UserFlags.Staff]) && (
+                      <Button variant="destructive" onClick={() => deleteMutation.mutate(resource.id)}>
+                        <AlertTriangle className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="border-t border-[#d8c5e9] pt-6">
+            <CardFooter className="border-t border-primary/20 pt-6">
               <p className="text-sm text-muted-foreground">
                 If you find this resource helpful, please consider uploading your own materials to help other students.
               </p>

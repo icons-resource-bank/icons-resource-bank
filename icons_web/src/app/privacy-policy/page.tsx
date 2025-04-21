@@ -1,4 +1,3 @@
-import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
@@ -38,7 +37,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="list-disc space-y-2 pl-6">
                   <li>
                     <strong>Personal Information:</strong> Information that identifies you as an individual, such as
-                    your name, email address, and Queen's University student ID when you register for an account or
+                    your name, email address, and Queen’s University student ID when you register for an account or
                     submit resources.
                   </li>
                   <li>
@@ -52,7 +51,7 @@ export default function PrivacyPolicyPage() {
                 </ul>
                 <p>
                   We collect this information directly from you when you provide it to us, automatically as you navigate
-                  through the site, and from third parties such as Queen's University for verification purposes.
+                  through the site, and from third parties such as Queen’s University for verification purposes.
                 </p>
               </CardContent>
             </Card>
@@ -82,7 +81,7 @@ export default function PrivacyPolicyPage() {
               <CardContent className="space-y-4">
                 <p>We may disclose personal information that we collect or you provide:</p>
                 <ul className="list-disc space-y-2 pl-6">
-                  <li>To Queen's University officials and Engineering Society representatives as necessary</li>
+                  <li>To Queen’s University officials and Engineering Society representatives as necessary</li>
                   <li>To contractors, service providers, and other third parties we use to support our services</li>
                   <li>To comply with any court order, law, or legal process</li>
                   <li>
@@ -151,7 +150,7 @@ export default function PrivacyPolicyPage() {
               <CardContent className="space-y-4">
                 <p>
                   We may update our Privacy Policy from time to time. If we make material changes to how we treat our
-                  users' personal information, we will notify you through a notice on the website home page or via
+                  users’ personal information, we will notify you through a notice on the website home page or via
                   email.
                 </p>
                 <p>
@@ -173,14 +172,14 @@ export default function PrivacyPolicyPage() {
                   </a>
                 </p>
                 <p>
-                  For more information about Queen's University's privacy practices, please visit the{" "}
+                  For more information about Queen’s University’s privacy practices, please visit the{" "}
                   <a
                     href="https://www.queensu.ca/accessandprivacy/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline dark:text-white"
                   >
-                    Queen's University Access and Privacy Office
+                    Queen’s University Access and Privacy Office
                   </a>
                   .
                 </p>
@@ -188,9 +187,9 @@ export default function PrivacyPolicyPage() {
             </Card>
 
             <div className="pt-6 text-center text-sm text-muted-foreground">
-              <p>Last Updated: April 15, 2024</p>
+              <p>Last Updated: April 20, 2025</p>
               <p className="mt-2">
-                <Link href="/terms-of-service" className="text-primary hover:underline dark:text-white">
+                <Link href="/terms-of-service" className="text-primary hover:underline dark:text-blue-400">
                   Terms of Service
                 </Link>
               </p>

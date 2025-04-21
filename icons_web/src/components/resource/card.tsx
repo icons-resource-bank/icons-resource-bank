@@ -5,12 +5,11 @@ import type React from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, Video, FileAudio, File, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Download, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { type Resource, ResourceType, resourceApi } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
 import { getIcon } from "@/app/resources/utils";
 
 const isYouTubeUrl = (url: string): boolean => {
@@ -22,6 +21,7 @@ interface ResourceCardProps {
 }
 
 export function ResourceCard({ resource }: ResourceCardProps) {
+  const router = useRouter();
   // Determine the icon based on the resource type
   const IconComponent = getIcon(resource);
 
@@ -59,11 +59,10 @@ export function ResourceCard({ resource }: ResourceCardProps) {
     <>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <IconComponent className="h-5 w-5 text-primary" />
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 dark:bg-white/10">
+            <IconComponent className="h-5 w-5 text-primary dark:text-muted-foreground" />
           </div>
           <div>
-            {/* Fix flashing when hover */}
             <h3 className="line-clamp-2 font-semibold">{resource.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{resource.course.name}</p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -73,20 +72,29 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {resource.tags.map((tag) => (
-            <Badge key={tag.id} variant="outline" className="border-primary/20 text-primary">
-              {tag.name}
+          {resource.tags.length > 0 ? (
+            resource.tags.map((tag) => (
+              <Badge key={tag.id} variant="outline" className="border-primary/20 text-primary">
+                {tag.name}
+              </Badge>
+            ))
+          ) : (
+            // Pad the tags to keep the layout consistent
+            <Badge variant="outline" className="invisible">
+              No tags
             </Badge>
-          ))}
+          )}
         </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between border-t border-[#d8c5e9] bg-muted/30 px-6 py-3">
+      <CardFooter className="flex items-center justify-between border-t border-primary/20 bg-muted/30 px-6 py-3 dark:bg-footer">
         <div className="text-xs text-muted-foreground">Uploaded {formatDate(resource.createdAt)}</div>
         {resource.type === ResourceType.URL ? (
           <Button
             size="sm"
             className="text-white hover:text-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
             asChild
+            // Prevent the link click from opening the resource page
+            onClick={(e) => e.stopPropagation()}
           >
             <a href={resource.uri} target="_blank" rel="noopener noreferrer">
               {isYouTubeUrl(resource.uri) ? (
@@ -131,13 +139,11 @@ export function ResourceCard({ resource }: ResourceCardProps) {
   );
 
   return (
-    <Card className="resource-card group cursor-pointer overflow-hidden border border-[#d8c5e9] bg-card shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:hover:border-primary/70">
-      <Link
-        href={`/resources/${resource.id}`}
-        className="resource-card-link block h-full transition-colors hover:text-primary dark:hover:text-primary/90"
-      >
-        {cardContent}
-      </Link>
+    <Card
+      className="resource-card group cursor-pointer overflow-hidden border border-primary/20 bg-card shadow-sm transition-all hover:shadow-md dark:border-border dark:hover:border-primary/70"
+      onClick={() => router.push(`/resources/${resource.id}`)}
+    >
+      {cardContent}
     </Card>
   );
 }

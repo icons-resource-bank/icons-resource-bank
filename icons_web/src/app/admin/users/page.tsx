@@ -34,7 +34,6 @@ import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatDateTime } from "@/lib/utils";
 
-// Flag filter options
 const flagFilterOptions = [
   { value: "all", label: "All Users" },
   { value: UserFlags.Admin.toString(), label: "Admins" },
@@ -43,7 +42,6 @@ const flagFilterOptions = [
   { value: UserFlags.Banned.toString(), label: "Banned Users" },
 ];
 
-// Items per page options
 const limitOptions = [
   { value: "10", label: "10 per page" },
   { value: "25", label: "25 per page" },
@@ -51,7 +49,6 @@ const limitOptions = [
   { value: "100", label: "100 per page" },
 ];
 
-// Ban duration presets
 const banDurations = [
   { id: "1d", label: "1 Day", value: 1 },
   { id: "3d", label: "3 Days", value: 3 },
@@ -68,7 +65,7 @@ export default function ManageUsersPage() {
   const [flagFilter, setFlagFilter] = useState("all");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Update pagination state to use offset instead of page
+  // State for pagination
   const [currentPage, setCurrentPage] = useState(1); // For UI display only
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(25);
@@ -82,7 +79,6 @@ export default function ManageUsersPage() {
   const [selectedBanDuration, setSelectedBanDuration] = useState<string>("");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
 
-  // Update the useEffect for search debounce to reset offset
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -94,7 +90,6 @@ export default function ManageUsersPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Update the useEffect for flag filter to reset offset
   useEffect(() => {
     setOffset(0);
     setCurrentPage(1);
@@ -106,7 +101,6 @@ export default function ManageUsersPage() {
     return Number.parseInt(flagFilter, 10);
   };
 
-  // Update the query to use offset
   const {
     data: usersData,
     isLoading,
@@ -126,7 +120,6 @@ export default function ManageUsersPage() {
       }),
   });
 
-  // Ban user mutation
   const banUserMutation = useMutation({
     mutationFn: userApi.banUser,
     onSuccess: () => {
@@ -147,7 +140,6 @@ export default function ManageUsersPage() {
     },
   });
 
-  // Unban user mutation
   const unbanUserMutation = useMutation({
     mutationFn: userApi.unbanUser,
     onSuccess: (_, userId) => {
@@ -166,7 +158,6 @@ export default function ManageUsersPage() {
     },
   });
 
-  // Update user flags mutation
   const updateUserFlagsMutation = useMutation({
     mutationFn: ({ userId, flags }: { userId: string; flags: number }) => userApi.updateUserFlags(userId, flags),
     onSuccess: () => {
@@ -187,7 +178,6 @@ export default function ManageUsersPage() {
     },
   });
 
-  // Helper function to get user role display text
   const getUserRoleText = (flags: number): string => {
     if (hasFlag(flags, UserFlags.Admin)) return "Admin";
     if (hasFlag(flags, UserFlags.Staff)) return "Staff";
@@ -206,16 +196,12 @@ export default function ManageUsersPage() {
       let newFlags = prev;
 
       if (checked) {
-        // If selecting Admin, remove Staff flag
+        // Only one of Admin or Staff should be given
         if (flag === UserFlags.Admin) {
           newFlags = (prev & ~UserFlags.Staff) | flag;
-        }
-        // If selecting Staff, remove Admin flag
-        else if (flag === UserFlags.Staff) {
+        } else if (flag === UserFlags.Staff) {
           newFlags = (prev & ~UserFlags.Admin) | flag;
-        }
-        // For other flags, just add the flag
-        else {
+        } else {
           newFlags = prev | flag;
         }
       } else {
@@ -258,7 +244,6 @@ export default function ManageUsersPage() {
     unbanUserMutation.mutate(userId);
   };
 
-  // Check if ban form is valid
   const isBanFormValid = () => {
     return selectedBanDuration.trim().length > 0;
   };
@@ -402,11 +387,9 @@ export default function ManageUsersPage() {
                               <AlertTriangle className="h-3 w-3" />
                               Banned
                             </Badge>
-                            {user.tempBannedUntil && (
-                              <span className="text-xs text-muted-foreground">
-                                until {formatDateTime(user.tempBannedUntil)}
-                              </span>
-                            )}
+                            <span className="text-xs text-muted-foreground">
+                              {user.tempBannedUntil ? `until ${formatDateTime(user.tempBannedUntil)}` : "permanently"}
+                            </span>
                           </div>
                         ) : (
                           "Active"
@@ -421,7 +404,7 @@ export default function ManageUsersPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-green-500 text-green-500 hover:bg-green-50 hover:text-green-600"
+                            className="border-green-500 text-green-500 hover:bg-green-50 hover:text-green-600 dark:hover:bg-accent"
                             onClick={() => handleUnbanUser(user.id)}
                             disabled={unbanUserMutation.isPending}
                           >

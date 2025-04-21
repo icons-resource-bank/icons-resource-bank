@@ -7,9 +7,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Upload, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ResourceSidebar } from "@/components/resource-sidebar";
+import { ResourceSidebar } from "@/components/resource/sidebar";
 import { FilterDialog, type FilterOptions } from "./filter-dialog";
-import { ResourceCard } from "@/components/resource-card";
+import { ResourceCard } from "@/components/resource/card";
 import Link from "next/link";
 import { courseApi, type PaginatedResponse, resourceApi, type Resource } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
@@ -25,16 +25,23 @@ export default function ResourcesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(12);
   const [filters, setFilters] = useState<FilterOptions>({
-    resourceType: null,
-    fileTypes: [],
+    type: null,
+    ftype: [],
     tagIds: [],
     sortBy: "created_at:desc",
   });
 
-  // Parse the sort option
   const getSortOptions = (sortOption: string) => {
     const [sortBy, sortOrder] = sortOption.split(":");
     return { sortBy, sortOrder } as { sortBy: string; sortOrder: "asc" | "desc" };
+  };
+
+  const getType = (type: string | null) => {
+    const parsed = parseInt(type || "");
+    if (isNaN(parsed)) {
+      return undefined;
+    }
+    return parsed;
   };
 
   const {
@@ -50,11 +57,14 @@ export default function ResourcesPage() {
   } = useQuery({
     queryKey: ["resources", courseParam, currentPage, filters, searchQuery],
     queryFn: async () => {
+      console.log(filters);
       return resourceApi.getResources({
-        ...filters,
         ...getSortOptions(filters.sortBy),
         courseIds: courseParam ? [courseParam] : undefined,
         query: searchQuery,
+        ftype: filters.ftype.map((ft) => ft.types).flat(),
+        tagIds: filters.tagIds,
+        type: getType(filters.type),
       });
     },
   });
@@ -70,7 +80,6 @@ export default function ResourcesPage() {
     setCurrentPage(1);
   }, [filters, searchQuery, courseParam]);
 
-  // Handle search input
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -82,16 +91,13 @@ export default function ResourcesPage() {
       params.delete("q");
     }
 
-    // Update URL
     router.push(`/resources?${params.toString()}`);
   };
 
-  // Handle filter changes
   const handleApplyFilters = (newFilters: FilterOptions) => {
     setFilters(newFilters);
   };
 
-  // Pagination handlers
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -105,22 +111,20 @@ export default function ResourcesPage() {
     }
   };
 
-  // Calculate pagination info
   const totalResources = resourcesData?.total ?? 0;
   const totalPages = Math.ceil(totalResources / limit);
   const startItem = totalResources === 0 ? 0 : (currentPage - 1) * limit + 1;
   const endItem = Math.min(currentPage * limit, totalResources);
 
-  // Determine if we're in a loading state
   const isLoading = isLoadingResources || isLoadingCourse;
 
   return (
-    <RequireAuth>
+    <RequireAuth showMessage>
       <div className="flex h-screen flex-col">
         <div className="flex flex-1 overflow-hidden">
           <ResourceSidebar />
-          <main className="flex h-full flex-1 flex-col border-l border-[#d8c5e9] shadow-sm dark:border-border">
-            <div className="border-[#d8c5e9] p-6 dark:border-border">
+          <main className="flex h-full flex-1 flex-col border-l border-primary shadow-sm dark:border-border">
+            <div className="border-primary p-6 dark:border-border">
               {courseData ? (
                 <>
                   <h1 className="text-3xl font-bold">
@@ -143,15 +147,14 @@ export default function ResourcesPage() {
                   <span>Loading resources...</span>
                 ) : (
                   <>
-                    Showing <strong>{startItem}</strong> to <strong>{endItem}</strong> of{" "}
-                    <strong>{totalResources}</strong> resources
+                    Showing {startItem} to {endItem} of {totalResources} resources
                     {courseData && <span> for {courseData.code}</span>}
                   </>
                 )}
               </div>
               <div className="mt-4 flex w-full items-center gap-4 sm:mt-0 sm:w-auto">
-                <Button asChild variant="default" size="sm" className="text-white">
-                  <Link href="/upload" className="flex items-center gap-1 hover:border-foreground/20 dark:border-2">
+                <Button asChild className="bg-primary text-white hover:bg-primary/90 dark:bg-white/10 dark:hover:bg-white/20">
+                  <Link href="/upload" className="flex items-center gap-1 hover:border-foreground/20">
                     <Upload className="h-4 w-4" />
                     Upload
                   </Link>
@@ -160,7 +163,7 @@ export default function ResourcesPage() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search resources..."
-                    className="border-[#d8c5e9] pl-9 dark:border-border"
+                    className="border-primary/20 pl-9 dark:border-border"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                   />
@@ -172,13 +175,13 @@ export default function ResourcesPage() {
             <div className="flex-1 overflow-y-auto p-6">
               {isLoading ? (
                 <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin text-primary dark:text-white" />
                 </div>
               ) : resourcesError ? (
-                <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm dark:border-border">
+                <div className="rounded-lg border border-primary/20 bg-background py-12 text-center shadow-sm dark:border-border">
                   <h3 className="mb-2 text-lg font-medium text-destructive">Error</h3>
                   <p className="text-muted-foreground">Failed to load resources. Please try again.</p>
-                  <Button onClick={() => refetchResources()} className="mt-4">
+                  <Button onClick={refetchResources} className="mt-4 bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20">
                     Try Again
                   </Button>
                 </div>
@@ -187,14 +190,14 @@ export default function ResourcesPage() {
                   {resourcesData?.items.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
                 </div>
               ) : (
-                <div className="rounded-lg border border-[#d8c5e9] bg-background py-12 text-center shadow-sm">
+                <div className="rounded-lg border border-primary/20 bg-background py-12 text-center shadow-sm">
                   <h3 className="mb-2 text-lg font-medium">No resources found</h3>
                   <p className="text-muted-foreground">
                     {courseData
                       ? `There are no resources available for ${courseData.code} yet.`
                       : searchQuery
                         ? "No resources match your search criteria."
-                        : "No resources available."}{" "}
+                        : "No resources available."}
                   </p>
                 </div>
               )}
@@ -202,7 +205,7 @@ export default function ResourcesPage() {
 
             {/* Pagination */}
             {!isLoading && totalResources > 0 && (
-              <div className="flex items-center justify-between border-t border-[#d8c5e9] px-6 py-4 dark:border-border">
+              <div className="flex items-center justify-between border-t border-primary/20 px-6 py-4 dark:border-border">
                 <div className="text-sm text-muted-foreground">
                   Showing <span className="font-medium">{startItem}</span> to{" "}
                   <span className="font-medium">{endItem}</span> of{" "}

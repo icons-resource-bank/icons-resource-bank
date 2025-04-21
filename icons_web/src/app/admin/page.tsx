@@ -1,3 +1,8 @@
 export default function DashboardPage() {
-  return <h1>Coming soon!</h1>;
+  return (
+    <>
+      <h3>Coming soon!</h3>
+      If you can think of any features you would like to see here, please submit feedback!
+    </>
+  );
 }

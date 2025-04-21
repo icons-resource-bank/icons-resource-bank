@@ -1,17 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { resourceApi } from "@/lib/api";
+import { resourceApi, ResourceType } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { FileText, CheckCircle, Link, XCircle, Loader2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 export default function PendingContentPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [isApproving, setIsApproving] = useState<string | null>(null);
   const [isRejecting, setIsRejecting] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function PendingContentPage() {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
       toast({
         title: "Resource approved",
-        description: "The resource has been approved and is now available to users.",
+        description: "The resource has been approved and is now available to users",
         variant: "success",
       });
       setIsApproving(null);
@@ -59,7 +61,7 @@ export default function PendingContentPage() {
       queryClient.invalidateQueries({ queryKey: ["resources"] });
       toast({
         title: "Resource rejected",
-        description: "The resource has been rejected.",
+        description: "The resource has been rejected",
       });
       setIsRejecting(null);
     },
@@ -117,7 +119,7 @@ export default function PendingContentPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead></TableHead>
+                  <TableHead>Name</TableHead>
                   <TableHead>Course</TableHead>
                   <TableHead>Submitted By</TableHead>
                   <TableHead>Date</TableHead>
@@ -128,21 +130,32 @@ export default function PendingContentPage() {
               <TableBody>
                 {pendingResources?.items.map((resource) => (
                   <TableRow key={resource.id}>
-                    {/* link to /resources/id in title */}
                     <TableCell className="font-medium">
-                      <a href={`/resources/${resource.id}`} className="text-blue-600 hover:underline">
+                      <a
+                        onClick={() => router.push(`/resources/${resource.id}`)}
+                        className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400"
+                      >
                         {resource.title}
                       </a>
                     </TableCell>
                     <TableCell>{resource.course.code}</TableCell>
                     <TableCell>{resource.author.name}</TableCell>
                     <TableCell>{formatDate(resource.createdAt)}</TableCell>
-                    <TableCell>{resource.ftype.toUpperCase()}</TableCell>
+                    <TableCell>
+                      {resource.type === ResourceType.FILE ? (
+                        resource.ftype.toUpperCase()
+                      ) : (
+                        <span className="flex items-center">
+                          <Link className="mr-1 h-3 w-3" />
+                          URL
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="space-x-2">
                       <Button
                         variant="default"
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 text-white hover:bg-green-700"
                         onClick={() => handleApproveResource(resource.id)}
                         disabled={isApproving === resource.id || isRejecting === resource.id}
                       >

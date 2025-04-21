@@ -28,7 +28,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { type FilterTabProps, predefinedColors, MAX_FILTER_NAME_LENGTH, colorIntToHex, colorHexToInt } from "./types";
+import { type FilterTabProps, predefinedColors, MAX_FILTER_NAME_LENGTH } from "./types";
+import { colorIntToHex, colorHexToInt } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function FilterTab({
@@ -114,7 +115,7 @@ export function FilterTab({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
+        <div className="flex flex-col gap-1">
           <CardTitle>Tags</CardTitle>
           <CardDescription>Manage resource tags</CardDescription>
         </div>

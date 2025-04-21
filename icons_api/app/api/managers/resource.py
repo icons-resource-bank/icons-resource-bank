@@ -42,7 +42,7 @@ class Resource(Model):
             data["author"] = (
                 await manager.app.state.users.get(id=data.pop("author_id")) or manager.app.state.users.DELETED
             ).to_dict()
-            data["tags"] = [(await manager.app.state.courses.get_tag(id=tag_id)).to_dict() for tag_id in filter(None, data.pop("tag_ids"))]  # type: ignore
+            data["tags"] = [(await manager.app.state.courses.get_tag(id=tag_id)).to_dict() for tag_id in data["tag_ids"]]  # type: ignore
         return data
 
 
@@ -81,7 +81,7 @@ class ResourceManager(BaseManager):
     _FILTERED_QUERY = """
         SELECT
             resources.*,
-            array_agg(resource_tags.tag_id) AS tag_ids,
+            COALESCE(array_agg(DISTINCT resource_tags.tag_id) FILTER (WHERE resource_tags.tag_id IS NOT NULL), '{{}}') AS tag_ids,
             COUNT(analytics.id) AS download_count,
             COUNT(*) OVER() AS total_count
         FROM resources

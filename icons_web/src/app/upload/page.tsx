@@ -4,18 +4,7 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Upload,
-  File,
-  X,
-  Loader2,
-  FileText,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  AlertTriangle,
-  Link,
-} from "lucide-react";
+import { Upload, File, X, Loader2, FileText, ChevronLeft, ChevronRight, AlertTriangle, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,47 +15,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resourceApi, courseApi, filterApi, ResourceType } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { RequireAuth } from "@/components/require-auth";
 import { useAuthStore } from "@/stores/auth";
+import { hasFlag, UserFlags } from "../../lib/flags";
 
-// Maximum file size (10MB)
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-// Allowed file types
-const ALLOWED_FILE_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "text/plain",
-  "application/zip",
-  "application/x-rar-compressed",
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-];
+// Maximum file size (25 MiB)
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 // Helper function to format file size
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const sizes = ["Bytes", "KiB", "MiB", "GiB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
@@ -82,6 +45,7 @@ function formatDate(dateString: string): string {
 }
 
 export default function UploadPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,7 +63,7 @@ export default function UploadPage() {
   // Pagination state for user resources
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const limit = 5;
 
   // Fetch courses for dropdown
   const { data: courses, isLoading: isLoadingCourses } = useQuery({
@@ -119,8 +83,11 @@ export default function UploadPage() {
     isLoading: isLoadingUserResources,
     error: userResourcesError,
   } = useQuery({
-    queryKey: ["userResources", offset, limit],
-    queryFn: () => resourceApi.getResources({ offset, limit, authorIds: [user.id] }),
+    queryKey: ["userResources", offset],
+    // @ts-ignore
+    queryFn: () =>
+      // @ts-ignore
+      resourceApi.getResources({ offset, limit, authorIds: [user.id], sortBy: "created_at", sortOrder: "desc" }),
   });
 
   // Upload resource mutation
@@ -130,7 +97,7 @@ export default function UploadPage() {
       queryClient.invalidateQueries({ queryKey: ["userResources"] });
       toast({
         title: "Resource uploaded",
-        description: "Your resource has been uploaded and is pending approval.",
+        description: "Your resource has been uploaded!",
         variant: "success",
       });
       resetForm();
@@ -160,10 +127,6 @@ export default function UploadPage() {
       newErrors.url = "URL must be between 10 and 2048 characters";
     }
 
-    if (selectedTagIds.length > 10) {
-      newErrors.tags = "You can select up to 10 tags";
-    }
-
     setErrors(newErrors);
   }, [title, description, url, resourceType, selectedTagIds]);
 
@@ -186,16 +149,6 @@ export default function UploadPage() {
       return;
     }
 
-    // Check file type
-    if (!ALLOWED_FILE_TYPES.includes(selectedFile.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        file: "File type not supported",
-      }));
-      setFile(null);
-      return;
-    }
-
     setFile(selectedFile);
     setErrors((prev) => {
       const newErrors = { ...prev };
@@ -210,14 +163,6 @@ export default function UploadPage() {
       if (prev.includes(tagId)) {
         return prev.filter((id) => id !== tagId);
       } else {
-        if (prev.length >= 10) {
-          toast({
-            title: "Maximum tags reached",
-            description: "You can select up to 10 tags",
-            variant: "destructive",
-          });
-          return prev;
-        }
         return [...prev, tagId];
       }
     });
@@ -264,10 +209,6 @@ export default function UploadPage() {
       }
     }
 
-    if (selectedTagIds.length > 10) {
-      newErrors.tags = "You can select up to 10 tags";
-    }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -278,7 +219,6 @@ export default function UploadPage() {
       title,
       description,
       courseId,
-      resourceType,
       file: resourceType === ResourceType.FILE ? file : null,
       url: resourceType === ResourceType.URL ? url : null,
       tagIds: selectedTagIds,
@@ -324,19 +264,23 @@ export default function UploadPage() {
   };
 
   return (
-    <RequireAuth showMessage={true}>
+    <RequireAuth banned showMessage>
       <div className="container py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Upload Resources</h1>
           <p className="text-muted-foreground">
-            Share your notes, study guides, and other resources with fellow students
+            Share your notes, study guides, and other resources with fellow students.
           </p>
         </div>
 
         <Tabs defaultValue="upload" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="upload">Upload New Resource</TabsTrigger>
-            <TabsTrigger value="my-resources">My Uploads</TabsTrigger>
+            <TabsTrigger className="data-[state=active]:bg-white/10" value="upload">
+              New Resource
+            </TabsTrigger>
+            <TabsTrigger className="data-[state=active]:bg-white/10" value="my-resources">
+              My Uploads
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upload">
@@ -344,7 +288,10 @@ export default function UploadPage() {
               <CardHeader>
                 <CardTitle>Upload a Resource</CardTitle>
                 <CardDescription>
-                  Share your study materials with other students. All uploads will be reviewed before being published.
+                  Share your study materials with other students.
+                  {hasFlag(user?.flags ?? 0, UserFlags.Trusted)
+                    ? " Your resource will not be reviewed, so be careful!"
+                    : " All uploads will be reviewed before being published."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -354,13 +301,12 @@ export default function UploadPage() {
                       <Label htmlFor="title">Title*</Label>
                       <Input
                         id="title"
-                        placeholder="e.g., Calculus I Midterm Study Guide"
+                        placeholder="e.g. Midterm Study Guide"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className={errors.title ? "border-red-500" : ""}
                       />
                       {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
-                      <p className="text-xs text-muted-foreground">4-64 characters</p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="course">Course*</Label>
@@ -395,7 +341,6 @@ export default function UploadPage() {
                       className={errors.description ? "border-red-500" : ""}
                     />
                     {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
-                    <p className="text-xs text-muted-foreground">8-4096 characters</p>
                   </div>
 
                   <div className="space-y-2">
@@ -424,7 +369,7 @@ export default function UploadPage() {
                     <div className="space-y-2">
                       <Label htmlFor="file">File Upload*</Label>
                       <div
-                        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors hover:border-primary/50 ${
+                        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors hover:border-primary/50 dark:hover:border-white/50 ${
                           errors.file ? "border-red-500" : "border-border"
                         }`}
                         onClick={() => fileInputRef.current?.click()}
@@ -435,11 +380,10 @@ export default function UploadPage() {
                           type="file"
                           className="hidden"
                           onChange={handleFileChange}
-                          accept={ALLOWED_FILE_TYPES.join(",")}
                         />
                         {file ? (
                           <div className="flex flex-col items-center">
-                            <File className="mb-2 h-10 w-10 text-primary" />
+                            <File className="mb-2 h-10 w-10 text-primary dark:text-muted-foreground" />
                             <p className="font-medium">{file.name}</p>
                             <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
                             <Button
@@ -463,9 +407,7 @@ export default function UploadPage() {
                           <>
                             <Upload className="mb-2 h-10 w-10 text-muted-foreground" />
                             <p className="font-medium">Click to upload or drag and drop</p>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, ZIP, RAR, JPG, PNG, GIF (Max 10MB)
-                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">Max 25 MiB</p>
                           </>
                         )}
                       </div>
@@ -520,7 +462,7 @@ export default function UploadPage() {
                       )}
                     </div>
                     {errors.tags && <p className="text-sm text-red-500">{errors.tags}</p>}
-                    <p className="text-xs text-muted-foreground">Select up to 10 tags</p>
+                    <p className="text-xs text-muted-foreground">Select tags to categorize your resource</p>
                   </div>
 
                   <div className="flex justify-end space-x-2">
@@ -529,6 +471,7 @@ export default function UploadPage() {
                     </Button>
                     <Button
                       type="submit"
+                      className="bg-primary text-white hover:bg-primary/90 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
                       disabled={
                         uploadResourceMutation.isPending ||
                         Object.keys(errors).length > 0 ||
@@ -611,7 +554,14 @@ export default function UploadPage() {
                         <CardContent className="p-4">
                           <div className="flex flex-col space-y-3">
                             <div className="flex items-start justify-between">
-                              <h3 className="text-lg font-medium">{resource.title}</h3>
+                              <h3 className="text-lg font-medium">
+                                <a
+                                  onClick={() => router.push(`/resources/${resource.id}`)}
+                                  className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400"
+                                >
+                                  {resource.title}
+                                </a>
+                              </h3>
                               <div className="flex items-center gap-2">
                                 {resource.type === ResourceType.FILE ? (
                                   <Badge variant="outline" className="ml-2">
@@ -626,7 +576,7 @@ export default function UploadPage() {
                                 {resource.pending && (
                                   <Badge variant="outline" className="border-amber-200 bg-amber-100 text-amber-800">
                                     <AlertTriangle className="mr-1 h-3 w-3" />
-                                    Pending Approval
+                                    Pending
                                   </Badge>
                                 )}
                               </div>
@@ -644,8 +594,10 @@ export default function UploadPage() {
                             <div className="flex items-center justify-between pt-2">
                               <div className="text-sm text-muted-foreground">
                                 <span className="font-medium">{resource.course?.code}</span> • Uploaded{" "}
-                                {formatDate(resource.createdAt)}
-                                {resource.downloadCount !== undefined && <> • {resource.downloadCount} downloads</>}
+                                {formatDate(resource.createdAt)}{" • "}
+                                <span className="text-muted-foreground">{resource.downloadCount}</span>
+                                {(resource.type === ResourceType.URL ? " click" : " download") +
+                                  (resource.downloadCount === 1 ? "" : "s")}
                               </div>
                             </div>
                           </div>

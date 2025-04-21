@@ -13,8 +13,8 @@ import { Toaster } from "@/components/ui/toast";
 const font = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "iCons - Engineering Society of Queen's University",
-  description: "A platform for students to access resources for their courses",
+  title: "iCons - Engineering Society of Queen’s University",
+  description: "Student run service providing Queen’s Engineering students with access to buildings, labs, and equipment!",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode; theme: string }) {

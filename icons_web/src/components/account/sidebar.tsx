@@ -1,17 +1,19 @@
-"use client";
 import { User, Settings, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
   {
+    id: "account",
     title: "Account Information",
     icon: User,
   },
   {
+    id: "settings",
     title: "General Settings",
     icon: Settings,
   },
   {
+    id: "privacy",
     title: "Privacy and Agreements",
     icon: Shield,
   },
@@ -24,17 +26,17 @@ interface AccountSidebarProps {
 
 export function AccountSidebar({ activeItem, setActiveItem }: AccountSidebarProps) {
   return (
-    <div className="w-full bg-gray-50 p-4 md:min-h-[calc(100vh-80px)] md:w-64">
-      <h2 className="mb-6 text-xl font-bold text-primary">Account Management</h2>
+    <div className="w-full bg-gray-50 dark:bg-footer p-4 md:min-h-[calc(100vh-80px)] md:w-64 rounded-lg shadow-md">
+      <h2 className="mb-6 text-xl font-bold text-primary dark:text-white">Account Management</h2>
       <nav>
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.title}>
               <button
-                onClick={() => setActiveItem(item.title)}
+                onClick={() => setActiveItem(item.id)}
                 className={cn(
                   "flex w-full items-center rounded-md p-2 text-left",
-                  activeItem === item.title ? "bg-primary text-white" : "text-gray-700 hover:bg-gray-200",
+                  activeItem === item.id ? "bg-primary text-white" : "text-muted-foreground hover:bg-gray-200 dark:hover:bg-white/10",
                 )}
               >
                 <item.icon className="mr-3 h-5 w-5" />

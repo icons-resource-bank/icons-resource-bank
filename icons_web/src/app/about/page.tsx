@@ -1,9 +1,6 @@
 import Image from "next/image";
-import { SiteHeader } from "@/components/site-header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, MapPin, Mail } from "lucide-react";
-import Link from "next/link";
+import { Clock } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -21,35 +18,32 @@ export default function AboutPage() {
 
       {/* Who We Are Section */}
       <section className="bg-background py-16 dark:bg-footer">
-        <div className="container">
-          <div className="grid items-center gap-12 md:grid-cols-2">
-            <div>
-              <h2 className="mb-6 text-3xl font-bold text-primary dark:text-white">Who We Are</h2>
-              <div className="space-y-4 text-lg">
-                <p className="text-muted-foreground">
-                  The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home
-                  of the Integrated Learning Centre (ILC).
-                </p>
-                <p className="text-muted-foreground">
-                  The iCons operate after ILC administration hours to keep the facility open to students, loan out
-                  equipment, promote a positive studying and learning atmosphere, and to act as a resource for students.
-                </p>
-                <p className="text-muted-foreground">
-                  Our team consists of dedicated engineering students who are passionate about helping their peers
-                  succeed in their academic journey.
-                </p>
-              </div>
+        <div className="container grid items-center gap-8 md:grid-cols-2">
+          <div>
+            <h2 className="mb-6 text-3xl font-bold text-primary dark:text-white">Who We Are</h2>
+            <div className="space-y-4 text-lg">
+              <p className="text-muted-foreground">
+                The Integrated Constables (iCons) is a student-run service that operates in Beamish-Munro Hall, home of
+                the Integrated Learning Centre (ILC).
+              </p>
+              <p className="text-muted-foreground">
+                The iCons operate after ILC administration hours to keep the facility open to students, loan out
+                equipment, promote a positive studying and learning atmosphere, and to act as a resource for students.
+              </p>
+              <p className="text-muted-foreground">
+                Our team consists of dedicated engineering students who are passionate about helping their peers succeed
+                in their academic journey.
+              </p>
             </div>
-            <div className="flex justify-center">
-              <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg shadow-lg">
-                <Image
-                  src="/images/iCons-Hub.jpg?height=1080&width=1920"
-                  alt="Engineering Society"
-                  fill
-                  className="h-12 w-auto"
-                />
-              </div>
-            </div>
+          </div>
+          <div className="flex justify-center">
+            <Image
+              src="/images/ilc-icons.jpg"
+              alt="Engineering Society"
+              className="rounded-lg shadow-lg"
+              width={530}
+              height={500}
+            />
           </div>
         </div>
       </section>

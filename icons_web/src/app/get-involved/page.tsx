@@ -21,7 +21,7 @@ export default function GetInvolvedPage() {
       {/* Contribute Resources Section */}
       <section className="bg-background py-16 dark:bg-footer">
         <div className="container">
-          <div className="grid items-center gap-12 md:grid-cols-2">
+          <div className="grid items-center gap-2 md:grid-cols-2">
             <div>
               <h2 className="mb-6 text-3xl font-bold text-primary dark:text-white">Contribute Resources</h2>
               <div className="space-y-4">
@@ -49,12 +49,7 @@ export default function GetInvolvedPage() {
             </div>
             <div className="flex justify-center">
               <div className="relative aspect-video w-full max-w-md overflow-hidden rounded-lg shadow-lg">
-                <Image
-                  src="/images/beamish-munro.jpg?height=600&width=800"
-                  alt="Contributing Resources"
-                  fill
-                  className="object-cover"
-                />
+                <Image src="/images/beamish-munro.jpg" alt="Beamish-Munro Hall" fill className="object-cover" />
               </div>
             </div>
           </div>
@@ -73,16 +68,15 @@ export default function GetInvolvedPage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-muted-foreground">
-                  Becoming an iCon is a rewarding way to get involved with the engineering community at Queen's
-                  University. As an iCon, you'll:
+                  Becoming an iCon is a rewarding way to get involved with the engineering community at Queen’s
+                  University. As an iCon, you’ll:
                 </p>
                 <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
                   <li>Help maintain the ILC during extended hours</li>
-                  <li>Assist fellow students with accessing resources</li>
+                  <li>Assist fellow students with course questions</li>
                   <li>Contribute to the development and organization of the resource bank</li>
                   <li>Gain valuable leadership and communication skills</li>
                   <li>Build connections within the engineering community</li>
-                  <li>Receive compensation for your time</li>
                 </ul>
               </CardContent>
             </Card>
@@ -102,12 +96,12 @@ export default function GetInvolvedPage() {
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                     <Calendar className="h-6 w-6 text-primary dark:text-white" />
                   </div>
-                  <CardTitle>1. Application Period</CardTitle>
+                  <CardTitle>1. Application</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Applications for iCon positions typically open at the beginning of each semester. Watch for
-                    announcements on our social media and the Engineering Society website.
+                    Applications for iCons positions typically open at the beginning of each semester. Watch for
+                    announcements on our social media!
                   </p>
                 </CardContent>
               </Card>
@@ -121,7 +115,7 @@ export default function GetInvolvedPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Selected applicants will be invited for an interview with the iCon coordinators to discuss their
+                    Selected applicants will be invited for an interview with the iCons coordinators to discuss their
                     interest, availability, and qualifications.
                   </p>
                 </CardContent>
@@ -159,7 +153,7 @@ export default function GetInvolvedPage() {
 
             <div className="text-center">
               <p className="mb-6 text-lg">
-                Interested in becoming an iCon? Contact us for more information about upcoming application periods.
+                Interested in becoming an iCon? For more information about upcoming application periods:
               </p>
               <Button asChild className="bg-primary hover:bg-primary/90">
                 <a
@@ -183,24 +177,14 @@ export default function GetInvolvedPage() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <Card className="border-2">
               <CardContent className="pt-6">
-                <div className="mb-4 flex flex-col items-center">
-                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
-                  <h3 className="font-bold">Current Icons Member</h3>
-                  <p className="text-sm">4th Year Mechanical Engineering</p>
-                </div>
-                <p className="text-center italic text-muted-foreground">
-                  "Being an iCon has been one of my favourite experiences at Queen’s so far! It has been a great way to
-                  connect with new people and learn lots of skills. I love being able to support first years in their
-                  classes as the iCons were so helpful for me in my first year. The intrapersonal skills I have
-                  developed as an iCon also helped me in securing my QUIP internship!"
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2">
-              <CardContent className="pt-6">
-                <div className="mb-4 flex flex-col items-center">
-                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
+                <div className="mb-3 flex flex-col items-center">
+                  <Image
+                    src="/images/example-icons-headshot.jpg"
+                    alt="iCon Member Headshot"
+                    width={72}
+                    height={72}
+                    className="mb-2 h-18 w-18 rounded-full object-cover"
+                  />
                   <h3 className="font-bold">Lucy Jardine</h3>
                   <p className="text-sm">3rd Year Mechanical Engineering</p>
                 </div>
@@ -214,14 +198,42 @@ export default function GetInvolvedPage() {
 
             <Card className="border-2">
               <CardContent className="pt-6">
-                <div className="mb-4 flex flex-col items-center">
-                  <div className="mb-4 h-16 w-16 rounded-full bg-primary/10"></div>
+                <div className="mb-3 flex flex-col items-center">
+                <Image
+                    src="/images/example-icons-headshot.jpg"
+                    alt="iCon Member Headshot"
+                    width={72}
+                    height={72}
+                    className="mb-2 h-18 w-18 rounded-full object-cover"
+                  />
                   <h3 className="font-bold">Michael Chen</h3>
                   <p className="text-sm">2nd Year Computer Engineering</p>
                 </div>
                 <p className="text-center italic text-muted-foreground">
                   "Working as an iCon has given me the opportunity to contribute to the engineering community while
                   building valuable connections and friendships."
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardContent className="pt-6">
+                <div className="mb-3 flex flex-col items-center">
+                  <Image
+                    src="/images/example-icons-headshot.jpg"
+                    alt="iCon Member Headshot"
+                    width={72}
+                    height={72}
+                    className="mb-2 h-18 w-18 rounded-full object-cover"
+                  />
+                  <h3 className="font-bold">Current iCon</h3>
+                  <p className="text-sm">4th Year Mechanical Engineering</p>
+                </div>
+                <p className="text-center italic text-muted-foreground">
+                  "Being an iCon has been one of my favourite experiences at Queen’s so far! It has been a great way to
+                  connect with new people and learn lots of skills. I love being able to support first years in their
+                  classes as the iCons were so helpful for me in my first year. The intrapersonal skills I have
+                  developed as an iCon also helped me in securing my QUIP internship!"
                 </p>
               </CardContent>
             </Card>

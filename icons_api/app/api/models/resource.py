@@ -4,12 +4,12 @@ from pydantic import BaseModel, Field, field_validator
 from pydantic_core import PydanticCustomError
 
 __all__ = (
-    "MAX_FILE_LENGTH_MIB",
+    "MAX_FILE_LENGTH",
     "ResourceCreateRequest",
     "ResourceUpdateRequest",
 )
 
-MAX_FILE_LENGTH_MIB = 25
+MAX_FILE_LENGTH = 25 * 1024 * 1024  # 25 MiB
 
 
 class ResourceCreateRequest(BaseModel):

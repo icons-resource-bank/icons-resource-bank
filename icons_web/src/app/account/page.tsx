@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RequireAuth } from "@/components/require-auth";
 import { AccountSidebar } from "@/components/account/sidebar";
-import AccountContent from "./account-content/account-content";
-import GeneralSettings from "./general-setting/general-settings-content";
-import PrivacySettings from "./privacy/privacy-content";
+import AccountContent from "./account-content";
+import GeneralSettings from "./general-settings-content";
+import PrivacySettings from "./privacy-content";
 
 export default function Home() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState(window?.location?.search?.substring?.(1) || "account");
+  const [activeSection, setActiveSection] = useState(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("section") || "account" : "account");
 
   const renderContent = () => {
     switch (activeSection) {
@@ -25,7 +25,7 @@ export default function Home() {
 
   const toggleSection = (section: string) => {
     setActiveSection(section);
-    router.push(`/account?${section}`);
+    router.push(`/account?section=${section}`);
   };
 
   return (

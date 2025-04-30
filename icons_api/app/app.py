@@ -52,7 +52,6 @@ __all__ = (
 
 def get_application() -> Application:
     settings = get_app_settings()
-
     settings.configure_logging()
 
     application = Application(**settings.fastapi_kwargs)

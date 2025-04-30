@@ -246,10 +246,12 @@ class UserManager(BaseManager):
         return feedback
 
     @overload
-    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User: ...
+    async def create(self, *, email: str, name: str, flags: int = 0, ignore_conflict: bool = False) -> User:
+        ...
 
     @overload
-    async def create(self, *, ignore_conflict: bool = False, **kwargs: Unpack[_QueryArguments]) -> User: ...
+    async def create(self, *, ignore_conflict: bool = False, **kwargs: Unpack[_QueryArguments]) -> User:
+        ...
 
     async def create(self, *, ignore_conflict: bool = False, **kwargs) -> User:
         query = f"INSERT INTO users ({', '.join(kwargs)}) VALUES ({', '.join(f'${i + 1}' for i in range(len(kwargs)))})"

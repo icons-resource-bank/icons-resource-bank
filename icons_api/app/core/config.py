@@ -17,4 +17,4 @@ environments: Dict[Environment, Type[Settings]] = {
 def get_app_settings() -> Settings:
     env = Environment(os.getenv("APP_ENV", Environment.dev.value))
     logger.info(f"Loading settings for environment: {env.name.upper()}")
-    return environments[Environment(env)]()  # type: ignore
+    return environments[env]()  # type: ignore

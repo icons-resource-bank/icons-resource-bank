@@ -56,7 +56,7 @@ async def get_me(request: AuthedRequest):
 @router.get("/@me/settings")
 @auth_check
 async def get_me_settings(request: AuthedRequest):
-    return JSONResponse(await request.app.state.users.get_settings(request.state.user.id)) 
+    return JSONResponse(await request.app.state.users.get_settings(request.state.user.id))
 
 
 @router.get("/{id}")

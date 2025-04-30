@@ -25,7 +25,7 @@ class Environment(Enum):
 
 
 class Settings(BaseSettings):
-    app_env: Environment = Environment.prod
+    app_env: Environment
     debug: bool = True
     title: str = "iCons"
     version: str = "0.0.1"
@@ -81,15 +81,18 @@ class Settings(BaseSettings):
 
 
 class DevSettings(Settings):
+    app_env: Environment = Environment.dev
     frontend_url: str = "http://localhost:3000"
 
 
 class ProdSettings(Settings):
+    app_env: Environment = Environment.prod
     debug: bool = False
     logging_level: int = logging.INFO
 
 
 class TestSettings(Settings):
+    app_env: Environment = Environment.test
     debug: bool = True
     secret_key: SecretStr = SecretStr("test_secret")
     frontend_url: str = "http://localhost:3000"

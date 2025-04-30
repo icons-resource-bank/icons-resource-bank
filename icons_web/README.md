@@ -17,11 +17,17 @@ $ cd icons_web
 $ pnpm install
 ```
 
+You must now create a `.env` file in the `icons_web` directory. See `.env.example` for the required environment variables.
+
 Then, you can start the development server:
 
 ```bash
 $ pnpm dev
 ```
+
+### Accessibility
+
+The project uses [Userway](https://userway.org/) for advanced accessibility features. The account ID must be provided in the `.env` file.
 
 ## Deployment
 

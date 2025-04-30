@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthStore } from "../../../stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import type React from "react";
-import { hasFlag, UserFlags } from "../../../lib/flags";
-import { User } from "../../../lib/api";
+import { hasFlag, UserFlags } from "@/lib/flags";
+import { User } from "@/lib/api";
 
 // Alternative approach: determine role directly from user flags
 function determineRoleFromFlags(user: User): string {

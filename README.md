@@ -10,7 +10,3 @@ The project is structured as a monorepo with the following packages:
 - `icons_web`: The frontend web application for the project. Built with Next.js and Tailwind CSS.
 
 No new files and folders should be added to the root of the repository.
-
-## License
-
-To be determined. All rights reserved.

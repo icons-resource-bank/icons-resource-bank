@@ -1,11 +1,9 @@
 {
     "recommendations": [
         "usernamehw.errorlens",
-        // Frontend
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
-        // Backend
         "ms-python.black-formatter",
         "ms-python.isort",
         "ms-python.vscode-pylance",

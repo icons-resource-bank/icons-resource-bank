@@ -38,7 +38,7 @@ async def get_courses(
         query=query,
         code=code,
         name=name,
-        year_level=year_level,
+        year_level=year_level,  # type: ignore
         category=category,
         icon=icon,
         description=description,

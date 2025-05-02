@@ -31,6 +31,8 @@ import {
 import { type FilterTabProps, predefinedColors, MAX_FILTER_NAME_LENGTH } from "./types";
 import { colorIntToHex, colorHexToInt } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/stores/auth";
+import { hasFlag, UserFlags } from "@/lib/flags";
 
 export function FilterTab({
   filters,
@@ -52,6 +54,7 @@ export function FilterTab({
   error,
   isPending,
 }: FilterTabProps) {
+  const { user: currentUser } = useAuthStore();
   // Use the first predefined color's value as default
   const defaultColorInt = predefinedColors[0].value;
   const defaultColorHex = predefinedColors[0].hexValue;
@@ -133,6 +136,7 @@ export function FilterTab({
                 resetFilterForm();
                 setFilterFormOpen(true);
               }}
+              disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Filter
@@ -289,10 +293,20 @@ export function FilterTab({
                       </div>
                     </TableCell>
                     <TableCell className="space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => onEdit(filter)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(filter)}
+                        disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
+                      >
                         Edit
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(filter.id)}>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDelete(filter.id)}
+                        disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
+                      >
                         Delete
                       </Button>
                     </TableCell>

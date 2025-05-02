@@ -20,6 +20,8 @@ import { courseApi, filterApi, type Course, type Filter } from "@/lib/api";
 import { colorHexToInt } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { hasFlag, UserFlags } from "@/lib/flags";
+import { useAuthStore } from "@/stores/auth";
 import { CourseForm } from "./course-form";
 import { CourseTable } from "./course-table";
 import { FilterTab } from "./filter-tab";
@@ -40,6 +42,7 @@ import {
 
 export default function ManageCoursesPage() {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuthStore();
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -495,6 +498,7 @@ export default function ManageCoursesPage() {
                   resetCourseForm();
                   setCourseFormOpen(true);
                 }}
+                disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Course

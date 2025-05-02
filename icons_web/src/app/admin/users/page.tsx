@@ -33,6 +33,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth";
 
 const flagFilterOptions = [
   { value: "all", label: "All Users" },
@@ -61,6 +62,7 @@ const banDurations = [
 
 export default function ManageUsersPage() {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [flagFilter, setFlagFilter] = useState("all");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -397,7 +399,12 @@ export default function ManageUsersPage() {
                       </TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell className="space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditUser(user)}
+                          disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
+                        >
                           Edit Permissions
                         </Button>
                         {isBanned(user) ? (

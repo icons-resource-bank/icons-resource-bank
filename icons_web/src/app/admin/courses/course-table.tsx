@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { getIconByName, yearLevels, getYearLevelLabel } from "./types";
 import type { Course, Filter } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/stores/auth";
+import { hasFlag, UserFlags } from "@/lib/flags";
 
 interface CourseTableProps {
   courses: Course[] | undefined;
@@ -41,6 +43,7 @@ export function CourseTable({
   onEdit,
   onDelete,
 }: CourseTableProps) {
+  const {user: currentUser} = useAuthStore();
   const handleYearLevelChange = (value: string) => {
     const yearLevel = parseInt(value, 10);
     setYearLevelFilter(yearLevel);
@@ -146,10 +149,20 @@ export function CourseTable({
                       )}
                     </TableCell>
                     <TableCell className="space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => onEdit(course)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(course)}
+                        disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
+                      >
                         Edit
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(course.id)}>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDelete(course.id)}
+                        disabled={!hasFlag(currentUser?.flags ?? 0, UserFlags.Admin)}
+                      >
                         Delete
                       </Button>
                     </TableCell>
